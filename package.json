@@ -1,16 +1,13 @@
 {
-  "name": "vyora-monorepo",
+  "name": "vyora",
+  "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@12.10.1",
+  "description": "Vyora — Small Business Billing & Management Project Root (vyora-backend, vyora-frontend, and future vyora-mobile)",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck"
-  },
-  "devDependencies": {
-    "turbo": "^2.4.4",
-    "typescript": "^5.8.2"
+    "start:backend": "pnpm --dir vyora-backend start",
+    "dev:backend": "pnpm --dir vyora-backend dev",
+    "dev:frontend": "pnpm --dir vyora-frontend dev",
+    "test:backend": "pnpm --dir vyora-backend test",
+    "test:frontend": "pnpm --dir vyora-frontend test"
   }
 }

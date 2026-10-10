@@ -1,8 +1,0 @@
-packages:
-  - 'apps/*'
-  - 'packages/*'
-allowBuilds:
-  '@scarf/scarf': true
-  '@swc/core': true
-  esbuild: true
-  mongodb-memory-server: true
