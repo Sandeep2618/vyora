@@ -51,7 +51,8 @@ This living document is the continuity log for engineers and AI coding assistant
 
 - **Date**: October 10, 2026
 - **Developer / Agent**: Senior Full-Stack Engineer (Antigravity)
-- **Branch**: `main` (workspace root at `C:\Users\sande\.gemini\antigravity\scratch\vyora`)
+- **Branch & Commit**: `master` (`8bcf661`)
+- **Workspace Root**: `C:\Users\sande\.gemini\antigravity\scratch\vyora`
 - **Completed Requirement IDs**: `V1-01`, `V1-02`, `V1-03`, `V1-04`, `V1-05`, `V1-06`, `V1-07`, `V1-08`, `V1-09`, `V1-10`, `V1-11`, `V1-12`, `V1-13`, `V1-14`, `V1-15`, `V1-16`
 
 ### Files Created & Changed
