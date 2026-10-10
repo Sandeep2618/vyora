@@ -8,6 +8,8 @@ interface PartyTableProps {
   parties: Party[];
   isLoading: boolean;
   partyType: PartyType;
+  hasActiveFilters?: boolean;
+  onResetFilters?: () => void;
   onAddFirst: () => void;
 }
 
@@ -15,6 +17,8 @@ export const PartyTable: React.FC<PartyTableProps> = ({
   parties,
   isLoading,
   partyType,
+  hasActiveFilters,
+  onResetFilters,
   onAddFirst,
 }) => {
   if (isLoading) {
@@ -29,12 +33,20 @@ export const PartyTable: React.FC<PartyTableProps> = ({
   if (parties.length === 0) {
     return (
       <EmptyState
-        title={`No ${partyType === 'CUSTOMER' ? 'customers' : 'suppliers'} found`}
-        description={`Add your ${
-          partyType === 'CUSTOMER' ? 'first customer' : 'first supplier'
-        } to track orders, invoices, and ledger balances.`}
-        actionLabel={`Add ${partyType === 'CUSTOMER' ? 'Customer' : 'Supplier'}`}
-        onAction={onAddFirst}
+        title={
+          hasActiveFilters
+            ? `No ${partyType === 'CUSTOMER' ? 'customers' : 'suppliers'} match filters`
+            : `No ${partyType === 'CUSTOMER' ? 'customers' : 'suppliers'} found`
+        }
+        description={
+          hasActiveFilters
+            ? `No ${partyType === 'CUSTOMER' ? 'customer' : 'supplier'} records match your active search or balance filters. Reset filters to see all.`
+            : `Add your ${
+                partyType === 'CUSTOMER' ? 'first customer' : 'first supplier'
+              } to track orders, invoices, and ledger balances.`
+        }
+        actionLabel={hasActiveFilters ? 'Reset Filters' : `Add ${partyType === 'CUSTOMER' ? 'Customer' : 'Supplier'}`}
+        onAction={hasActiveFilters ? onResetFilters : onAddFirst}
       />
     );
   }

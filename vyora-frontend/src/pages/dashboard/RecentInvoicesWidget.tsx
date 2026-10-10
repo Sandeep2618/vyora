@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FileText, Plus } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { formatCurrency, formatDateReadable } from '../../utils';
@@ -79,8 +80,23 @@ export const RecentInvoicesWidget: React.FC<RecentInvoicesWidgetProps> = ({ invo
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-[#566B69]">
-                  No invoices recorded yet. Click "New Invoice" to create one.
+                <td colSpan={5} className="py-10 text-center text-[#566B69]">
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-[#E6F4F2] text-[#0F766E] flex items-center justify-center mb-2">
+                      <FileText className="w-5 h-5 opacity-80" />
+                    </div>
+                    <span className="font-semibold text-[#123B3A]">No recent invoices</span>
+                    <span className="text-[11px] text-[#566B69] mt-0.5 mb-3">
+                      Generate your first GST invoice to begin tracking sales and receivables.
+                    </span>
+                    <Link
+                      to="/invoices/create"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0F766E] text-white text-xs font-semibold rounded-lg hover:bg-[#0D665F] transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Create First Invoice</span>
+                    </Link>
+                  </div>
                 </td>
               </tr>
             )}

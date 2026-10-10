@@ -198,6 +198,8 @@ export const PartiesPage: React.FC = () => {
           parties={filteredParties}
           isLoading={isLoading}
           partyType={activeTab}
+          hasActiveFilters={hasActiveFilters}
+          onResetFilters={clearAllFilters}
           onAddFirst={() => setIsModalOpen(true)}
         />
       </Card>

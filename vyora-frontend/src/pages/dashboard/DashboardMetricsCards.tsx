@@ -27,8 +27,14 @@ export const DashboardMetricsCards: React.FC<DashboardMetricsCardsProps> = ({
             {isLoading ? '...' : formatCurrency(metrics?.totalSalesMinor || 0)}
           </h3>
           <div className="flex items-center gap-1 mt-1.5 text-xs text-[#15803D] font-medium">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+{metrics?.totalSalesChangePercent || 12}% vs last week</span>
+            {metrics?.totalSalesMinor ? (
+              <>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>+{metrics?.totalSalesChangePercent || 12}% vs last week</span>
+              </>
+            ) : (
+              <span className="text-[#566B69]">No sales recorded yet</span>
+            )}
           </div>
         </div>
       </div>
@@ -46,8 +52,14 @@ export const DashboardMetricsCards: React.FC<DashboardMetricsCardsProps> = ({
             {isLoading ? '...' : metrics?.totalInvoicesCount || 0}
           </h3>
           <div className="flex items-center gap-1 mt-1.5 text-xs text-[#15803D] font-medium">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+{metrics?.totalInvoicesChangePercent || 8}% vs last week</span>
+            {metrics?.totalInvoicesCount ? (
+              <>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>+{metrics?.totalInvoicesChangePercent || 8}% vs last week</span>
+              </>
+            ) : (
+              <span className="text-[#566B69]">0 invoices generated</span>
+            )}
           </div>
         </div>
       </div>
@@ -64,9 +76,15 @@ export const DashboardMetricsCards: React.FC<DashboardMetricsCardsProps> = ({
           <h3 className="text-2xl font-bold text-[#123B3A]">
             {isLoading ? '...' : formatCurrency(metrics?.outstandingReceivablesMinor || 0)}
           </h3>
-          <div className="flex items-center gap-1 mt-1.5 text-xs text-[#B91C1C] font-medium">
-            <ArrowDownRight className="w-3.5 h-3.5" />
-            <span>{metrics?.outstandingReceivablesChangePercent || -5}% vs last week</span>
+          <div className="flex items-center gap-1 mt-1.5 text-xs font-medium">
+            {metrics?.outstandingReceivablesMinor ? (
+              <div className="flex items-center gap-1 text-[#B91C1C]">
+                <ArrowDownRight className="w-3.5 h-3.5" />
+                <span>{metrics?.outstandingReceivablesChangePercent || -5}% vs last week</span>
+              </div>
+            ) : (
+              <span className="text-[#15803D]">All customer dues settled</span>
+            )}
           </div>
         </div>
       </div>
@@ -83,9 +101,14 @@ export const DashboardMetricsCards: React.FC<DashboardMetricsCardsProps> = ({
           <h3 className="text-2xl font-bold text-[#123B3A]">
             {isLoading ? '...' : formatCurrency(metrics?.totalStockValueMinor || 0)}
           </h3>
-          <div className="flex items-center gap-1 mt-1.5 text-xs text-[#15803D] font-medium">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+{metrics?.totalStockValueChangePercent || 3}% vs last week</span>
+          <div className="flex items-center gap-1 mt-1.5 text-xs text-[#566B69] font-medium">
+            {metrics?.lowStockCount ? (
+              <span className="text-[#B91C1C] font-semibold">
+                ⚠️ {metrics.lowStockCount} items low on stock
+              </span>
+            ) : (
+              <span>Inventory levels healthy</span>
+            )}
           </div>
         </div>
       </div>

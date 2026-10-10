@@ -57,7 +57,15 @@ export const TopProductsWidget: React.FC<TopProductsWidgetProps> = ({ products }
             ) : (
               <tr>
                 <td colSpan={3} className="py-8 text-center text-[#566B69]">
-                  No sales recorded yet.
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="w-9 h-9 rounded-lg bg-[#E6F4F2] text-[#0F766E] flex items-center justify-center mb-2">
+                      <span className="text-base font-bold">📦</span>
+                    </div>
+                    <span className="font-semibold text-[#123B3A]">No items sold yet</span>
+                    <span className="text-[11px] text-[#566B69] mt-0.5">
+                      Top performers will be ranked here as invoices are issued.
+                    </span>
+                  </div>
                 </td>
               </tr>
             )}

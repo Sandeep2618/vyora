@@ -8,6 +8,8 @@ import { EmptyState } from '../../components/ui/EmptyState';
 interface ProductTableProps {
   products: Product[];
   isLoading: boolean;
+  hasActiveFilters?: boolean;
+  onResetFilters?: () => void;
   onArchive: (id: string) => void;
   onAddFirst: () => void;
 }
@@ -15,6 +17,8 @@ interface ProductTableProps {
 export const ProductTable: React.FC<ProductTableProps> = ({
   products,
   isLoading,
+  hasActiveFilters,
+  onResetFilters,
   onArchive,
   onAddFirst,
 }) => {
@@ -30,10 +34,14 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   if (products.length === 0) {
     return (
       <EmptyState
-        title="No products found"
-        description="Add items to your catalog to start creating invoices and tracking inventory."
-        actionLabel="Add Product"
-        onAction={onAddFirst}
+        title={hasActiveFilters ? 'No products match filters' : 'No products found'}
+        description={
+          hasActiveFilters
+            ? 'No catalog items match your search or filter criteria. Try clearing filters.'
+            : 'Add items to your catalog to start creating invoices and tracking inventory.'
+        }
+        actionLabel={hasActiveFilters ? 'Reset Filters' : 'Add Product'}
+        onAction={hasActiveFilters ? onResetFilters : onAddFirst}
       />
     );
   }

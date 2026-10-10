@@ -185,6 +185,8 @@ export const ProductsPage: React.FC = () => {
         <ProductTable
           products={filteredProducts}
           isLoading={isLoading}
+          hasActiveFilters={hasActiveFilters}
+          onResetFilters={clearAllFilters}
           onArchive={(id) => archiveMutation.mutate(id)}
           onAddFirst={() => setIsModalOpen(true)}
         />

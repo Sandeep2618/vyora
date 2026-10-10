@@ -9,6 +9,8 @@ import { EmptyState } from '../../components/ui/EmptyState';
 interface InvoiceTableProps {
   invoices: Invoice[];
   isLoading: boolean;
+  hasActiveFilters?: boolean;
+  onResetFilters?: () => void;
   onFinalize: (id: string) => void;
   onCancelClick: (invoice: Invoice) => void;
   onCreateClick: () => void;
@@ -17,6 +19,8 @@ interface InvoiceTableProps {
 export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   invoices,
   isLoading,
+  hasActiveFilters,
+  onResetFilters,
   onFinalize,
   onCancelClick,
   onCreateClick,
@@ -49,10 +53,14 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   if (invoices.length === 0) {
     return (
       <EmptyState
-        title="No invoices found"
-        description="Issue your first sales invoice to track receivables, GST tax slabs, and payment collections."
-        actionLabel="Create Invoice"
-        onAction={onCreateClick}
+        title={hasActiveFilters ? 'No invoices match filters' : 'No invoices found'}
+        description={
+          hasActiveFilters
+            ? 'No invoices match your selected status, timeframe, or search criteria. Reset filters to see all.'
+            : 'Issue your first sales invoice to track receivables, GST tax slabs, and payment collections.'
+        }
+        actionLabel={hasActiveFilters ? 'Reset Filters' : 'Create Invoice'}
+        onAction={hasActiveFilters ? onResetFilters : onCreateClick}
       />
     );
   }

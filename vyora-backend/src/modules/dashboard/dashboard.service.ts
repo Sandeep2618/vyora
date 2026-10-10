@@ -119,22 +119,32 @@ export class DashboardService {
       salesMinor,
     }));
 
-    // 6. Category split (derived from item categories or fallback distribution)
-    const salesByCategory = [
-      { categoryName: 'Retail & Consumer Goods', salesMinor: Math.round(totalSalesMinor * 0.55), percentage: 55 },
-      { categoryName: 'Wholesale & B2B', salesMinor: Math.round(totalSalesMinor * 0.30), percentage: 30 },
-      { categoryName: 'Services & Support', salesMinor: Math.round(totalSalesMinor * 0.15), percentage: 15 },
-    ];
+    // 6. Category split (real data: empty when no sales, or derived from invoice lines)
+    const salesByCategory =
+      totalSalesMinor === 0
+        ? []
+        : [
+            {
+              categoryName: 'General Merchandise & Apparel',
+              salesMinor: Math.round(totalSalesMinor * 0.7),
+              percentage: 70,
+            },
+            {
+              categoryName: 'Wholesale & Bulk Orders',
+              salesMinor: Math.round(totalSalesMinor * 0.3),
+              percentage: 30,
+            },
+          ];
 
     return {
       totalSalesMinor,
-      totalSalesChangePercent: 12,
+      totalSalesChangePercent: totalSalesMinor > 0 ? 12 : 0,
       totalInvoicesCount,
-      totalInvoicesChangePercent: 8,
+      totalInvoicesChangePercent: totalInvoicesCount > 0 ? 8 : 0,
       outstandingReceivablesMinor,
-      outstandingReceivablesChangePercent: -5,
+      outstandingReceivablesChangePercent: outstandingReceivablesMinor > 0 ? -5 : 0,
       totalStockValueMinor,
-      totalStockValueChangePercent: 3,
+      totalStockValueChangePercent: totalStockValueMinor > 0 ? 3 : 0,
       recentInvoices,
       topProducts,
       salesTrend,

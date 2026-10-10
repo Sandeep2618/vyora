@@ -174,6 +174,8 @@ export const InvoiceListPage: React.FC = () => {
         <InvoiceTable
           invoices={filteredInvoices}
           isLoading={isLoading}
+          hasActiveFilters={hasActiveFilters}
+          onResetFilters={clearAllFilters}
           onFinalize={(id) => finalizeMutation.mutate(id)}
           onCancelClick={(inv) => setCancelingInvoice(inv)}
           onCreateClick={() => navigate('/invoices/create')}

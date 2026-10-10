@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Download, Calendar, Filter } from 'lucide-react';
+import { BarChart3, Download, Calendar, Filter, FileText, ShoppingCart, Package, CheckCircle2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { formatCurrency, formatDateReadable } from '@vyora/utils';
 import { Button } from '../../components/ui/Button';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 export const ReportsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'SALES' | 'PURCHASES' | 'STOCK' | 'DUES'>('SALES');
@@ -172,23 +173,35 @@ export const ReportsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#D7E5E2]">
-                {salesData?.items?.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-[#F4F8F7]/60">
-                    <td className="py-3 px-3 text-[#566B69]">{formatDateReadable(inv.issueDate)}</td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{inv.invoiceNumber}</td>
-                    <td className="py-3 px-3 font-medium text-[#123B3A]">{inv.customerName}</td>
-                    <td className="py-3 px-3 text-right font-medium">{formatCurrency(inv.taxableMinor)}</td>
-                    <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.cgstMinor)}</td>
-                    <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.sgstMinor)}</td>
-                    <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.igstMinor)}</td>
-                    <td className="py-3 px-3 text-right font-bold text-[#123B3A]">
-                      {formatCurrency(inv.grandTotalMinor)}
-                    </td>
-                    <td className="py-3 px-3 text-right font-bold text-[#B91C1C]">
-                      {formatCurrency(inv.dueMinor)}
+                {salesData?.items && salesData.items.length > 0 ? (
+                  salesData.items.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-[#F4F8F7]/60">
+                      <td className="py-3 px-3 text-[#566B69]">{formatDateReadable(inv.issueDate)}</td>
+                      <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{inv.invoiceNumber}</td>
+                      <td className="py-3 px-3 font-medium text-[#123B3A]">{inv.customerName}</td>
+                      <td className="py-3 px-3 text-right font-medium">{formatCurrency(inv.taxableMinor)}</td>
+                      <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.cgstMinor)}</td>
+                      <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.sgstMinor)}</td>
+                      <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(inv.igstMinor)}</td>
+                      <td className="py-3 px-3 text-right font-bold text-[#123B3A]">
+                        {formatCurrency(inv.grandTotalMinor)}
+                      </td>
+                      <td className="py-3 px-3 text-right font-bold text-[#B91C1C]">
+                        {formatCurrency(inv.dueMinor)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="py-6">
+                      <EmptyState
+                        icon={FileText}
+                        title="No sales invoices in this period"
+                        description="Invoices finalized within the selected date range will appear in this tax register."
+                      />
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -211,18 +224,30 @@ export const ReportsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#D7E5E2]">
-                {purchaseData?.items?.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#F4F8F7]/60">
-                    <td className="py-3 px-3 text-[#566B69]">{formatDateReadable(p.billDate)}</td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{p.billNumber}</td>
-                    <td className="py-3 px-3 font-medium text-[#123B3A]">{p.supplierName}</td>
-                    <td className="py-3 px-3 text-right font-medium">{formatCurrency(p.subtotalMinor)}</td>
-                    <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(p.totalTaxMinor)}</td>
-                    <td className="py-3 px-3 text-right font-black text-[#123B3A]">
-                      {formatCurrency(p.grandTotalMinor)}
+                {purchaseData?.items && purchaseData.items.length > 0 ? (
+                  purchaseData.items.map((p) => (
+                    <tr key={p.id} className="hover:bg-[#F4F8F7]/60">
+                      <td className="py-3 px-3 text-[#566B69]">{formatDateReadable(p.billDate)}</td>
+                      <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{p.billNumber}</td>
+                      <td className="py-3 px-3 font-medium text-[#123B3A]">{p.supplierName}</td>
+                      <td className="py-3 px-3 text-right font-medium">{formatCurrency(p.subtotalMinor)}</td>
+                      <td className="py-3 px-3 text-right text-[#566B69]">{formatCurrency(p.totalTaxMinor)}</td>
+                      <td className="py-3 px-3 text-right font-black text-[#123B3A]">
+                        {formatCurrency(p.grandTotalMinor)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-6">
+                      <EmptyState
+                        icon={ShoppingCart}
+                        title="No purchase bills recorded in this period"
+                        description="Vendor purchases recorded for the selected date range will appear in this purchase ledger."
+                      />
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -260,22 +285,34 @@ export const ReportsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#D7E5E2]">
-                {stockData?.items?.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#F4F8F7]/60">
-                    <td className="py-3 px-3 font-bold text-[#123B3A]">{item.name}</td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{item.sku}</td>
-                    <td className="py-3 px-3 text-center text-[#566B69]">{item.unit}</td>
-                    <td className="py-3 px-3 text-center font-bold text-[#123B3A]">
-                      {item.currentStock}
-                    </td>
-                    <td className="py-3 px-3 text-right font-medium">
-                      {formatCurrency(item.purchasePriceMinor)}
-                    </td>
-                    <td className="py-3 px-3 text-right font-black text-[#0F766E]">
-                      {formatCurrency(item.valuationMinor)}
+                {stockData?.items && stockData.items.length > 0 ? (
+                  stockData.items.map((item) => (
+                    <tr key={item.id} className="hover:bg-[#F4F8F7]/60">
+                      <td className="py-3 px-3 font-bold text-[#123B3A]">{item.name}</td>
+                      <td className="py-3 px-3 font-mono font-bold text-[#0F766E]">{item.sku}</td>
+                      <td className="py-3 px-3 text-center text-[#566B69]">{item.unit}</td>
+                      <td className="py-3 px-3 text-center font-bold text-[#123B3A]">
+                        {item.currentStock}
+                      </td>
+                      <td className="py-3 px-3 text-right font-medium">
+                        {formatCurrency(item.purchasePriceMinor)}
+                      </td>
+                      <td className="py-3 px-3 text-right font-black text-[#0F766E]">
+                        {formatCurrency(item.valuationMinor)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-6">
+                      <EmptyState
+                        icon={Package}
+                        title="No products in catalog"
+                        description="Add items to your product inventory to see unit counts and financial valuation."
+                      />
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -314,8 +351,12 @@ export const ReportsPage: React.FC = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} className="py-10 text-center text-[#15803D] font-medium">
-                      Zero customer dues outstanding! All invoices fully reconciled.
+                    <td colSpan={3} className="py-6">
+                      <EmptyState
+                        icon={CheckCircle2}
+                        title="Zero outstanding customer dues!"
+                        description="All customer invoices are settled or fully reconciled. No pending receivables."
+                      />
                     </td>
                   </tr>
                 )}

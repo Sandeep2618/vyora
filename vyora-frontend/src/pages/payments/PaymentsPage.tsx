@@ -12,6 +12,7 @@ import { Badge } from '../../components/ui/Badge';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Card } from '../../components/ui/Card';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 export const PaymentsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -259,8 +260,18 @@ export const PaymentsPage: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-[#566B69]">
-                    No payment records match your filters.
+                  <td colSpan={7} className="py-6">
+                    <EmptyState
+                      icon={CreditCard}
+                      title={hasActiveFilters ? 'No payments match filters' : 'No payment vouchers recorded'}
+                      description={
+                        hasActiveFilters
+                          ? 'No payment records match your active search or filters. Reset filters to see all.'
+                          : 'Record receipts from customers or payments to vendors to manage cash flow traceably.'
+                      }
+                      actionLabel={hasActiveFilters ? 'Reset Filters' : 'Record Voucher'}
+                      onAction={hasActiveFilters ? clearAllFilters : () => setIsModalOpen(true)}
+                    />
                   </td>
                 </tr>
               )}

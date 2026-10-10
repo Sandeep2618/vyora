@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 export const PurchasesPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -135,8 +136,14 @@ export const PurchasesPage: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-10 text-center text-[#566B69]">
-                    No purchase bills recorded yet. Click "Record Purchase Bill" to add one.
+                  <td colSpan={8} className="py-6">
+                    <EmptyState
+                      icon={ShoppingCart}
+                      title="No purchase bills recorded yet"
+                      description="Record supplier invoices to track inventory additions and vendor payables."
+                      actionLabel="Record Purchase Bill"
+                      onAction={() => setIsModalOpen(true)}
+                    />
                   </td>
                 </tr>
               )}
