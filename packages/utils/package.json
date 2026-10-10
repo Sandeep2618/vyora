@@ -1,0 +1,22 @@
+{
+  "name": "@vyora/utils",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vyora/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@vyora/typescript-config": "workspace:*",
+    "tsup": "^8.3.6",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}

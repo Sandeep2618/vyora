@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0F766E;
+  --color-primary-dark: #0D665F;
+  --color-primary-light: #E6F4F2;
+  --color-deep-nav: #123B3A;
+  --color-deep-nav-hover: #194C4B;
+  --color-page-bg: #F4F8F7;
+  --color-surface: #FFFFFF;
+  --color-success: #15803D;
+  --color-success-bg: #ECFDF5;
+  --color-warning: #A16207;
+  --color-warning-bg: #FEFCE8;
+  --color-danger: #B91C1C;
+  --color-danger-bg: #FEF2F2;
+  --color-border: #D7E5E2;
+  --color-muted-text: #566B69;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-page-bg);
+    color: var(--color-deep-nav);
+    font-family: var(--font-sans);
+  }
+}
+
+/* Custom scrollbars and utility classes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D7E5E2;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A0BDB8;
+}
+
+@media print {
+  body {
+    background-color: #FFFFFF !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
