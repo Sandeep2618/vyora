@@ -14,11 +14,19 @@ dist/
 build/
 .cache/
 
-# Environment files
+# Environment files & Secrets (Strictly Ignored)
 .env
 .env.local
-.env.*.local
+.env.*
+*.env
+**/.env
+**/.env.*
+**/*.env
+passwords.txt
+secrets.json
+credentials.json
 !.env.example
+!**/.env.example
 
 # OS files
 .DS_Store

@@ -12,7 +12,7 @@ import { RecentInvoicesWidget } from './RecentInvoicesWidget';
 import { TopProductsWidget } from './TopProductsWidget';
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isOwner } = useAuth();
   const navigate = useNavigate();
   const { data: metrics, isLoading } = useDashboardMetrics();
 
@@ -35,13 +35,15 @@ export const DashboardPage: React.FC = () => {
           <Calendar className="w-3.5 h-3.5 text-[#0F766E]" />
           <span>Today, {todayStr}</span>
         </div>
-        <Button
-          onClick={() => navigate('/invoices/create')}
-          className="flex items-center gap-1.5 shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Invoice</span>
-        </Button>
+        {isOwner && (
+          <Button
+            onClick={() => navigate('/invoices/create')}
+            className="flex items-center gap-1.5 shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Invoice</span>
+          </Button>
+        )}
       </PageHeader>
 
       {/* 4 Metric Cards */}

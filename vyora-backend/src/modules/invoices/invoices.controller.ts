@@ -11,6 +11,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { InvoicesService } from './invoices.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreateInvoiceSchema, CancelInvoiceSchema, CreateInvoiceInput, CancelInvoiceInput } from '@vyora/validation';
@@ -18,7 +20,7 @@ import { InvoiceStatus } from '@vyora/shared-types';
 
 @ApiTags('Sales Invoices')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @Controller('invoices')
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
@@ -34,7 +36,8 @@ export class InvoicesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create invoice (draft or finalize immediately)' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Create invoice (Owner only)' })
   @ApiQuery({ name: 'finalize', required: false, type: Boolean })
   async create(
     @CurrentTenant() businessId: string,
@@ -78,7 +81,8 @@ export class InvoicesController {
   }
 
   @Post(':id/finalize')
-  @ApiOperation({ summary: 'Finalize a draft invoice, assign unique sequence number, deduct stock' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Finalize a draft invoice, assign unique sequence number, deduct stock (Owner only)' })
   async finalize(
     @CurrentTenant() businessId: string,
     @CurrentUser() user: any,
@@ -88,7 +92,8 @@ export class InvoicesController {
   }
 
   @Post(':id/cancel')
-  @ApiOperation({ summary: 'Controlled invoice cancellation with stock and balance reversal' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Controlled invoice cancellation with stock and balance reversal (Owner only)' })
   async cancel(
     @CurrentTenant() businessId: string,
     @CurrentUser() user: any,

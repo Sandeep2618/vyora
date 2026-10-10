@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -12,19 +13,22 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { PartiesService } from './parties.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { PartySchema, PartyInput } from '@vyora/validation';
 import { PartyType } from '@vyora/shared-types';
 
 @ApiTags('Customers & Suppliers')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @Controller('parties')
 export class PartiesController {
   constructor(private readonly partiesService: PartiesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new customer or supplier' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Create a new customer or supplier (Owner only)' })
   async create(
     @CurrentTenant() businessId: string,
     @Body() body: PartyInput,
@@ -61,7 +65,8 @@ export class PartiesController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Update customer/supplier details' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Update customer/supplier details (Owner only)' })
   async update(
     @CurrentTenant() businessId: string,
     @Param('id') id: string,
@@ -69,5 +74,15 @@ export class PartiesController {
   ) {
     const validated = PartySchema.parse(body);
     return this.partiesService.update(businessId, id, validated);
+  }
+
+  @Delete(':id')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Archive/Delete customer or supplier (Owner only)' })
+  async archive(
+    @CurrentTenant() businessId: string,
+    @Param('id') id: string,
+  ) {
+    return this.partiesService.archive(businessId, id);
   }
 }

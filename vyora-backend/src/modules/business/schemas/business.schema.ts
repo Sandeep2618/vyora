@@ -64,6 +64,9 @@ export class Business {
 
   @Prop({ required: true, type: String, ref: 'User' })
   ownerUserId: string;
+
+  @Prop({ type: String, enum: ['starter', 'growth', 'enterprise'], default: 'growth' })
+  subscriptionPlan: 'starter' | 'growth' | 'enterprise';
 }
 
 export const BusinessSchema = SchemaFactory.createForClass(Business);

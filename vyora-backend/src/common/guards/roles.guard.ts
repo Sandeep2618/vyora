@@ -21,7 +21,9 @@ export class RolesGuard implements CanActivate {
     const effectiveRole = businessRole || user?.role;
 
     if (!effectiveRole || !requiredRoles.includes(effectiveRole)) {
-      throw new ForbiddenException('You do not have the required permissions for this action');
+      throw new ForbiddenException(
+        'Only business owners have permission to add, edit, or delete records. Staff accounts have view-only access.',
+      );
     }
 
     return true;

@@ -5,6 +5,7 @@ import { Printer, ArrowLeft, CreditCard, CheckCircle2, XCircle } from 'lucide-re
 import { api } from '../../lib/api';
 import { formatCurrency, formatDateReadable, minorToMajor, majorToMinor } from '@vyora/utils';
 import { Invoice, PaymentMethod } from '@vyora/shared-types';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
@@ -14,6 +15,7 @@ export const InvoiceViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isOwner } = useAuth();
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [payAmountMajor, setPayAmountMajor] = useState<number>(0);
@@ -108,7 +110,7 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          {invoice.status === 'DRAFT' && (
+          {isOwner && invoice.status === 'DRAFT' && (
             <Button
               isLoading={finalizeMutation.isPending}
               onClick={() => finalizeMutation.mutate()}
@@ -119,7 +121,8 @@ export const InvoiceViewPage: React.FC = () => {
             </Button>
           )}
 
-          {invoice.status !== 'DRAFT' &&
+          {isOwner &&
+            invoice.status !== 'DRAFT' &&
             invoice.status !== 'PAID' &&
             invoice.status !== 'CANCELLED' && (
               <Button

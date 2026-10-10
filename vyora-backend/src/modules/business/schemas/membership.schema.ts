@@ -14,6 +14,9 @@ export class Membership {
 
   @Prop({ type: String, required: true, default: 'STAFF', enum: ['OWNER', 'STAFF', 'ADMIN'] })
   role: UserRole;
+
+  @Prop({ type: Boolean, default: true })
+  isActive: boolean;
 }
 
 export const MembershipSchema = SchemaFactory.createForClass(Membership);

@@ -10,6 +10,7 @@ interface InvoiceTableProps {
   invoices: Invoice[];
   isLoading: boolean;
   hasActiveFilters?: boolean;
+  isOwner?: boolean;
   onResetFilters?: () => void;
   onFinalize: (id: string) => void;
   onCancelClick: (invoice: Invoice) => void;
@@ -20,6 +21,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   invoices,
   isLoading,
   hasActiveFilters,
+  isOwner = true,
   onResetFilters,
   onFinalize,
   onCancelClick,
@@ -59,8 +61,8 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
             ? 'No invoices match your selected status, timeframe, or search criteria. Reset filters to see all.'
             : 'Issue your first sales invoice to track receivables, GST tax slabs, and payment collections.'
         }
-        actionLabel={hasActiveFilters ? 'Reset Filters' : 'Create Invoice'}
-        onAction={hasActiveFilters ? onResetFilters : onCreateClick}
+        actionLabel={hasActiveFilters ? 'Reset Filters' : isOwner ? 'Create Invoice' : undefined}
+        onAction={hasActiveFilters ? onResetFilters : isOwner ? onCreateClick : undefined}
       />
     );
   }
@@ -105,7 +107,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                   >
                     <Eye className="w-4 h-4" />
                   </Link>
-                  {inv.status === 'DRAFT' && (
+                  {isOwner && inv.status === 'DRAFT' && (
                     <button
                       onClick={() => onFinalize(inv.id)}
                       title="Finalize Invoice"
@@ -114,7 +116,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
                       <CheckCircle2 className="w-4 h-4" />
                     </button>
                   )}
-                  {inv.status !== 'CANCELLED' && inv.paidAmountMinor === 0 && (
+                  {isOwner && inv.status !== 'CANCELLED' && inv.paidAmountMinor === 0 && (
                     <button
                       onClick={() => onCancelClick(inv)}
                       title="Cancel Invoice"

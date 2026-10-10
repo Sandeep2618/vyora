@@ -3,11 +3,14 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { PlanGuard } from '../../common/guards/plan.guard';
+import { RequirePlan } from '../../common/decorators/plan.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 
 @ApiTags('Reports')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, PlanGuard)
+@RequirePlan('growth')
 @Controller('reports')
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}

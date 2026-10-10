@@ -13,19 +13,22 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ProductSchema, ProductInput } from '@vyora/validation';
 
 @ApiTags('Products & Services')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new product or service' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Create a new product or service (Owner only)' })
   async create(
     @CurrentTenant() businessId: string,
     @CurrentUser() user: any,
@@ -63,7 +66,8 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Update product details' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Update product details (Owner only)' })
   async update(
     @CurrentTenant() businessId: string,
     @Param('id') id: string,
@@ -74,7 +78,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Archive product' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Archive product (Owner only)' })
   async archive(@CurrentTenant() businessId: string, @Param('id') id: string) {
     return this.productsService.archive(businessId, id);
   }

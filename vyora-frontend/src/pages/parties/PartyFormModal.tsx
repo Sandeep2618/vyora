@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
-import { PartyType } from '../../types';
-import { useCreateParty } from '../../hooks/useParties';
+import { Party, PartyType } from '../../types';
+import { useCreateParty, useUpdateParty } from '../../hooks/useParties';
 
 interface PartyFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   partyType: PartyType;
+  partyToEdit?: Party | null;
 }
 
 export const PartyFormModal: React.FC<PartyFormModalProps> = ({
   isOpen,
   onClose,
   partyType,
+  partyToEdit,
 }) => {
+  const isEditing = Boolean(partyToEdit);
+
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +28,28 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
   const [city, setCity] = useState('');
   const [state, setState] = useState('Maharashtra');
   const [pincode, setPincode] = useState('400001');
+
+  useEffect(() => {
+    if (partyToEdit) {
+      setName(partyToEdit.name);
+      setPhone(partyToEdit.phone);
+      setEmail(partyToEdit.email || '');
+      setGstin(partyToEdit.gstin || '');
+      setLine1(partyToEdit.billingAddress?.line1 || '');
+      setCity(partyToEdit.billingAddress?.city || '');
+      setState(partyToEdit.billingAddress?.state || 'Maharashtra');
+      setPincode(partyToEdit.billingAddress?.pincode || '400001');
+    } else {
+      setName('');
+      setPhone('');
+      setEmail('');
+      setGstin('');
+      setLine1('');
+      setCity('');
+      setState('Maharashtra');
+      setPincode('400001');
+    }
+  }, [partyToEdit, isOpen]);
 
   const resetForm = () => {
     setName('');
@@ -39,11 +65,16 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
     onClose();
   });
 
+  const updateMutation = useUpdateParty(() => {
+    resetForm();
+    onClose();
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim() || !line1.trim() || !city.trim()) return;
 
-    createMutation.mutate({
+    const payload = {
       type: partyType,
       name,
       phone,
@@ -55,17 +86,31 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
         state,
         pincode,
       },
-    });
+    };
+
+    if (partyToEdit) {
+      updateMutation.mutate({
+        id: partyToEdit.id,
+        data: payload,
+      });
+    } else {
+      createMutation.mutate(payload);
+    }
   };
 
+  const isPending = createMutation.isPending || updateMutation.isPending;
   const label = partyType === 'CUSTOMER' ? 'Customer' : 'Supplier';
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Add ${label}`}
-      description="Enter contact details and billing address"
+      title={isEditing ? `Edit ${label}` : `Add ${label}`}
+      description={
+        isEditing
+          ? 'Update contact details and billing address'
+          : 'Enter contact details and billing address'
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -134,11 +179,11 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
           </Button>
           <Button
             type="submit"
-            isLoading={createMutation.isPending}
+            isLoading={isPending}
             disabled={!name.trim() || !phone.trim() || !line1.trim() || !city.trim()}
             className="w-full sm:w-auto"
           >
-            Save Record
+            {isEditing ? `Update ${label}` : 'Save Record'}
           </Button>
         </div>
       </form>

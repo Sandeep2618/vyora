@@ -1,5 +1,5 @@
 import React from 'react';
-import { Archive } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import { Product } from '../../types';
 import { formatCurrency } from '../../utils';
 import { Badge } from '../../components/ui/Badge';
@@ -9,8 +9,10 @@ interface ProductTableProps {
   products: Product[];
   isLoading: boolean;
   hasActiveFilters?: boolean;
+  isOwner?: boolean;
   onResetFilters?: () => void;
-  onArchive: (id: string) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
   onAddFirst: () => void;
 }
 
@@ -18,8 +20,10 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   products,
   isLoading,
   hasActiveFilters,
+  isOwner = true,
   onResetFilters,
-  onArchive,
+  onEdit,
+  onDelete,
   onAddFirst,
 }) => {
   if (isLoading) {
@@ -40,8 +44,8 @@ export const ProductTable: React.FC<ProductTableProps> = ({
             ? 'No catalog items match your search or filter criteria. Try clearing filters.'
             : 'Add items to your catalog to start creating invoices and tracking inventory.'
         }
-        actionLabel={hasActiveFilters ? 'Reset Filters' : 'Add Product'}
-        onAction={hasActiveFilters ? onResetFilters : onAddFirst}
+        actionLabel={hasActiveFilters ? 'Reset Filters' : isOwner ? 'Add Product' : undefined}
+        onAction={hasActiveFilters ? onResetFilters : isOwner ? onAddFirst : undefined}
       />
     );
   }
@@ -96,13 +100,28 @@ export const ProductTable: React.FC<ProductTableProps> = ({
                   </div>
                 </td>
                 <td className="py-3.5 px-4 text-right">
-                  <button
-                    onClick={() => onArchive(prod.id)}
-                    title="Archive product"
-                    className="p-1.5 text-[#566B69] hover:text-[#B91C1C] hover:bg-[#FEE2E2] rounded-md transition-colors"
-                  >
-                    <Archive className="w-3.5 h-3.5" />
-                  </button>
+                  {isOwner ? (
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => onEdit(prod)}
+                        title="Edit product"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#0F766E] bg-[#E6F4F2] hover:bg-[#0F766E] hover:text-white rounded-lg transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => onDelete(prod)}
+                        title="Delete product"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#B91C1C] bg-[#FEE2E2] hover:bg-[#B91C1C] hover:text-white rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-[#566B69] italic">--</span>
+                  )}
                 </td>
               </tr>
             );

@@ -37,4 +37,8 @@ export const partiesApi = {
   update: (id: string, data: PartyInput): Promise<Party> => {
     return api.put<Party>(`/parties/${id}`, data);
   },
+
+  archive: (id: string): Promise<{ success: boolean; message: string }> => {
+    return api.delete<{ success: boolean; message: string }>(`/parties/${id}`);
+  },
 };

@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, UserPlus, Shield, History, Building2 } from 'lucide-react';
+import { Save, UserPlus, Shield, History, Building2, Sparkles, ExternalLink, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { SubscriptionPlan } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
 
 export const SettingsPage: React.FC = () => {
-  const { user, business, refreshBusiness } = useAuth();
+  const { user, business, refreshBusiness, isOwner, plan, updateSubscriptionPlan } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'STAFF' | 'AUDIT'>('PROFILE');
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'PLANS' | 'STAFF' | 'AUDIT'>('PROFILE');
+  const [planSuccessMsg, setPlanSuccessMsg] = useState<string | null>(null);
+  const [isSwitchingPlan, setIsSwitchingPlan] = useState(false);
 
   // Business profile form state
   const [name, setName] = useState(business?.name || '');
@@ -44,6 +49,19 @@ export const SettingsPage: React.FC = () => {
     queryFn: () => api.get('/audit/logs'),
     enabled: activeTab === 'AUDIT',
   });
+
+  const handlePlanChange = async (targetPlan: SubscriptionPlan) => {
+    try {
+      setIsSwitchingPlan(true);
+      await updateSubscriptionPlan(targetPlan);
+      setPlanSuccessMsg(`Business subscription switched to ${targetPlan === 'enterprise' ? 'Business Pro' : targetPlan === 'growth' ? 'Growth' : 'Starter Free'}. Features updated instantly.`);
+      setTimeout(() => setPlanSuccessMsg(null), 5000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update plan');
+    } finally {
+      setIsSwitchingPlan(false);
+    }
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: () =>
@@ -101,6 +119,15 @@ export const SettingsPage: React.FC = () => {
         >
           <Building2 className="w-4 h-4" />
           <span>Business Profile</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('PLANS')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+            activeTab === 'PLANS' ? 'bg-[#0F766E] text-white' : 'text-[#566B69] hover:text-[#123B3A]'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Subscription & Plans</span>
         </button>
         <button
           onClick={() => setActiveTab('STAFF')}
@@ -220,15 +247,213 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-end pt-4 border-t border-[#D7E5E2]">
-            <Button
-              isLoading={updateProfileMutation.isPending}
-              onClick={() => updateProfileMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              <Save className="w-4 h-4 mr-1.5" />
-              Save Settings
-            </Button>
+          {!isOwner && (
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+              <span>Staff Account: You have view-only access. Only business owners can modify business settings.</span>
+            </div>
+          )}
+
+          {isOwner && (
+            <div className="flex justify-end pt-4 border-t border-[#D7E5E2]">
+              <Button
+                isLoading={updateProfileMutation.isPending}
+                onClick={() => updateProfileMutation.mutate()}
+                className="w-full sm:w-auto"
+              >
+                <Save className="w-4 h-4 mr-1.5" />
+                Save Settings
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB: SUBSCRIPTION & PLANS */}
+      {activeTab === 'PLANS' && (
+        <div className="space-y-6">
+          {planSuccessMsg && (
+            <div className="p-3.5 bg-green-50 border border-green-200 rounded-xl text-xs sm:text-sm text-[#15803D] flex items-center gap-2.5 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <p className="flex-1 font-medium">{planSuccessMsg}</p>
+              <button onClick={() => setPlanSuccessMsg(null)} className="text-[#15803D] font-bold">
+                ✕
+              </button>
+            </div>
+          )}
+
+          <div className="bg-white border border-[#D7E5E2] rounded-xl p-6 shadow-2xs space-y-4">
+            <div>
+              <h3 className="text-base font-bold text-[#123B3A]">Subscription Tiers & Feature Gating</h3>
+              <p className="text-xs text-[#566B69] mt-0.5">
+                Features automatically adjust based on active tier. Owners can switch tiers anytime.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {/* 1. Starter */}
+              <div
+                className={`p-5 rounded-xl border flex flex-col justify-between transition-all ${
+                  plan === 'starter'
+                    ? 'border-[#0F766E] bg-teal-50/20 shadow-md ring-2 ring-[#0F766E]'
+                    : 'border-[#D7E5E2] bg-white'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-base font-bold text-[#123B3A]">Starter</h4>
+                    {plan === 'starter' && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0F766E] text-white">
+                        ACTIVE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#566B69] mb-3">For solo proprietors & basic counter sales</p>
+                  <p className="text-2xl font-black text-[#123B3A] mb-4">
+                    ₹0<span className="text-xs font-normal text-[#566B69]">/forever</span>
+                  </p>
+
+                  <ul className="text-xs text-[#566B69] space-y-2 mb-6">
+                    <li>✓ Up to 50 GST Invoices / month</li>
+                    <li>✓ Product catalog (100 items)</li>
+                    <li>✓ Standard A4 PDF printing</li>
+                    <li>✓ Basic Customer ledger balances</li>
+                    <li className="text-gray-400">✗ Supplier purchases & payables</li>
+                    <li className="text-gray-400">✗ Monthly GSTR tax reports</li>
+                    <li className="text-gray-400">✗ Staff user delegation (1 user only)</li>
+                  </ul>
+                </div>
+
+                {plan === 'starter' ? (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Current Active Plan
+                  </Button>
+                ) : isOwner ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    isLoading={isSwitchingPlan}
+                    onClick={() => handlePlanChange('starter')}
+                    className="w-full"
+                  >
+                    Switch to Starter
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Owner Only
+                  </Button>
+                )}
+              </div>
+
+              {/* 2. Growth */}
+              <div
+                className={`p-5 rounded-xl border flex flex-col justify-between relative transition-all ${
+                  plan === 'growth'
+                    ? 'border-[#0F766E] bg-teal-50/20 shadow-md ring-2 ring-[#0F766E]'
+                    : 'border-[#0F766E]/40 bg-white'
+                }`}
+              >
+                <span className="absolute -top-2.5 right-4 bg-[#0F766E] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  Most Popular
+                </span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-base font-bold text-[#123B3A]">Growth</h4>
+                    {plan === 'growth' && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0F766E] text-white">
+                        ACTIVE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#566B69] mb-3">For thriving retailers, wholesalers & traders</p>
+                  <p className="text-2xl font-black text-[#0F766E] mb-4">
+                    ₹499<span className="text-xs font-normal text-[#566B69]">/month</span>
+                  </p>
+
+                  <ul className="text-xs text-[#566B69] space-y-2 mb-6">
+                    <li className="font-semibold text-[#123B3A]">✓ Unlimited GST Invoices & Bills</li>
+                    <li className="font-semibold text-[#123B3A]">✓ Supplier purchases & payables</li>
+                    <li className="font-semibold text-[#123B3A]">✓ Customer credit limits & receipts</li>
+                    <li className="font-semibold text-[#123B3A]">✓ GSTR-1 & GSTR-3B tax reports</li>
+                    <li className="font-semibold text-[#123B3A]">✓ Up to 3 Staff user accounts</li>
+                    <li>✓ Automated low stock alerts</li>
+                    <li className="text-gray-400">✗ Audited Stock adjustments</li>
+                  </ul>
+                </div>
+
+                {plan === 'growth' ? (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Current Active Plan
+                  </Button>
+                ) : isOwner ? (
+                  <Button
+                    size="sm"
+                    isLoading={isSwitchingPlan}
+                    onClick={() => handlePlanChange('growth')}
+                    className="w-full"
+                  >
+                    Switch to Growth
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Owner Only
+                  </Button>
+                )}
+              </div>
+
+              {/* 3. Business Pro */}
+              <div
+                className={`p-5 rounded-xl border flex flex-col justify-between transition-all ${
+                  plan === 'enterprise'
+                    ? 'border-purple-600 bg-purple-50/20 shadow-md ring-2 ring-purple-600'
+                    : 'border-purple-200 bg-white'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-base font-bold text-[#123B3A]">Business Pro</h4>
+                    {plan === 'enterprise' && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-700 text-white">
+                        ACTIVE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-[#566B69] mb-3">For multi-counter outlets & high-volume merchants</p>
+                  <p className="text-2xl font-black text-purple-700 mb-4">
+                    ₹999<span className="text-xs font-normal text-[#566B69]">/month</span>
+                  </p>
+
+                  <ul className="text-xs text-[#566B69] space-y-2 mb-6">
+                    <li className="font-semibold text-[#123B3A]">✓ Everything in Growth plan</li>
+                    <li className="font-semibold text-purple-800">✓ Unlimited Staff accounts</li>
+                    <li className="font-semibold text-purple-800">✓ Audited Stock Adjustment workflows</li>
+                    <li className="font-semibold text-purple-800">✓ Complete financial audit trail</li>
+                    <li>✓ Custom invoice prefixes & auto-padding</li>
+                    <li>✓ Multi-device simultaneous access</li>
+                    <li>✓ Priority WhatsApp & phone SLA</li>
+                  </ul>
+                </div>
+
+                {plan === 'enterprise' ? (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Current Active Plan
+                  </Button>
+                ) : isOwner ? (
+                  <Button
+                    size="sm"
+                    isLoading={isSwitchingPlan}
+                    onClick={() => handlePlanChange('enterprise')}
+                    className="w-full bg-purple-700 hover:bg-purple-800 text-white"
+                  >
+                    Switch to Business Pro
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="outline" disabled className="w-full">
+                    Owner Only
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -236,6 +461,19 @@ export const SettingsPage: React.FC = () => {
       {/* TAB 2: STAFF & PERMISSIONS */}
       {activeTab === 'STAFF' && (
         <div className="bg-white border border-[#D7E5E2] rounded-xl p-6 shadow-2xs space-y-4">
+          <div className="p-4 bg-[#E6F4F2] border border-[#A0D2CA] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-[#123B3A]">Full Team Roles & Switches Management</p>
+              <p className="text-[11px] text-[#566B69] mt-0.5">
+                Switch member roles between Owner (Full Access) and Staff (View Only) with individual toggle switches.
+              </p>
+            </div>
+            <Button size="sm" onClick={() => navigate('/roles')} className="shrink-0">
+              Open Team Roles Page
+              <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+            </Button>
+          </div>
+
           <div className="flex items-center justify-between pb-4 border-b border-[#D7E5E2]">
             <div>
               <h3 className="text-sm font-bold text-[#123B3A]">Authorized Staff Members</h3>
@@ -243,10 +481,12 @@ export const SettingsPage: React.FC = () => {
                 Backend enforces role permissions strictly on endpoints
               </p>
             </div>
-            <Button size="sm" onClick={() => setIsStaffModalOpen(true)}>
-              <UserPlus className="w-3.5 h-3.5 mr-1" />
-              Add Staff Member
-            </Button>
+            {isOwner && (
+              <Button size="sm" onClick={() => setIsStaffModalOpen(true)}>
+                <UserPlus className="w-3.5 h-3.5 mr-1" />
+                Add Staff Member
+              </Button>
+            )}
           </div>
 
           <div className="overflow-x-auto -mx-1 sm:mx-0">

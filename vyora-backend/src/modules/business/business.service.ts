@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -68,24 +69,31 @@ export class BusinessService {
       purchasePrefix: business.purchasePrefix,
       nextPurchaseNumber: business.nextPurchaseNumber,
       termsAndConditions: business.termsAndConditions,
+      subscriptionPlan: business.subscriptionPlan || 'growth',
       createdAt: (business as any).createdAt,
       updatedAt: (business as any).updatedAt,
     };
   }
 
   async getStaff(businessId: string) {
-    const memberships = await this.membershipModel.find({ businessId });
+    const [memberships, business] = await Promise.all([
+      this.membershipModel.find({ businessId }),
+      this.businessModel.findById(businessId),
+    ]);
     const userIds = memberships.map((m) => m.userId);
     const users = await this.userModel.find({ _id: { $in: userIds } });
 
     return memberships.map((m) => {
       const u = users.find((user) => user._id.toString() === m.userId);
+      const isPrimaryOwner = Boolean(business && business.ownerUserId === m.userId);
       return {
         id: m._id.toString(),
         userId: m.userId,
         name: u?.name || 'Unknown',
         email: u?.email || 'Unknown',
         role: m.role,
+        isPrimaryOwner,
+        isActive: m.isActive !== false,
         createdAt: (m as any).createdAt,
       };
     });
@@ -132,6 +140,156 @@ export class BusinessService {
       email: user.email,
       role: membership.role,
     };
+  }
+
+  async updateStaffRole(
+    businessId: string,
+    membershipId: string,
+    newRole: UserRole,
+    currentUserId?: string,
+  ) {
+    const [membership, business] = await Promise.all([
+      this.membershipModel.findOne({ _id: membershipId, businessId }),
+      this.businessModel.findById(businessId),
+    ]);
+    if (!membership) {
+      throw new NotFoundException('Team member not found in this business');
+    }
+
+    const isTargetPrimaryOwner = Boolean(business && business.ownerUserId === membership.userId);
+    const isCallerPrimaryOwner = Boolean(business && business.ownerUserId === currentUserId);
+
+    // Rule 1: The real/primary business owner can NEVER have their role altered or demoted
+    if (isTargetPrimaryOwner) {
+      throw new ForbiddenException('The primary business owner permissions cannot be altered or demoted.');
+    }
+
+    // Rule 2: If caller is a promoted owner (not the real owner), they cannot change any other owner's role
+    if (!isCallerPrimaryOwner && membership.role === 'OWNER') {
+      throw new ForbiddenException('Only the primary business owner has permission to change or demote owner roles.');
+    }
+
+    // Rule 3: Protection against zero active owners
+    if (membership.role === 'OWNER' && newRole === 'STAFF') {
+      const ownerCount = await this.membershipModel.countDocuments({
+        businessId,
+        role: 'OWNER',
+        isActive: true,
+      });
+      if (ownerCount <= 1) {
+        throw new ConflictException('Cannot demote the last remaining owner. Assign another owner first.');
+      }
+    }
+
+    membership.role = newRole;
+    await membership.save();
+
+    await this.userModel.findByIdAndUpdate(membership.userId, { role: newRole });
+
+    return {
+      id: membership._id.toString(),
+      userId: membership.userId,
+      role: membership.role,
+      isPrimaryOwner: false,
+      isActive: membership.isActive !== false,
+    };
+  }
+
+  async toggleStaffStatus(
+    businessId: string,
+    membershipId: string,
+    isActive: boolean,
+    currentUserId?: string,
+  ) {
+    const [membership, business] = await Promise.all([
+      this.membershipModel.findOne({ _id: membershipId, businessId }),
+      this.businessModel.findById(businessId),
+    ]);
+    if (!membership) {
+      throw new NotFoundException('Team member not found in this business');
+    }
+
+    const isTargetPrimaryOwner = Boolean(business && business.ownerUserId === membership.userId);
+    const isCallerPrimaryOwner = Boolean(business && business.ownerUserId === currentUserId);
+
+    // Primary owner cannot be suspended
+    if (isTargetPrimaryOwner) {
+      throw new ForbiddenException('The primary business owner account cannot be deactivated.');
+    }
+
+    // Promoted owners cannot deactivate other owners
+    if (!isCallerPrimaryOwner && membership.role === 'OWNER') {
+      throw new ForbiddenException('Only the primary business owner can deactivate an owner account.');
+    }
+
+    if (!isActive && membership.role === 'OWNER') {
+      const activeOwners = await this.membershipModel.countDocuments({
+        businessId,
+        role: 'OWNER',
+        isActive: true,
+      });
+      if (activeOwners <= 1) {
+        throw new ConflictException('Cannot deactivate the last active owner.');
+      }
+    }
+
+    membership.isActive = isActive;
+    await membership.save();
+
+    return {
+      id: membership._id.toString(),
+      isActive: membership.isActive,
+    };
+  }
+
+  async removeStaffMember(
+    businessId: string,
+    membershipId: string,
+    currentUserId?: string,
+  ) {
+    const [membership, business] = await Promise.all([
+      this.membershipModel.findOne({ _id: membershipId, businessId }),
+      this.businessModel.findById(businessId),
+    ]);
+    if (!membership) {
+      throw new NotFoundException('Team member not found');
+    }
+
+    const isTargetPrimaryOwner = Boolean(business && business.ownerUserId === membership.userId);
+    const isCallerPrimaryOwner = Boolean(business && business.ownerUserId === currentUserId);
+
+    if (isTargetPrimaryOwner) {
+      throw new ForbiddenException('The primary business owner cannot be removed.');
+    }
+
+    if (!isCallerPrimaryOwner && membership.role === 'OWNER') {
+      throw new ForbiddenException('Only the primary business owner can remove an owner account.');
+    }
+
+    if (membership.role === 'OWNER') {
+      const activeOwners = await this.membershipModel.countDocuments({
+        businessId,
+        role: 'OWNER',
+      });
+      if (activeOwners <= 1) {
+        throw new ConflictException('Cannot remove the primary business owner.');
+      }
+    }
+
+    await this.membershipModel.findByIdAndDelete(membershipId);
+    return { success: true };
+  }
+
+  async updateSubscriptionPlan(businessId: string, plan: 'starter' | 'growth' | 'enterprise') {
+    const updated = await this.businessModel.findByIdAndUpdate(
+      businessId,
+      { subscriptionPlan: plan },
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException('Business not found');
+    }
+    return this.mapBusiness(updated);
   }
 
   /**

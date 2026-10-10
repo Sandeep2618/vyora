@@ -47,8 +47,13 @@ This living document is the continuity log for engineers and AI coding assistant
 | **V1-14** | Print / PDF | Professional A4 Tax Invoice view, print CSS, tax breakdowns, signatory | **Implemented & Tested** | Verified on `InvoiceViewPage.tsx` |
 | **V1-15** | Settings & Audit | Business profile, tax defaults, numbering format, staff RBAC, audit log trail | **Implemented & Tested** | `AuditService` logs all financial events |
 | **V1-16** | Quality & Ops | Health check endpoint, structured error logs, unit tests, auto-seeding | **Implemented & Tested** | `/api/v1/health` + 9/9 unit tests pass |
+| **V1-17** | Engineering Memory | `vyora-core` skill persistence for zero-breakage continuous AI development | **Implemented & Tested** | Authoritative instructions in `.gemini/config/skills/vyora-core/` |
+| **V1-18** | Role Authorization (RBAC) | Strict Owner (full access) vs Staff (view-only); mutation buttons gated | **Implemented & Tested** | Backend `RolesGuard` + UI button restrictions across all views |
+| **V1-19** | Team Roles Switchboard | Dedicated `/roles` page with individual member switches for role & active status | **Implemented & Tested** | Live toggle sync with backend `business.service.ts` |
+| **V1-20** | Subscription Plan Gating | Starter, Growth, and Business Pro tier gating matching website pricing | **Implemented & Tested** | Backend `PlanGuard` + UI feature hiding & 1-click upgrade switcher |
 
 ---
+
 
 ## 3. Investigation & Resolution: 500 Internal Server Errors
 
@@ -190,9 +195,8 @@ To ensure high-performance usability on mobile phones (360px–480px) and tablet
 - **Cluster**: `cluster0.ei4by7h.mongodb.net`
 - **Database**: `vyora`
 - **Credentials Configured**:
-  - Username: `sandeep26062004_db_user`
-  - Active Auth Key: `X1wUdhfTJjy35nsX` (Note: Password `sandip123` can be synchronized in Atlas -> Database Access anytime)
-  - Connection String in `vyora-backend/.env`: `mongodb+srv://sandeep26062004_db_user:X1wUdhfTJjy35nsX@cluster0.ei4by7h.mongodb.net/vyora?retryWrites=true&w=majority`
+  - Loaded securely from `MONGODB_URI` in `.env` (Never hardcode credentials or secrets in repository files).
+  - Connection String in `vyora-backend/.env`: `mongodb+srv://<username>:<password>@cluster0.ei4by7h.mongodb.net/vyora?retryWrites=true&w=majority`
 - **Auto-Seeder Initialization (`seeder.service.ts`)**:
   - Automatically checks `users.countDocuments()`.
   - Initialized Atlas database with demo credentials (`demo@vyora.com` / `password123`), initial business entity, products, customers, and invoice.
@@ -220,9 +224,36 @@ To eliminate broken tables, empty whitespace, and uninformative blanks, clean fa
 
 ---
 
-## 9. Next Tasks
+## 10. Role-Based Access Control (RBAC) & Subscription Gating Architecture
+
+### 1. Role Authority Matrix
+- **OWNER / ADMIN**: Full administrative control across the entire workspace. Allowed to create, edit, finalize, and cancel invoices, add and archive products, manage customer/supplier ledgers, record purchases and receipts, adjust stock (on Business Pro), modify business settings, switch team roles, and change subscription tiers.
+- **STAFF**: Operational view-only access. Staff accounts can view dashboard charts, browse the invoice registry, search products, inspect customer dues, and view stock movement ledgers. **All mutation buttons (`Create Invoice`, `Add Product`, `Add Customer`, `Record Purchase Bill`, `Record Voucher`, `Adjust Stock`, `Archive`, `Finalize`, `Cancel`) are completely hidden in the UI and strictly rejected with 403 Forbidden by the backend `RolesGuard`.**
+
+### 2. Dedicated Team Roles & Switches Page (`/roles`)
+- **Direct Switch Toggle**: Individual switch per team member to toggle between `STAFF` (View-Only) and `OWNER` (Full Access). Calls `PATCH /business/staff/:id/role`.
+- **Account Access Switch**: Live toggle to suspend or re-activate access without deleting membership history. Calls `PATCH /business/staff/:id/status`.
+- **Safety Invariant**: The sole owner of a business cannot be demoted to Staff or suspended to prevent accidental administrative lockout.
+- **Member Invite Modal**: Prominent red asterisks (`<span className="text-[#B91C1C] font-bold">*</span>`) on required fields (Name, Email, Role) with default initial temporary credentials (`VyoraStaff@123`).
+
+### 3. Subscription Plan Feature Gating (Matching `vyora-website`)
+Features dynamically adjust based on the tenant's `subscriptionPlan` on their `Business` record:
+- **Starter (Free - ₹0/mo)**: 50 GST Invoices/month, product catalog up to 100 items, 1 owner account. Purchases, Payments, Tax Reports, and Staff accounts are hidden.
+- **Growth (₹499/mo)**: Unlimited Invoices & Inventory, Purchases, Customer Payments & Ledger receipts, Full GSTR-1/3B tax reports, up to 3 Staff user accounts.
+- **Business Pro (₹999/mo)**: Everything in Growth + Unlimited Staff accounts, Audited Stock Adjustment workflows, Custom prefixes & auto-padding, Complete audit trail logs.
+- **1-Click Dynamic Plan Switcher**: Built into `/settings` under the **Subscription & Plans** tab and available via the Team Roles upgrade modal.
+
+### 4. Official Project Management PDF Brief
+The authoritative, print-ready document is compiled and saved at:
+- **PDF Location**: [`docs/Vyora_Project_Manager_Brief.pdf`](file:///C:/Users/sande/vyora/docs/Vyora_Project_Manager_Brief.pdf) (179 KB)
+- **Source HTML**: [`docs/project_manager_brief.html`](file:///C:/Users/sande/vyora/docs/project_manager_brief.html)
+
+---
+
+## 11. Next Tasks
 
 1. **Vyora Mobile (React Native) Scaffolding**: Create `vyora/vyora-mobile` reusing the modular API contracts.
 2. **Thermal Receipt Mode**: Add 80mm / 58mm compact thermal receipt view in `vyora-frontend`.
 3. **GSTR-1 Export Automation**: Add CSV / Excel export endpoint for monthly GST GSTR-1 and GSTR-3B filings.
+
 

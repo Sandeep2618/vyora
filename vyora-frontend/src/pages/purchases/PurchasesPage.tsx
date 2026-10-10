@@ -9,8 +9,10 @@ import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { useAuth } from '../../context/AuthContext';
 
 export const PurchasesPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -79,10 +81,12 @@ export const PurchasesPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5">
-            <Plus className="w-4 h-4" />
-            <span>Record Purchase Bill</span>
-          </Button>
+          {isOwner && (
+            <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5">
+              <Plus className="w-4 h-4" />
+              <span>Record Purchase Bill</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -141,8 +145,8 @@ export const PurchasesPage: React.FC = () => {
                       icon={ShoppingCart}
                       title="No purchase bills recorded yet"
                       description="Record supplier invoices to track inventory additions and vendor payables."
-                      actionLabel="Record Purchase Bill"
-                      onAction={() => setIsModalOpen(true)}
+                      actionLabel={isOwner ? "Record Purchase Bill" : undefined}
+                      onAction={isOwner ? () => setIsModalOpen(true) : undefined}
                     />
                   </td>
                 </tr>

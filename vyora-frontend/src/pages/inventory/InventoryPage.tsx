@@ -4,11 +4,14 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { SearchInput } from '../../components/ui/SearchInput';
+import { useAuth } from '../../context/AuthContext';
 import { useInventoryMovements } from '../../hooks/useInventory';
 import { StockMovementTable } from './StockMovementTable';
 import { StockAdjustmentModal } from './StockAdjustmentModal';
 
 export const InventoryPage: React.FC = () => {
+  const { isOwner, hasFeature } = useAuth();
+  const canAdjust = isOwner && hasFeature('STOCK_ADJUSTMENTS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [movementTypeFilter, setMovementTypeFilter] = useState<string>('ALL');
@@ -60,10 +63,12 @@ export const InventoryPage: React.FC = () => {
         title="Inventory Movements"
         description="Traceable stock movement history across sales, purchases, and audited manual adjustments"
       >
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto">
-          <Plus className="w-4 h-4" />
-          <span>Record Stock Adjustment</span>
-        </Button>
+        {canAdjust && (
+          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto">
+            <Plus className="w-4 h-4" />
+            <span>Record Stock Adjustment</span>
+          </Button>
+        )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
@@ -143,6 +148,7 @@ export const InventoryPage: React.FC = () => {
         <StockMovementTable
           movements={filteredMovements}
           isLoading={isLoading}
+          canAdjust={canAdjust}
           onOpenAdjustment={() => setIsModalOpen(true)}
         />
       </Card>

@@ -1,23 +1,29 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, Filter, X } from 'lucide-react';
-import { PartyType } from '../../types';
+import { Party, PartyType } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { SearchInput } from '../../components/ui/SearchInput';
-import { useParties } from '../../hooks/useParties';
+import { useAuth } from '../../context/AuthContext';
+import { useParties, useArchiveParty } from '../../hooks/useParties';
 import { PartyTable } from './PartyTable';
 import { PartyFormModal } from './PartyFormModal';
 
 export const PartiesPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const [activeTab, setActiveTab] = useState<PartyType>('CUSTOMER');
   const [search, setSearch] = useState('');
   const [balanceFilter, setBalanceFilter] = useState<'ALL' | 'DUE' | 'SETTLED'>('ALL');
   const [stateFilter, setStateFilter] = useState<string>('ALL');
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [partyToEdit, setPartyToEdit] = useState<Party | null>(null);
+  const [partyToDelete, setPartyToDelete] = useState<Party | null>(null);
 
   const { data, isLoading } = useParties({ type: activeTab });
+  const archiveMutation = useArchiveParty();
 
   const isCustomer = activeTab === 'CUSTOMER';
   const label = isCustomer ? 'Customer' : 'Supplier';
@@ -76,10 +82,18 @@ export const PartiesPage: React.FC = () => {
         title={pluralLabel}
         description={`Manage your ${label.toLowerCase()} accounts, contact info, and balance ledgers`}
       >
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto justify-center">
-          <Plus className="w-4 h-4" />
-          <span>Add {label}</span>
-        </Button>
+        {isOwner && (
+          <Button
+            onClick={() => {
+              setPartyToEdit(null);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add {label}</span>
+          </Button>
+        )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
@@ -199,16 +213,70 @@ export const PartiesPage: React.FC = () => {
           isLoading={isLoading}
           partyType={activeTab}
           hasActiveFilters={hasActiveFilters}
+          isOwner={isOwner}
           onResetFilters={clearAllFilters}
-          onAddFirst={() => setIsModalOpen(true)}
+          onEdit={(party) => {
+            setPartyToEdit(party);
+            setIsModalOpen(true);
+          }}
+          onDelete={(party) => {
+            setPartyToDelete(party);
+          }}
+          onAddFirst={() => {
+            setPartyToEdit(null);
+            setIsModalOpen(true);
+          }}
         />
       </Card>
 
       <PartyFormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setPartyToEdit(null);
+        }}
         partyType={activeTab}
+        partyToEdit={partyToEdit}
       />
+
+      {/* Modal: Delete Party Confirmation */}
+      <Modal
+        isOpen={!!partyToDelete}
+        onClose={() => setPartyToDelete(null)}
+        title={`Delete ${label}`}
+        description={`Confirm removal of ${label.toLowerCase()} account`}
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-xs sm:text-sm text-[#566B69]">
+            Are you sure you want to delete <strong className="text-[#123B3A]">{partyToDelete?.name}</strong>? This will archive their contact details and balance ledger from active views.
+          </p>
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#D7E5E2]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPartyToDelete(null)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              isLoading={archiveMutation.isPending}
+              onClick={async () => {
+                if (partyToDelete) {
+                  await archiveMutation.mutateAsync(partyToDelete.id);
+                  setPartyToDelete(null);
+                }
+              }}
+              className="w-full sm:w-auto"
+            >
+              Delete {label}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

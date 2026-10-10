@@ -64,6 +64,12 @@ All UI elements must strictly preserve Theme B:
 - Invoices with status other than `DRAFT` cannot be edited in place; they must be cancelled with audit logs.
 - Stock quantities must change traceably through `StockMovement` records.
 
+### 7. Zero Secrets in Commits / Manual Push Only (STRICT SECURITY RULE)
+- **NEVER hardcode, log, or commit sensitive credentials**: This includes MongoDB URIs with passwords (`mongodb+srv://...`), private keys, AWS tokens, JWT secrets, or `.env` files.
+- All secrets MUST remain strictly in local `.env` files, which are permanently ignored in `.gitignore`.
+- **MANUAL PUSH ONLY**: AI agents must NEVER automatically execute `git push`. All git pushes must be executed manually by the user after reviewing commits.
+- Run `npm run check-secrets` before staging or committing any files to ensure zero credential leaks.
+
 ---
 
 ## 4. Verification Check Before Completing Work

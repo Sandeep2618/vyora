@@ -6,11 +6,13 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { SearchInput } from '../../components/ui/SearchInput';
+import { useAuth } from '../../context/AuthContext';
 import { useInvoices, useFinalizeInvoice } from '../../hooks/useInvoices';
 import { InvoiceTable } from './InvoiceTable';
 import { CancelInvoiceModal } from './CancelInvoiceModal';
 
 export const InvoiceListPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'ALL' | 'PAID' | 'PENDING' | 'OVERDUE' | 'CANCELLED'>('ALL');
   const [search, setSearch] = useState('');
@@ -76,13 +78,15 @@ export const InvoiceListPage: React.FC = () => {
         title="Invoices"
         description="Manage and track all your sales invoices in one place"
       >
-        <Button
-          onClick={() => navigate('/invoices/create')}
-          className="flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Create Invoice</span>
-        </Button>
+        {isOwner && (
+          <Button
+            onClick={() => navigate('/invoices/create')}
+            className="flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Invoice</span>
+          </Button>
+        )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
@@ -175,6 +179,7 @@ export const InvoiceListPage: React.FC = () => {
           invoices={filteredInvoices}
           isLoading={isLoading}
           hasActiveFilters={hasActiveFilters}
+          isOwner={isOwner}
           onResetFilters={clearAllFilters}
           onFinalize={(id) => finalizeMutation.mutate(id)}
           onCancelClick={(inv) => setCancelingInvoice(inv)}

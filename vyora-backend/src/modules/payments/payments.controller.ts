@@ -3,19 +3,25 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { PaymentsService } from './payments.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { PlanGuard } from '../../common/guards/plan.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RequirePlan } from '../../common/decorators/plan.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { CreatePaymentSchema, CreatePaymentInput } from '@vyora/validation';
 
 @ApiTags('Payments & Receipts')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard, PlanGuard)
+@RequirePlan('growth')
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Record a payment or receipt voucher with idempotency protection' })
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Record a payment or receipt voucher (Owner only)' })
   async create(
     @CurrentTenant() businessId: string,
     @CurrentUser() user: any,

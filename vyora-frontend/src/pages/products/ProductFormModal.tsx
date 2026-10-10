@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { Button } from '../../components/ui/Button';
-import { ItemUnit, TaxRatePercent } from '../../types';
-import { majorToMinor } from '../../utils';
-import { useCreateProduct } from '../../hooks/useProducts';
+import { ItemUnit, Product, TaxRatePercent } from '../../types';
+import { majorToMinor, minorToMajor } from '../../utils';
+import { useCreateProduct, useUpdateProduct } from '../../hooks/useProducts';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
+  productToEdit?: Product | null;
 }
 
-export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onClose }) => {
+export const ProductFormModal: React.FC<ProductFormModalProps> = ({
+  isOpen,
+  onClose,
+  productToEdit,
+}) => {
+  const isEditing = Boolean(productToEdit);
+
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
   const [hsnCode, setHsnCode] = useState('');
@@ -22,6 +29,30 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
   const [taxRate, setTaxRate] = useState<TaxRatePercent>(18);
   const [openingStock, setOpeningStock] = useState<number>(0);
   const [reorderLevel, setReorderLevel] = useState<number>(5);
+
+  useEffect(() => {
+    if (productToEdit) {
+      setName(productToEdit.name);
+      setSku(productToEdit.sku);
+      setHsnCode(productToEdit.hsnCode || '');
+      setUnit(productToEdit.unit);
+      setSellingRate(minorToMajor(productToEdit.sellingPriceMinor));
+      setPurchaseRate(productToEdit.purchasePriceMinor ? minorToMajor(productToEdit.purchasePriceMinor) : 0);
+      setTaxRate(productToEdit.taxRatePercent);
+      setOpeningStock(productToEdit.openingStock || 0);
+      setReorderLevel(productToEdit.reorderLevel ?? 5);
+    } else {
+      setName('');
+      setSku('');
+      setHsnCode('');
+      setUnit('PCS');
+      setSellingRate(0);
+      setPurchaseRate(0);
+      setTaxRate(18);
+      setOpeningStock(0);
+      setReorderLevel(5);
+    }
+  }, [productToEdit, isOpen]);
 
   const resetForm = () => {
     setName('');
@@ -37,11 +68,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
     onClose();
   });
 
+  const updateMutation = useUpdateProduct(() => {
+    resetForm();
+    onClose();
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !sku.trim()) return;
 
-    createMutation.mutate({
+    const payload = {
       name,
       sku,
       hsnCode: hsnCode || undefined,
@@ -51,15 +87,30 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
       taxRatePercent: taxRate,
       openingStock: Number(openingStock),
       reorderLevel: Number(reorderLevel),
-    });
+    };
+
+    if (isEditing && productToEdit) {
+      updateMutation.mutate({
+        id: productToEdit.id,
+        data: payload,
+      });
+    } else {
+      createMutation.mutate(payload);
+    }
   };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add Product / Service"
-      description="Add a catalog item with pricing, tax rate, and opening inventory"
+      title={isEditing ? 'Edit Product / Service' : 'Add Product / Service'}
+      description={
+        isEditing
+          ? 'Update catalog item details, pricing, and GST tax rate'
+          : 'Add a catalog item with pricing, tax rate, and opening inventory'
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -157,11 +208,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({ isOpen, onCl
           </Button>
           <Button
             type="submit"
-            isLoading={createMutation.isPending}
+            isLoading={isPending}
             disabled={!name.trim() || !sku.trim()}
             className="w-full sm:w-auto"
           >
-            Save Product
+            {isEditing ? 'Update Product' : 'Save Product'}
           </Button>
         </div>
       </form>

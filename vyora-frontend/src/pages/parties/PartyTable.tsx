@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Edit2, Trash2 } from 'lucide-react';
 import { Party, PartyType } from '../../types';
 import { formatCurrency } from '../../utils';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -9,7 +9,10 @@ interface PartyTableProps {
   isLoading: boolean;
   partyType: PartyType;
   hasActiveFilters?: boolean;
+  isOwner?: boolean;
   onResetFilters?: () => void;
+  onEdit: (party: Party) => void;
+  onDelete: (party: Party) => void;
   onAddFirst: () => void;
 }
 
@@ -18,7 +21,10 @@ export const PartyTable: React.FC<PartyTableProps> = ({
   isLoading,
   partyType,
   hasActiveFilters,
+  isOwner = true,
   onResetFilters,
+  onEdit,
+  onDelete,
   onAddFirst,
 }) => {
   if (isLoading) {
@@ -45,15 +51,15 @@ export const PartyTable: React.FC<PartyTableProps> = ({
                 partyType === 'CUSTOMER' ? 'first customer' : 'first supplier'
               } to track orders, invoices, and ledger balances.`
         }
-        actionLabel={hasActiveFilters ? 'Reset Filters' : `Add ${partyType === 'CUSTOMER' ? 'Customer' : 'Supplier'}`}
-        onAction={hasActiveFilters ? onResetFilters : onAddFirst}
+        actionLabel={hasActiveFilters ? 'Reset Filters' : isOwner ? `Add ${partyType === 'CUSTOMER' ? 'Customer' : 'Supplier'}` : undefined}
+        onAction={hasActiveFilters ? onResetFilters : isOwner ? onAddFirst : undefined}
       />
     );
   }
 
   return (
     <div className="overflow-x-auto -mx-1 sm:mx-0">
-      <table className="w-full text-left text-xs min-w-[640px] whitespace-nowrap">
+      <table className="w-full text-left text-xs min-w-[680px] whitespace-nowrap">
         <thead>
           <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
             <th className="py-3 px-4">Name</th>
@@ -61,6 +67,7 @@ export const PartyTable: React.FC<PartyTableProps> = ({
             <th className="py-3 px-4">Location</th>
             <th className="py-3 px-4">GSTIN</th>
             <th className="py-3 px-4 text-right">Balance</th>
+            <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[#D7E5E2]">
@@ -116,6 +123,30 @@ export const PartyTable: React.FC<PartyTableProps> = ({
                       : 'Settled'}
                   </span>
                 </span>
+              </td>
+              <td className="py-3.5 px-4 text-right">
+                {isOwner ? (
+                  <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => onEdit(party)}
+                      title={`Edit ${party.name}`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#0F766E] bg-[#E6F4F2] hover:bg-[#0F766E] hover:text-white rounded-lg transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => onDelete(party)}
+                      title={`Delete ${party.name}`}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#B91C1C] bg-[#FEE2E2] hover:bg-[#B91C1C] hover:text-white rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[11px] text-[#566B69] italic">--</span>
+                )}
               </td>
             </tr>
           ))}

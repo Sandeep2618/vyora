@@ -19,3 +19,25 @@ export const useCreateParty = (onSuccess?: () => void) => {
     },
   });
 };
+
+export const useUpdateParty = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: PartyInput }) => partiesApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parties'] });
+      if (onSuccess) onSuccess();
+    },
+  });
+};
+
+export const useArchiveParty = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => partiesApi.archive(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parties'] });
+      if (onSuccess) onSuccess();
+    },
+  });
+};

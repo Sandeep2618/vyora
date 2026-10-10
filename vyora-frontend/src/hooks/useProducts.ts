@@ -29,6 +29,18 @@ export const useCreateProduct = (onSuccess?: () => void) => {
   });
 };
 
+export const useUpdateProduct = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ProductInput }) => productsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      if (onSuccess) onSuccess();
+    },
+  });
+};
+
 export const useArchiveProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({

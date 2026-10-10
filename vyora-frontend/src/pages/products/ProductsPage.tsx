@@ -2,18 +2,24 @@ import React, { useState, useMemo } from 'react';
 import { Plus, Filter, X } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { SearchInput } from '../../components/ui/SearchInput';
+import { useAuth } from '../../context/AuthContext';
 import { useProducts, useArchiveProduct } from '../../hooks/useProducts';
+import { Product } from '../../types';
 import { ProductTable } from './ProductTable';
 import { ProductFormModal } from './ProductFormModal';
 
 export const ProductsPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const [search, setSearch] = useState('');
   const [stockFilter, setStockFilter] = useState<'ALL' | 'LOW' | 'IN_STOCK' | 'OUT_OF_STOCK'>('ALL');
   const [taxFilter, setTaxFilter] = useState<string>('ALL');
   const [unitFilter, setUnitFilter] = useState<string>('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const { data, isLoading } = useProducts({ search: '' });
@@ -67,10 +73,18 @@ export const ProductsPage: React.FC = () => {
         title="Products & Services"
         description="Manage your inventory items, prices in minor precision, and GST tax brackets"
       >
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto justify-center">
-          <Plus className="w-4 h-4" />
-          <span>Add Product</span>
-        </Button>
+        {isOwner && (
+          <Button
+            onClick={() => {
+              setProductToEdit(null);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 w-full sm:w-auto justify-center"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Product</span>
+          </Button>
+        )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
@@ -186,16 +200,69 @@ export const ProductsPage: React.FC = () => {
           products={filteredProducts}
           isLoading={isLoading}
           hasActiveFilters={hasActiveFilters}
+          isOwner={isOwner}
           onResetFilters={clearAllFilters}
-          onArchive={(id) => archiveMutation.mutate(id)}
-          onAddFirst={() => setIsModalOpen(true)}
+          onEdit={(prod) => {
+            setProductToEdit(prod);
+            setIsModalOpen(true);
+          }}
+          onDelete={(prod) => {
+            setProductToDelete(prod);
+          }}
+          onAddFirst={() => {
+            setProductToEdit(null);
+            setIsModalOpen(true);
+          }}
         />
       </Card>
 
       <ProductFormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setProductToEdit(null);
+        }}
+        productToEdit={productToEdit}
       />
+
+      {/* Modal: Delete Product Confirmation */}
+      <Modal
+        isOpen={!!productToDelete}
+        onClose={() => setProductToDelete(null)}
+        title="Delete Product"
+        description="Confirm product removal from your active inventory"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-xs sm:text-sm text-[#566B69]">
+            Are you sure you want to delete <strong className="text-[#123B3A]">{productToDelete?.name}</strong> ({productToDelete?.sku})? This will archive the item from your active inventory and catalog.
+          </p>
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#D7E5E2]">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setProductToDelete(null)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              isLoading={archiveMutation.isPending}
+              onClick={async () => {
+                if (productToDelete) {
+                  await archiveMutation.mutateAsync(productToDelete.id);
+                  setProductToDelete(null);
+                }
+              }}
+              className="w-full sm:w-auto"
+            >
+              Delete Product
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

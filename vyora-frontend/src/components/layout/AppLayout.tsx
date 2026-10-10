@@ -16,27 +16,38 @@ import {
   X,
   ChevronDown,
   Globe,
+  ShieldCheck,
+  UserCheck,
+  Sparkles,
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, FeatureKey } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
 
 export const AppLayout: React.FC = () => {
-  const { user, business, logout } = useAuth();
+  const { user, business, logout, isOwner, plan, hasFeature } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  const navItems = [
+  const allNavItems: {
+    label: string;
+    icon: any;
+    path: string;
+    feature?: FeatureKey;
+  }[] = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-    { label: 'Invoices', icon: FileText, path: '/invoices' },
-    { label: 'Customers', icon: Users, path: '/parties' },
-    { label: 'Products', icon: Package, path: '/products' },
-    { label: 'Inventory', icon: ArrowLeftRight, path: '/inventory' },
-    { label: 'Purchase', icon: ShoppingCart, path: '/purchases' },
-    { label: 'Payments', icon: CreditCard, path: '/payments' },
-    { label: 'Reports', icon: BarChart3, path: '/reports' },
+    { label: 'Invoices', icon: FileText, path: '/invoices', feature: 'INVOICES' },
+    { label: 'Customers', icon: Users, path: '/parties', feature: 'PARTIES' },
+    { label: 'Products', icon: Package, path: '/products', feature: 'PRODUCTS' },
+    { label: 'Inventory', icon: ArrowLeftRight, path: '/inventory', feature: 'INVENTORY' },
+    { label: 'Purchase', icon: ShoppingCart, path: '/purchases', feature: 'PURCHASES' },
+    { label: 'Payments', icon: CreditCard, path: '/payments', feature: 'PAYMENTS' },
+    { label: 'Reports', icon: BarChart3, path: '/reports', feature: 'REPORTS' },
+    { label: 'Team & Roles', icon: ShieldCheck, path: '/roles', feature: 'ROLES' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
+
+  const navItems = allNavItems.filter((item) => !item.feature || hasFeature(item.feature));
 
   return (
     <div className="flex h-screen bg-[#F4F8F7] overflow-hidden">
@@ -96,16 +107,31 @@ export const AppLayout: React.FC = () => {
           ))}
         </nav>
 
+        {/* Plan Card in Mobile Drawer */}
         <div className="p-3 mx-3 mb-3 bg-[#0D2D2C] border border-[#1A4F4E] rounded-xl text-xs">
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-white text-[11px] uppercase tracking-wider">
+              {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth Plan' : 'Starter Free'}
+            </span>
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#0F766E] text-white">
+              {plan === 'enterprise' ? 'PRO' : plan === 'growth' ? 'ACTIVE' : 'FREE'}
+            </span>
+          </div>
           <p className="text-[#A0BDB8] text-[11px]">
-            {business?.name || 'Vyora App'} • {business?.currency || 'INR'}
+            {plan === 'enterprise'
+              ? 'Unlimited staff, audited stock'
+              : plan === 'growth'
+              ? 'Up to 3 staff, purchases & reports'
+              : 'Basic invoices (50/mo), 1 owner'}
           </p>
         </div>
 
         <div className="px-4 py-3 border-t border-[#1A4F4E]/60 flex items-center justify-between bg-[#0E3130]">
           <div className="truncate pr-2">
             <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-            <p className="text-[10px] text-[#A0BDB8] uppercase">{user?.role || 'OWNER'}</p>
+            <p className="text-[10px] text-[#A0BDB8] uppercase font-bold">
+              {isOwner ? 'OWNER (Full Access)' : 'STAFF (View Only)'}
+            </p>
           </div>
           <button
             onClick={logout}
@@ -154,14 +180,22 @@ export const AppLayout: React.FC = () => {
           ))}
         </nav>
 
-        {/* Pro Banner Card */}
+        {/* Pro Banner / Plan Card */}
         <div className="p-3 mx-3 mb-3 bg-[#0D2D2C] border border-[#1A4F4E] rounded-xl text-xs">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 rounded-full bg-[#0F766E] animate-pulse" />
-            <span className="font-semibold text-white">Theme B: Teal Ledger</span>
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-white text-[11px] uppercase tracking-wider">
+              {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth Plan' : 'Starter Free'}
+            </span>
+            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#0F766E] text-white">
+              {plan === 'enterprise' ? 'PRO' : plan === 'growth' ? 'ACTIVE' : 'FREE'}
+            </span>
           </div>
           <p className="text-[#A0BDB8] text-[11px] leading-relaxed">
-            Standard Edition • {business?.currency || 'INR'} Minor Unit Precision
+            {plan === 'enterprise'
+              ? 'Unlimited staff, audited stock'
+              : plan === 'growth'
+              ? 'Up to 3 staff, purchases & reports'
+              : 'Basic invoices (50/mo), 1 owner'}
           </p>
         </div>
 
@@ -173,7 +207,9 @@ export const AppLayout: React.FC = () => {
             </div>
             <div className="truncate">
               <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
-              <p className="text-[10px] text-[#A0BDB8] uppercase">{user?.role || 'OWNER'}</p>
+              <p className="text-[10px] text-[#A0BDB8] uppercase font-bold">
+                {isOwner ? 'OWNER (Full Access)' : 'STAFF (View Only)'}
+              </p>
             </div>
           </div>
           <button
@@ -203,10 +239,46 @@ export const AppLayout: React.FC = () => {
             {/* Business Badge */}
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-lg text-xs font-semibold text-[#123B3A] shrink-0">
               <Building2 className="w-3.5 h-3.5 text-[#0F766E]" />
-              <span className="truncate max-w-[120px] sm:max-w-[180px]">
+              <span className="truncate max-w-[100px] sm:max-w-[160px]">
                 {business?.name || 'My Business'}
               </span>
             </div>
+
+            {/* Plan Badge */}
+            <span
+              className={cn(
+                'hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shrink-0',
+                plan === 'enterprise'
+                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                  : plan === 'growth'
+                  ? 'bg-teal-50 text-[#0F766E] border-[#A0D2CA]'
+                  : 'bg-amber-50 text-amber-700 border-amber-200',
+              )}
+            >
+              {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth' : 'Starter'}
+            </span>
+
+            {/* Role Badge */}
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0',
+                isOwner
+                  ? 'bg-[#E6F4F2] text-[#0F766E] border-[#A0D2CA]'
+                  : 'bg-amber-50 text-amber-700 border-amber-200',
+              )}
+            >
+              {isOwner ? (
+                <>
+                  <ShieldCheck className="w-3 h-3" />
+                  <span>OWNER</span>
+                </>
+              ) : (
+                <>
+                  <UserCheck className="w-3 h-3" />
+                  <span>STAFF (View Only)</span>
+                </>
+              )}
+            </span>
           </div>
 
           {/* Right Header: Marketing Website Link & User Profile */}

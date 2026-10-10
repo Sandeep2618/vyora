@@ -19,12 +19,14 @@ export interface MovementItem {
 interface StockMovementTableProps {
   movements: MovementItem[];
   isLoading: boolean;
+  canAdjust?: boolean;
   onOpenAdjustment: () => void;
 }
 
 export const StockMovementTable: React.FC<StockMovementTableProps> = ({
   movements,
   isLoading,
+  canAdjust = true,
   onOpenAdjustment,
 }) => {
   const getMovementBadge = (type: string, delta: number) => {
@@ -57,8 +59,8 @@ export const StockMovementTable: React.FC<StockMovementTableProps> = ({
       <EmptyState
         title="No stock movements recorded"
         description="All sales, purchases, and manual adjustments create an immutable audit trail here."
-        actionLabel="Record Adjustment"
-        onAction={onOpenAdjustment}
+        actionLabel={canAdjust ? "Record Adjustment" : undefined}
+        onAction={canAdjust ? onOpenAdjustment : undefined}
       />
     );
   }

@@ -5,8 +5,10 @@ import { api } from '../../lib/api';
 import { formatCurrency, formatDateReadable } from '@vyora/utils';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { useAuth } from '../../context/AuthContext';
 
 export const ReportsPage: React.FC = () => {
+  const { hasFeature, isOwner, updateSubscriptionPlan, plan } = useAuth();
   const [activeTab, setActiveTab] = useState<'SALES' | 'PURCHASES' | 'STOCK' | 'DUES'>('SALES');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -20,7 +22,7 @@ export const ReportsPage: React.FC = () => {
       if (endDate) q.set('endDate', endDate);
       return api.get(`/reports/sales-register?${q.toString()}`);
     },
-    enabled: activeTab === 'SALES',
+    enabled: activeTab === 'SALES' && hasFeature('REPORTS'),
   });
 
   // 2. Purchase Register Query
@@ -32,22 +34,41 @@ export const ReportsPage: React.FC = () => {
       if (endDate) q.set('endDate', endDate);
       return api.get(`/reports/purchase-register?${q.toString()}`);
     },
-    enabled: activeTab === 'PURCHASES',
+    enabled: activeTab === 'PURCHASES' && hasFeature('REPORTS'),
   });
 
   // 3. Stock Summary Query
   const { data: stockData, isLoading: isStockLoading } = useQuery<{ items: any[]; summary: any }>({
     queryKey: ['report-stock'],
     queryFn: () => api.get('/reports/stock-summary'),
-    enabled: activeTab === 'STOCK',
+    enabled: activeTab === 'STOCK' && hasFeature('REPORTS'),
   });
 
   // 4. Customer Dues Query
   const { data: duesData, isLoading: isDuesLoading } = useQuery<{ items: any[]; summary: any }>({
     queryKey: ['report-dues'],
     queryFn: () => api.get('/reports/customer-dues'),
-    enabled: activeTab === 'DUES',
+    enabled: activeTab === 'DUES' && hasFeature('REPORTS'),
   });
+
+  if (!hasFeature('REPORTS')) {
+    return (
+      <div className="max-w-xl mx-auto py-16 px-4 text-center space-y-4">
+        <div className="w-16 h-16 rounded-2xl bg-teal-50 border border-[#A0D2CA] text-[#0F766E] flex items-center justify-center mx-auto">
+          <BarChart3 className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold text-[#123B3A]">Business Reports require Growth Plan</h2>
+        <p className="text-xs sm:text-sm text-[#566B69] max-w-md mx-auto">
+          Sales Register, Purchase Register, Stock Inventory Valuation, and Debtor Aging are available on Growth (₹499/mo) and Business Pro (₹999/mo) plans.
+        </p>
+        {isOwner && (
+          <Button onClick={() => updateSubscriptionPlan('growth')} className="mt-2">
+            Upgrade to Growth Plan (₹499/mo)
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">

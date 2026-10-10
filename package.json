@@ -8,6 +8,7 @@
     "dev:backend": "pnpm --dir vyora-backend dev",
     "dev:frontend": "pnpm --dir vyora-frontend dev",
     "test:backend": "pnpm --dir vyora-backend test",
-    "test:frontend": "pnpm --dir vyora-frontend test"
+    "test:frontend": "pnpm --dir vyora-frontend test",
+    "check-secrets": "node scripts/check-secrets.js"
   }
 }

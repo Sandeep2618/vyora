@@ -16,6 +16,20 @@ export interface AuthTokens {
   user: UserProfile;
 }
 
+// Subscription Plans matching website pricing
+export type SubscriptionPlan = 'starter' | 'growth' | 'enterprise';
+
+export interface StaffMember {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  isPrimaryOwner?: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
 // Business Entity
 export interface BusinessProfile {
   id: string;
@@ -38,6 +52,7 @@ export interface BusinessProfile {
   purchasePrefix: string;
   nextPurchaseNumber: number;
   termsAndConditions?: string;
+  subscriptionPlan?: SubscriptionPlan;
   createdAt: string;
   updatedAt: string;
 }

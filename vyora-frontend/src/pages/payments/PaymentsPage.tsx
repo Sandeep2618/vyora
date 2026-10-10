@@ -13,8 +13,10 @@ import { SearchInput } from '../../components/ui/SearchInput';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { useAuth } from '../../context/AuthContext';
 
 export const PaymentsPage: React.FC = () => {
+  const { isOwner } = useAuth();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -114,10 +116,12 @@ export const PaymentsPage: React.FC = () => {
         title="Payments & Receipts"
         description="Record customer receipts, supplier settlements, and reconcile outstanding dues"
       >
-        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto">
-          <Plus className="w-4 h-4" />
-          <span>Record Voucher</span>
-        </Button>
+        {isOwner && (
+          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto">
+            <Plus className="w-4 h-4" />
+            <span>Record Voucher</span>
+          </Button>
+        )}
       </PageHeader>
 
       {/* Payments Table Card */}
@@ -269,8 +273,8 @@ export const PaymentsPage: React.FC = () => {
                           ? 'No payment records match your active search or filters. Reset filters to see all.'
                           : 'Record receipts from customers or payments to vendors to manage cash flow traceably.'
                       }
-                      actionLabel={hasActiveFilters ? 'Reset Filters' : 'Record Voucher'}
-                      onAction={hasActiveFilters ? clearAllFilters : () => setIsModalOpen(true)}
+                      actionLabel={hasActiveFilters ? 'Reset Filters' : isOwner ? 'Record Voucher' : undefined}
+                      onAction={hasActiveFilters ? clearAllFilters : isOwner ? () => setIsModalOpen(true) : undefined}
                     />
                   </td>
                 </tr>

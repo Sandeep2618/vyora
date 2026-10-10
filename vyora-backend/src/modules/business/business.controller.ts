@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { BusinessService } from './business.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -6,6 +6,7 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { BusinessProfileSchema, BusinessProfileInput } from '@vyora/validation';
 import { UserRole } from '@vyora/shared-types';
 
@@ -33,6 +34,16 @@ export class BusinessController {
     return this.businessService.updateBusiness(businessId, validated);
   }
 
+  @Put('plan')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Upgrade or change subscription plan (Owner only)' })
+  async updatePlan(
+    @CurrentTenant() businessId: string,
+    @Body() body: { plan: 'starter' | 'growth' | 'enterprise' },
+  ) {
+    return this.businessService.updateSubscriptionPlan(businessId, body.plan);
+  }
+
   @Get('staff')
   @ApiOperation({ summary: 'List all staff members and roles for this business' })
   async getStaff(@CurrentTenant() businessId: string) {
@@ -47,5 +58,40 @@ export class BusinessController {
     @Body() body: { name: string; email: string; role: UserRole },
   ) {
     return this.businessService.addStaffMember(businessId, body);
+  }
+
+  @Patch('staff/:id/role')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Switch or change member role (Owner only)' })
+  async updateStaffRole(
+    @CurrentTenant() businessId: string,
+    @CurrentUser() user: any,
+    @Param('id') membershipId: string,
+    @Body() body: { role: UserRole },
+  ) {
+    return this.businessService.updateStaffRole(businessId, membershipId, body.role, user?.id);
+  }
+
+  @Patch('staff/:id/status')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Toggle member access active status (Owner only)' })
+  async toggleStaffStatus(
+    @CurrentTenant() businessId: string,
+    @CurrentUser() user: any,
+    @Param('id') membershipId: string,
+    @Body() body: { isActive: boolean },
+  ) {
+    return this.businessService.toggleStaffStatus(businessId, membershipId, body.isActive, user?.id);
+  }
+
+  @Delete('staff/:id')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Remove a team member from this business (Owner only)' })
+  async removeStaff(
+    @CurrentTenant() businessId: string,
+    @CurrentUser() user: any,
+    @Param('id') membershipId: string,
+  ) {
+    return this.businessService.removeStaffMember(businessId, membershipId, user?.id);
   }
 }

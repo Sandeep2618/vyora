@@ -86,6 +86,16 @@ export class PartiesService {
     );
   }
 
+  async archive(businessId: string, id: string) {
+    const party = await this.partyModel.findOne({ _id: id, businessId });
+    if (!party) {
+      throw new NotFoundException('Party not found');
+    }
+    party.isArchived = true;
+    await party.save();
+    return { success: true, message: 'Party archived successfully' };
+  }
+
   private mapParty(doc: PartyDocument) {
     return {
       id: doc._id.toString(),

@@ -188,9 +188,16 @@ export class TenantGuard implements CanActivate {
       }
     }
 
-    // Attach verified businessId and role to request
+    // Attach verified businessId, role, and subscriptionPlan to request
     request.businessId = businessIdStr;
     request.businessRole = effectiveRole || user.role || 'OWNER';
+
+    if (this.businessModel && Types.ObjectId.isValid(businessIdStr)) {
+      const biz = await this.businessModel.findById(businessIdStr).select('subscriptionPlan').lean();
+      request.businessPlan = (biz as any)?.subscriptionPlan || 'starter';
+    } else {
+      request.businessPlan = 'starter';
+    }
 
     return true;
   }

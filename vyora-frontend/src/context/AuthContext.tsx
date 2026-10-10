@@ -1,16 +1,33 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { api } from '../lib/api';
-import { UserProfile, BusinessProfile, AuthTokens } from '@vyora/shared-types';
+import { UserProfile, BusinessProfile, AuthTokens, SubscriptionPlan, UserRole } from '../types';
 import { LoginInput, RegisterInput } from '@vyora/validation';
+
+export type FeatureKey =
+  | 'INVOICES'
+  | 'PRODUCTS'
+  | 'PARTIES'
+  | 'INVENTORY'
+  | 'PURCHASES'
+  | 'PAYMENTS'
+  | 'REPORTS'
+  | 'ROLES'
+  | 'STOCK_ADJUSTMENTS';
 
 interface AuthContextType {
   user: UserProfile | null;
   business: BusinessProfile | null;
   isLoading: boolean;
+  isOwner: boolean;
+  isStaff: boolean;
+  role: UserRole;
+  plan: SubscriptionPlan;
+  hasFeature: (feature: FeatureKey) => boolean;
   login: (credentials: LoginInput) => Promise<void>;
   register: (data: RegisterInput) => Promise<void>;
   logout: () => void;
   refreshBusiness: () => Promise<void>;
+  updateSubscriptionPlan: (plan: SubscriptionPlan) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -92,16 +109,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchBusinessProfile();
   };
 
+  const role: UserRole = user?.role || 'STAFF';
+  const isOwner = role === 'OWNER' || role === 'ADMIN';
+  const isStaff = !isOwner;
+  const plan: SubscriptionPlan = (business?.subscriptionPlan as SubscriptionPlan) || 'growth';
+
+  const hasFeature = (feature: FeatureKey): boolean => {
+    switch (feature) {
+      case 'INVOICES':
+      case 'PRODUCTS':
+      case 'PARTIES':
+      case 'INVENTORY':
+        return true;
+      case 'PURCHASES':
+      case 'PAYMENTS':
+      case 'REPORTS':
+      case 'ROLES':
+        return plan === 'growth' || plan === 'enterprise';
+      case 'STOCK_ADJUSTMENTS':
+        return plan === 'enterprise';
+      default:
+        return true;
+    }
+  };
+
+  const updateSubscriptionPlan = async (newPlan: SubscriptionPlan) => {
+    const updated = await api.put<BusinessProfile>('/business/plan', { plan: newPlan });
+    setBusiness(updated);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         business,
         isLoading,
+        isOwner,
+        isStaff,
+        role,
+        plan,
+        hasFeature,
         login,
         register,
         logout,
         refreshBusiness,
+        updateSubscriptionPlan,
       }}
     >
       {children}

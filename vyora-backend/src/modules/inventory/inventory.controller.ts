@@ -3,13 +3,17 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { InventoryService } from './inventory.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { TenantGuard } from '../../common/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { PlanGuard } from '../../common/guards/plan.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RequirePlan } from '../../common/decorators/plan.decorator';
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { StockAdjustmentSchema, StockAdjustmentInput } from '@vyora/validation';
 
 @ApiTags('Inventory')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, TenantGuard)
+@UseGuards(JwtAuthGuard, TenantGuard, RolesGuard, PlanGuard)
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
@@ -34,7 +38,9 @@ export class InventoryController {
   }
 
   @Post('adjustments')
-  @ApiOperation({ summary: 'Record a manual stock adjustment with mandatory audit reason' })
+  @Roles('OWNER', 'ADMIN')
+  @RequirePlan('enterprise')
+  @ApiOperation({ summary: 'Record a manual stock adjustment with mandatory audit reason (Owner & Enterprise plan only)' })
   async createAdjustment(
     @CurrentTenant() businessId: string,
     @CurrentUser() user: any,
