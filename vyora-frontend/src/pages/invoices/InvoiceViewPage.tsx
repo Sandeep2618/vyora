@@ -107,11 +107,12 @@ export const InvoiceViewPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {invoice.status === 'DRAFT' && (
             <Button
               isLoading={finalizeMutation.isPending}
               onClick={() => finalizeMutation.mutate()}
+              className="flex-1 sm:flex-none justify-center"
             >
               <CheckCircle2 className="w-4 h-4 mr-1.5" />
               Finalize Document
@@ -127,13 +128,14 @@ export const InvoiceViewPage: React.FC = () => {
                   setPayAmountMajor(minorToMajor(invoice.dueAmountMinor));
                   setIsPaymentModalOpen(true);
                 }}
+                className="flex-1 sm:flex-none justify-center"
               >
                 <CreditCard className="w-4 h-4 mr-1.5" />
                 Record Payment
               </Button>
             )}
 
-          <Button variant="outline" onClick={handlePrint}>
+          <Button variant="outline" onClick={handlePrint} className="flex-1 sm:flex-none justify-center">
             <Printer className="w-4 h-4 mr-1.5" />
             Print / Save PDF
           </Button>
@@ -141,9 +143,9 @@ export const InvoiceViewPage: React.FC = () => {
       </div>
 
       {/* A4 Printable Document Container */}
-      <div className="bg-white border border-[#D7E5E2] rounded-xl p-8 sm:p-12 shadow-sm text-[#123B3A] print:border-none print:shadow-none print:p-0">
+      <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 sm:p-8 lg:p-12 shadow-sm text-[#123B3A] print:border-none print:shadow-none print:p-0">
         {/* Document Header */}
-        <div className="flex justify-between items-start pb-8 border-b-2 border-[#0F766E]">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 sm:pb-8 border-b-2 border-[#0F766E]">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg bg-[#0F766E] text-white flex items-center justify-center font-black text-lg">
@@ -167,7 +169,7 @@ export const InvoiceViewPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <span className="inline-block px-3 py-1 bg-[#E6F4F2] text-[#0F766E] font-black text-sm tracking-wider uppercase rounded-md mb-2">
               TAX INVOICE
             </span>
@@ -187,7 +189,7 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
 
         {/* Bill To & Ship To */}
-        <div className="grid grid-cols-2 gap-8 py-6 border-b border-[#D7E5E2] text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 py-6 border-b border-[#D7E5E2] text-xs">
           <div>
             <span className="font-bold text-[#0F766E] uppercase tracking-wider block mb-1">
               Billed To:
@@ -225,8 +227,8 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
 
         {/* Itemized Table */}
-        <div className="py-6">
-          <table className="w-full text-left text-xs">
+        <div className="py-6 overflow-x-auto -mx-2 sm:mx-0">
+          <table className="w-full text-left text-xs min-w-[650px] whitespace-nowrap">
             <thead>
               <tr className="border-b-2 border-[#123B3A] text-[#123B3A] font-bold">
                 <th className="py-2.5 px-2 w-8">#</th>
@@ -267,7 +269,7 @@ export const InvoiceViewPage: React.FC = () => {
 
         {/* Calculation Totals Breakdown */}
         <div className="pt-4 border-t-2 border-[#D7E5E2] flex justify-end text-xs">
-          <div className="w-72 space-y-2">
+          <div className="w-full sm:w-80 ml-auto space-y-2">
             <div className="flex justify-between text-[#566B69]">
               <span>Subtotal:</span>
               <span className="font-semibold text-[#123B3A]">
@@ -332,7 +334,7 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
 
         {/* Footer Terms & Signatory */}
-        <div className="mt-12 pt-8 border-t border-[#D7E5E2] grid grid-cols-2 gap-8 text-xs">
+        <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-[#D7E5E2] grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 text-xs">
           <div>
             <h4 className="font-bold text-[#123B3A] mb-1">Terms & Conditions</h4>
             <p className="text-[#566B69] leading-relaxed">
@@ -340,8 +342,8 @@ export const InvoiceViewPage: React.FC = () => {
                 '1. Goods once sold will not be taken back without original packaging.\n2. Payment is due strictly per stated invoice terms.\n3. Subject to local jurisdiction.'}
             </p>
           </div>
-          <div className="text-right flex flex-col justify-end">
-            <div className="border-b border-[#123B3A] w-48 ml-auto pb-1 mb-1"></div>
+          <div className="text-left sm:text-right flex flex-col justify-end">
+            <div className="border-b border-[#123B3A] w-48 sm:ml-auto pb-1 mb-1"></div>
             <p className="font-bold text-[#123B3A]">
               For {invoice.businessSnapshot?.name || 'Vyora Business'}
             </p>
@@ -361,7 +363,7 @@ export const InvoiceViewPage: React.FC = () => {
       >
         <div className="space-y-4">
           <Input
-            label="Payment Amount (₹) *"
+            label="Payment Amount (₹)"
             type="number"
             step="0.01"
             max={minorToMajor(invoice.dueAmountMinor)}
@@ -372,7 +374,7 @@ export const InvoiceViewPage: React.FC = () => {
 
           <div>
             <label className="block text-xs font-semibold text-[#123B3A] mb-1">
-              Payment Method *
+              Payment Method <span className="text-[#B91C1C] font-bold">*</span>
             </label>
             <select
               value={payMethod}
@@ -402,14 +404,15 @@ export const InvoiceViewPage: React.FC = () => {
             placeholder="Optional receipt notes"
           />
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsPaymentModalOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsPaymentModalOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               isLoading={paymentMutation.isPending}
               disabled={payAmountMajor <= 0}
               onClick={() => paymentMutation.mutate()}
+              className="w-full sm:w-auto"
             >
               Confirm Receipt Voucher
             </Button>

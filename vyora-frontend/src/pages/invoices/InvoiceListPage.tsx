@@ -1,249 +1,189 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Eye, CheckCircle2, XCircle, Printer } from 'lucide-react';
-import { api } from '../../lib/api';
-import { formatCurrency, formatDateReadable } from '@vyora/utils';
-import { Invoice, InvoiceStatus } from '@vyora/shared-types';
-import { Badge } from '../../components/ui/Badge';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Filter, X } from 'lucide-react';
+import { Invoice } from '../../types';
 import { Button } from '../../components/ui/Button';
-import { Modal } from '../../components/ui/Modal';
-import { Input } from '../../components/ui/Input';
+import { Card } from '../../components/ui/Card';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { SearchInput } from '../../components/ui/SearchInput';
+import { useInvoices, useFinalizeInvoice } from '../../hooks/useInvoices';
+import { InvoiceTable } from './InvoiceTable';
+import { CancelInvoiceModal } from './CancelInvoiceModal';
 
 export const InvoiceListPage: React.FC = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'ALL' | 'PAID' | 'PENDING' | 'OVERDUE'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PAID' | 'PENDING' | 'OVERDUE' | 'CANCELLED'>('ALL');
   const [search, setSearch] = useState('');
-  const [selectedInvoiceForCancel, setSelectedInvoiceForCancel] = useState<Invoice | null>(null);
-  const [cancelReason, setCancelReason] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'ALL' | 'TODAY' | 'THIS_MONTH' | 'LAST_30'>('ALL');
+  const [showFilters, setShowFilters] = useState(false);
+  const [cancelingInvoice, setCancelingInvoice] = useState<Invoice | null>(null);
 
-  const { data, isLoading } = useQuery<{ items: Invoice[]; total: number }>({
-    queryKey: ['invoices', activeTab, search],
-    queryFn: () => {
-      let statusParam = '';
-      if (activeTab === 'PAID') statusParam = 'status=PAID';
-      else if (activeTab === 'PENDING') statusParam = 'status=PARTIAL';
-      else if (activeTab === 'OVERDUE') statusParam = 'status=UNPAID';
+  const { data, isLoading } = useInvoices();
+  const finalizeMutation = useFinalizeInvoice();
 
-      const searchParam = search ? `search=${encodeURIComponent(search)}` : '';
-      const params = [statusParam, searchParam].filter(Boolean).join('&');
-      return api.get<{ items: Invoice[]; total: number }>(`/invoices${params ? `?${params}` : ''}`);
-    },
-  });
+  // Instant client-side filtering
+  const filteredInvoices = useMemo(() => {
+    if (!data?.items) return [];
 
-  const finalizeMutation = useMutation({
-    mutationFn: (id: string) => api.post(`/invoices/${id}/finalize`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-    },
-  });
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  const cancelMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
-      api.post(`/invoices/${id}/cancel`, { reason }),
-    onSuccess: () => {
-      setSelectedInvoiceForCancel(null);
-      setCancelReason('');
-      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-    },
-  });
+    return data.items.filter((inv) => {
+      // Status filter
+      let matchesStatus = true;
+      if (activeTab === 'PAID') matchesStatus = inv.status === 'PAID';
+      else if (activeTab === 'PENDING') matchesStatus = inv.status === 'PARTIAL' || inv.status === 'DRAFT';
+      else if (activeTab === 'OVERDUE') matchesStatus = inv.status === 'UNPAID';
+      else if (activeTab === 'CANCELLED') matchesStatus = inv.status === 'CANCELLED';
 
-  const getStatusVariant = (status: InvoiceStatus) => {
-    switch (status) {
-      case 'PAID':
-        return 'paid';
-      case 'PARTIAL':
-      case 'DRAFT':
-        return 'pending';
-      case 'UNPAID':
-        return 'overdue';
-      case 'CANCELLED':
-        return 'cancelled';
-      default:
-        return 'neutral';
-    }
+      // Search
+      const q = search.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        inv.invoiceNumber.toLowerCase().includes(q) ||
+        inv.customerSnapshot.name.toLowerCase().includes(q) ||
+        (inv.customerSnapshot.phone && inv.customerSnapshot.phone.includes(q));
+
+      // Timeframe filter
+      let matchesTime = true;
+      const invDate = new Date(inv.issueDate);
+      if (timeFilter === 'TODAY') {
+        matchesTime = inv.issueDate.startsWith(todayStr);
+      } else if (timeFilter === 'THIS_MONTH') {
+        matchesTime = invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+      } else if (timeFilter === 'LAST_30') {
+        matchesTime = invDate >= thirtyDaysAgo;
+      }
+
+      return matchesStatus && matchesSearch && matchesTime;
+    });
+  }, [data?.items, activeTab, search, timeFilter]);
+
+  const hasActiveFilters = activeTab !== 'ALL' || timeFilter !== 'ALL' || search !== '';
+
+  const clearAllFilters = () => {
+    setActiveTab('ALL');
+    setTimeFilter('ALL');
+    setSearch('');
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#123B3A]">Invoices</h2>
-          <p className="text-xs sm:text-sm text-[#566B69] mt-0.5">
-            Manage and track all your sales invoices in one place
-          </p>
-        </div>
+    <div className="space-y-4 sm:space-y-5 max-w-7xl mx-auto">
+      <PageHeader
+        title="Invoices"
+        description="Manage and track all your sales invoices in one place"
+      >
+        <Button
+          onClick={() => navigate('/invoices/create')}
+          className="flex items-center gap-1.5 shadow-sm w-full sm:w-auto justify-center"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create Invoice</span>
+        </Button>
+      </PageHeader>
 
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={() => navigate('/invoices/create')}
-            className="flex items-center gap-1.5 shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Invoice</span>
-          </Button>
-        </div>
-      </div>
+      <Card className="p-3.5 sm:p-5 space-y-4">
+        {/* Responsive Toolbar */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Status Tabs and Filter Button */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 bg-[#F4F8F7] p-1 rounded-xl border border-[#D7E5E2] overflow-x-auto max-w-full">
+              {(['ALL', 'PAID', 'PENDING', 'OVERDUE', 'CANCELLED'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize whitespace-nowrap ${
+                    activeTab === tab
+                      ? 'bg-[#0F766E] text-white shadow-2xs'
+                      : 'text-[#566B69] hover:text-[#123B3A]'
+                  }`}
+                >
+                  {tab.toLowerCase()}
+                </button>
+              ))}
+            </div>
 
-      {/* Filter Tabs & Search Bar */}
-      <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Tabs matching design mockup */}
-          <div className="flex items-center gap-2 bg-[#F4F8F7] p-1 rounded-lg border border-[#D7E5E2] w-fit">
-            {(['ALL', 'PAID', 'PENDING', 'OVERDUE'] as const).map((tab) => (
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 shrink-0 ${
+                showFilters || timeFilter !== 'ALL'
+                  ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
+                  : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Date Filter</span>
+              {timeFilter !== 'ALL' && <span className="w-2 h-2 rounded-full bg-[#0F766E]" />}
+            </button>
+
+            {hasActiveFilters && (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors capitalize ${
-                  activeTab === tab
-                    ? 'bg-[#0F766E] text-white shadow-2xs'
-                    : 'text-[#566B69] hover:text-[#123B3A]'
-                }`}
+                type="button"
+                onClick={clearAllFilters}
+                className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1 shrink-0"
               >
-                {tab.toLowerCase()}
+                <X className="w-3 h-3" />
+                <span>Reset</span>
               </button>
-            ))}
+            )}
           </div>
 
-          {/* Search */}
-          <div className="relative max-w-xs w-full">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#566B69]" />
-            <input
-              type="text"
-              placeholder="Search invoice number, customer..."
+          {/* Search Bar: Full width on mobile/tablet, right aligned on desktop */}
+          <div className="w-full lg:w-72 shrink-0">
+            <SearchInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F4F8F7] border border-[#D7E5E2] rounded-lg text-[#123B3A] focus:outline-none focus:border-[#0F766E] focus:bg-white transition-colors"
+              onChange={setSearch}
+              placeholder="Search invoice number, customer..."
             />
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-                <th className="py-3 px-4">Invoice No.</th>
-                <th className="py-3 px-4">Customer</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#D7E5E2]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-[#566B69]">
-                    Loading invoices...
-                  </td>
-                </tr>
-              ) : data?.items && data.items.length > 0 ? (
-                data.items.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-[#0F766E]">
-                      <Link to={`/invoices/${inv.id}`}>{inv.invoiceNumber}</Link>
-                    </td>
-                    <td className="py-3.5 px-4 font-medium text-[#123B3A]">
-                      {inv.customerSnapshot.name}
-                    </td>
-                    <td className="py-3.5 px-4 text-[#566B69]">
-                      {formatDateReadable(inv.issueDate)}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#123B3A] text-right">
-                      {formatCurrency(inv.grandTotalMinor)}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
-                      <Badge variant={getStatusVariant(inv.status)}>{inv.status}</Badge>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          to={`/invoices/${inv.id}`}
-                          title="View / Print Invoice"
-                          className="p-1.5 text-[#566B69] hover:text-[#0F766E] hover:bg-[#E6F4F2] rounded-md transition-colors"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Link>
-                        {inv.status === 'DRAFT' && (
-                          <button
-                            onClick={() => finalizeMutation.mutate(inv.id)}
-                            title="Finalize Invoice"
-                            className="p-1.5 text-[#15803D] hover:bg-[#DCFCE7] rounded-md transition-colors"
-                          >
-                            <CheckCircle2 className="w-4 h-4" />
-                          </button>
-                        )}
-                        {inv.status !== 'CANCELLED' && inv.paidAmountMinor === 0 && (
-                          <button
-                            onClick={() => setSelectedInvoiceForCancel(inv)}
-                            title="Cancel Invoice"
-                            className="p-1.5 text-[#B91C1C] hover:bg-[#FEE2E2] rounded-md transition-colors"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#566B69]">
-                    No invoices found. Click "Create Invoice" to issue a new bill.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Controlled Cancellation Modal */}
-      <Modal
-        isOpen={!!selectedInvoiceForCancel}
-        onClose={() => setSelectedInvoiceForCancel(null)}
-        title="Cancel Invoice"
-        description={`Cancel invoice ${selectedInvoiceForCancel?.invoiceNumber}. This action is audited and reverses allocated stock and customer ledger balances.`}
-      >
-        <div className="space-y-4">
-          <Input
-            label="Reason for Cancellation *"
-            placeholder="e.g. Order cancelled by client or wrong billing details entered"
-            value={cancelReason}
-            onChange={(e) => setCancelReason(e.target.value)}
-            required
-          />
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              variant="outline"
-              onClick={() => setSelectedInvoiceForCancel(null)}
-            >
-              Back
-            </Button>
-            <Button
-              variant="danger"
-              disabled={!cancelReason.trim()}
-              isLoading={cancelMutation.isPending}
-              onClick={() => {
-                if (selectedInvoiceForCancel) {
-                  cancelMutation.mutate({
-                    id: selectedInvoiceForCancel.id,
-                    reason: cancelReason,
-                  });
-                }
-              }}
-            >
-              Confirm Cancellation
-            </Button>
+        {/* Date Filter Toolbar Drawer */}
+        {showFilters && (
+          <div className="p-3.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-xl flex items-center gap-3 animate-in fade-in flex-wrap">
+            <span className="text-xs font-bold text-[#123B3A]">Issue Date Range:</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { label: 'All Time', val: 'ALL' },
+                { label: 'Today', val: 'TODAY' },
+                { label: 'This Month', val: 'THIS_MONTH' },
+                { label: 'Last 30 Days', val: 'LAST_30' },
+              ].map((opt) => (
+                <button
+                  key={opt.val}
+                  type="button"
+                  onClick={() => setTimeFilter(opt.val as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    timeFilter === opt.val
+                      ? 'bg-[#0F766E] text-white shadow-2xs font-semibold'
+                      : 'bg-white border border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </Modal>
+        )}
+
+        <InvoiceTable
+          invoices={filteredInvoices}
+          isLoading={isLoading}
+          onFinalize={(id) => finalizeMutation.mutate(id)}
+          onCancelClick={(inv) => setCancelingInvoice(inv)}
+          onCreateClick={() => navigate('/invoices/create')}
+        />
+      </Card>
+
+      <CancelInvoiceModal
+        invoice={cancelingInvoice}
+        onClose={() => setCancelingInvoice(null)}
+      />
     </div>
   );
 };

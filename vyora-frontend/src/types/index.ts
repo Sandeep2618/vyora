@@ -338,3 +338,109 @@ export interface DashboardSummary {
   }[];
   lowStockCount: number;
 }
+
+// Input DTOs
+export interface BusinessProfileInput {
+  name: string;
+  legalName?: string;
+  gstin?: string;
+  pan?: string;
+  phone: string;
+  email?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  currency?: string;
+  invoicePrefix?: string;
+  invoiceNumberPadding?: number;
+  purchasePrefix?: string;
+  termsAndConditions?: string;
+}
+
+export interface PartyInput {
+  type: PartyType;
+  name: string;
+  contactPerson?: string;
+  phone: string;
+  email?: string;
+  gstin?: string;
+  pan?: string;
+  billingAddress: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+  shippingAddress?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+  openingBalanceMinor?: number;
+  creditLimitMinor?: number;
+}
+
+export interface ProductInput {
+  name: string;
+  sku: string;
+  hsnCode?: string;
+  description?: string;
+  unit: ItemUnit;
+  sellingPriceMinor: number;
+  purchasePriceMinor?: number;
+  taxRatePercent: TaxRatePercent;
+  openingStock?: number;
+  reorderLevel?: number;
+}
+
+export interface CreateInvoiceItemInput {
+  productId: string;
+  quantity: number;
+  unitPriceMinor: number;
+  discountPercent?: number;
+  taxRatePercent: TaxRatePercent;
+}
+
+export interface CreateInvoiceInput {
+  customerId: string;
+  issueDate: string;
+  dueDate: string;
+  items: CreateInvoiceItemInput[];
+  notes?: string;
+  roundOff?: boolean;
+}
+
+export interface CalculatedLineItem {
+  productId: string;
+  productName: string;
+  sku: string;
+  quantity: number;
+  unitPriceMinor: number;
+  discountPercent: number;
+  discountAmountMinor: number;
+  taxableAmountMinor: number;
+  taxRatePercent: number;
+  cgstMinor: number;
+  sgstMinor: number;
+  igstMinor: number;
+  totalTaxMinor: number;
+  lineTotalMinor: number;
+}
+
+export interface InvoiceTotals {
+  subtotalMinor: number;
+  totalDiscountMinor: number;
+  totalTaxableAmountMinor: number;
+  cgstMinor: number;
+  sgstMinor: number;
+  igstMinor: number;
+  totalTaxMinor: number;
+  roundOffMinor: number;
+  grandTotalMinor: number;
+  items: CalculatedLineItem[];
+}

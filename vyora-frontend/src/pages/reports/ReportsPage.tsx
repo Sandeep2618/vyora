@@ -69,8 +69,8 @@ export const ReportsPage: React.FC = () => {
 
       {/* Navigation Tabs and Date Range Filter */}
       <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs space-y-4 no-print">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 bg-[#F4F8F7] p-1 rounded-lg border border-[#D7E5E2] overflow-x-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 bg-[#F4F8F7] p-1 rounded-lg border border-[#D7E5E2] overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveTab('SALES')}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-colors ${
@@ -106,7 +106,7 @@ export const ReportsPage: React.FC = () => {
           </div>
 
           {(activeTab === 'SALES' || activeTab === 'PURCHASES') && (
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-[#566B69] font-medium">Dates:</span>
               <input
                 type="date"
@@ -156,8 +156,8 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[750px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-3">Date</th>
@@ -198,8 +198,8 @@ export const ReportsPage: React.FC = () => {
       {/* TAB 2: PURCHASE REGISTER */}
       {activeTab === 'PURCHASES' && (
         <div className="space-y-4">
-          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[650px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-3">Date</th>
@@ -247,8 +247,8 @@ export const ReportsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[680px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-3">Product Name</th>
@@ -292,8 +292,8 @@ export const ReportsPage: React.FC = () => {
             </h3>
           </div>
 
-          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[500px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-4">Customer Name</th>

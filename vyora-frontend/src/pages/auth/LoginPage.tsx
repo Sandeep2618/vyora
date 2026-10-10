@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F8F7] flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md bg-white border border-[#D7E5E2] rounded-2xl shadow-sm p-8">
+      <div className="w-full max-w-md bg-white border border-[#D7E5E2] rounded-2xl shadow-sm p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-[#0F766E] flex items-center justify-center shadow-sm">
             <span className="text-white font-black text-2xl tracking-tighter">V</span>

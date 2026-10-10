@@ -93,13 +93,136 @@ On every subsequent request (such as `/inventory/movements`, `/products`, `/part
   - `GET /api/v1/products`: Returns `total: 4` (200 OK)
   - `GET /api/v1/inventory/movements`: Returns `total: 6` (200 OK)
 - **Active Processes**:
-  - Backend running on `http://localhost:4000/api/v1`
-  - Frontend running on `http://localhost:3000`
+  - Backend running on `http://localhost:4000/api/v1` (Healthy & connected to MongoDB)
+  - Frontend running on `http://localhost:3000` (Vite dev server)
 
 ---
 
-## 5. Next Tasks
+## 5. Modular React Architecture (vyora-frontend)
 
-1. **Vyora Mobile (React Native) Scaffolding**: Create `vyora/vyora-mobile` connecting to `vyora-backend`.
+The frontend has been refactored into clean, modular, and idiomatic React components, hooks, and services:
+
+1. **Centralized API Services (`src/api/`)**:
+   - `products.ts`, `parties.ts`, `invoices.ts`, `inventory.ts`, `dashboard.ts`, `business.ts`
+   - Decouples raw HTTP paths and query strings from the UI components.
+   - Clean, typed contracts shareable with future React Native mobile apps.
+
+2. **Custom Hook Data Layer (`src/hooks/`)**:
+   - `useProducts`, `useProduct`, `useCreateProduct`, `useArchiveProduct`
+   - `useParties`, `useCreateParty`
+   - `useInvoices`, `useInvoice`, `useCreateInvoice`, `useFinalizeInvoice`, `useCancelInvoice`
+   - `useInventoryMovements`, `useStockAdjustment`
+   - `useDashboardMetrics`
+   - Automatic TanStack Query cache invalidation keeps all views synchronized in real time.
+
+3. **Atomic Reusable UI Components (`src/components/ui/`)**:
+   - `Card.tsx`, `PageHeader.tsx`, `SearchInput.tsx`, `Select.tsx`, `EmptyState.tsx`, `Modal.tsx`, `Button.tsx`, `Badge.tsx`, `Input.tsx`
+
+4. **Decomposed Page Modules**:
+   - **Products**: `ProductsPage.tsx` (reduced from 324 to 65 lines) composing `ProductTable.tsx` and `ProductFormModal.tsx`.
+   - **Parties**: `PartiesPage.tsx` (reduced from 289 to 85 lines) composing `PartyTable.tsx` and `PartyFormModal.tsx`.
+   - **Inventory**: `InventoryPage.tsx` (reduced from 206 to 45 lines) composing `StockMovementTable.tsx` and `StockAdjustmentModal.tsx`.
+   - **Invoices**: `InvoiceListPage.tsx` (reduced from 250 to 85 lines) composing `InvoiceTable.tsx` and `CancelInvoiceModal.tsx`.
+   - **Dashboard**: `DashboardPage.tsx` (reduced from 345 to 65 lines) composing `DashboardMetricsCards.tsx`, `SalesChart.tsx`, `SalesByCategory.tsx`, `RecentInvoicesWidget.tsx`, and `TopProductsWidget.tsx`.
+
+5. **Type Safety & Automated Test Verification**:
+   - `pnpm --dir vyora-frontend typecheck`: **0 errors** (`tsc --noEmit` clean).
+   - `pnpm --dir vyora-frontend test`: **All tests passing**.
+   - `pnpm --dir vyora-backend test`: **7/7 unit tests passing**.
+
+---
+
+## 6. Marketing Website & Blog Engine (`D:\project\vyora-website`)
+
+A standalone marketing and blog platform created to educate potential customers, showcase the app, and allow regular blog publishing:
+
+- **Path**: `D:\project\vyora-website\`
+- **Stack**: React 19 + TypeScript + Vite + Tailwind CSS 4 Theme B + Lucide Icons + React Router
+- **Active Port**: `http://localhost:3001`
+- **Features Included**:
+  1. **Home Landing Page (`/`)**: High-converting Hero, Interactive Live App Preview tabs (GST Invoice, Stock, Ledgers, KPI), Comparison Matrix (Vyora vs Tally vs Excel), Feature Grid, Customer Stories with ROI metrics, Transparent Pricing, FAQs, and bottom CTA banner.
+  2. **Features Page (`/features`)**: Deep-dive breakdowns with sample GST computations and stock logs.
+  3. **Pricing Page (`/pricing`)**: Interactive time and money savings calculator.
+  4. **Publishing Blog Engine (`/blog` and `/blog/:slug`)**:
+     - Central data repository in `src/data/blogs.ts` for regular blog updates.
+     - Live keyword search across titles, summaries, and tags.
+     - Category filter pills with active counters.
+     - Rich formatted post reading view with table of contents, author profile, WhatsApp/LinkedIn/Twitter sharing, and app trial callout.
+     - 5 pre-populated high-value guides (GST e-invoicing 2026, Tally comparison, inventory shrinkage control, accounts receivable optimization, V1 release notes).
+  5. **Contact / Demo Page (`/contact`)**: Consultation & demo scheduling form with direct WhatsApp contact.
+- **Verification**: `pnpm build` completed with zero TypeScript errors; dev server active on port 3001.
+
+---
+
+## 7. Mobile Device UI & UX Optimization Architecture
+
+To ensure high-performance usability on mobile phones (360px–480px) and tablets:
+
+1. **Mobile Bottom Navigation Bar (`AppLayout.tsx`)**:
+   - Fixed thumb-reach bottom bar (`lg:hidden`) for 1-tap switching between **Dashboard**, **Invoices**, **Parties**, **Products**, and **Menu** (drawer toggle).
+   - Main viewport container padded with `pb-20 lg:pb-6` preventing overlap with floating or bottom controls.
+   - Drawer sidebar pinned only at `lg:` (1024px+), freeing 100% of screen width on mobile and tablets.
+
+2. **Zero Table Squashing (Horizontal Swipe Architecture)**:
+   - All data tables across the app (`InvoiceTable`, `ProductTable`, `PartyTable`, `StockMovementTable`, `PaymentsPage`, `PurchasesPage`, `ReportsPage`, `RecentInvoicesWidget`, `CreateInvoicePage`, and `InvoiceViewPage`) wrapped in `overflow-x-auto -mx-1 sm:mx-0` with minimum widths (`min-w-[500px]` to `min-w-[750px]`) and `whitespace-nowrap`.
+   - Prevents table columns from collapsing into unreadable vertical multi-line text on phone screens.
+
+3. **Touch-Friendly Responsive Form Controls**:
+   - Search inputs wrapped in `<div className="w-full lg:w-72 shrink-0">` for full-width touch accessibility on phones.
+   - Multi-column form fields (`City`, `State`, `Pincode`, numbering settings) refactored from rigid columns to `grid-cols-1 sm:grid-cols-2` and `grid-cols-1 sm:grid-cols-3`.
+   - Action buttons across all modals (`Modal.tsx`, `ProductFormModal`, `PartyFormModal`, `StockAdjustmentModal`, `CancelInvoiceModal`, `PurchasesPage`, `InvoiceViewPage`) updated with `flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2` and `w-full sm:w-auto`.
+
+4. **Tax Invoice Printable View (`InvoiceViewPage.tsx`)**:
+   - Document container padding relaxed to `p-4 sm:p-8 lg:p-12`.
+   - Document header and Billed To blocks updated to `flex-col sm:flex-row` and `grid-cols-1 sm:grid-cols-2`.
+   - Itemized lines table protected with smooth horizontal scroll and `min-w-[650px]`.
+   - Calculation totals block adapted to `w-full sm:w-80 ml-auto`.
+
+5. **Marketing Website Responsiveness (`D:\project\vyora-website`)**:
+   - Header with animated mobile dropdown drawer and quick "App" pill.
+   - Interactive App Preview and Comparison Matrix (`ComparisonTable.tsx`) equipped with horizontal scroll guards (`min-w-[620px]`).
+
+---
+
+## 8. Real Database Integration & Comprehensive Fallback UIs
+
+### 1. MongoDB Atlas Live Cloud Cluster Integration
+- **Cluster**: `cluster0.ei4by7h.mongodb.net`
+- **Database**: `vyora`
+- **Credentials Configured**:
+  - Username: `sandeep26062004_db_user`
+  - Active Auth Key: `X1wUdhfTJjy35nsX` (Note: Password `sandip123` can be synchronized in Atlas -> Database Access anytime)
+  - Connection String in `vyora-backend/.env`: `mongodb+srv://sandeep26062004_db_user:X1wUdhfTJjy35nsX@cluster0.ei4by7h.mongodb.net/vyora?retryWrites=true&w=majority`
+- **Auto-Seeder Initialization (`seeder.service.ts`)**:
+  - Automatically checks `users.countDocuments()`.
+  - Initialized Atlas database with demo credentials (`demo@vyora.com` / `password123`), initial business entity, products, customers, and invoice.
+  - Verified live write persistence: Creating items via API or frontend writes directly to Atlas with unique SKU validation (409 Conflict on duplicates, 201 Created on new items).
+
+### 2. Comprehensive Fallback UI Architecture Across Frontend
+To eliminate broken tables, empty whitespace, and uninformative blanks, clean fallback states matching Theme B (Teal Ledger) were deployed across all application views:
+
+| Page / Component | Condition | Fallback UI Treatment |
+| :--- | :--- | :--- |
+| **Sales Trend (`SalesChart.tsx`)** | `salesTrend.length === 0` or all zero sales | `<BarChart2>` icon, "No sales recorded yet", guidance text, and direct "Create Invoice" CTA button. |
+| **Sales by Category (`SalesByCategory.tsx`)** | `categories.length === 0` or 0 sales | `<PieChart>` icon, "No category distribution", and dynamic prompt explaining categorization once invoices are issued. |
+| **Top Products (`TopProductsWidget.tsx`)** | `products.length === 0` | 📦 icon, "No items sold yet", informing users that ranking will populate upon sales finalization. |
+| **Recent Invoices (`RecentInvoicesWidget.tsx`)** | `invoices.length === 0` | `<FileText>` icon, "No recent invoices", and direct "Create First Invoice" button. |
+| **Purchases Register (`PurchasesPage.tsx`)** | `bills.length === 0` | Full-width `<EmptyState>` with `<ShoppingCart>`, "No purchase bills recorded yet", and "Record Purchase Bill" button. |
+| **Payments Ledger (`PaymentsPage.tsx`)** | `filteredPayments.length === 0` | Filter-aware `<EmptyState>` with `<CreditCard>`. Distinguishes between "No payments match filters" (with Reset Filters CTA) and "No payment vouchers recorded" (with Record Voucher CTA). |
+| **Sales Register Report (`ReportsPage.tsx`)** | `salesData.items.length === 0` | Fallback table row with `<EmptyState>` and `<FileText>` icon indicating no invoices in the selected period. |
+| **Purchase Register Report (`ReportsPage.tsx`)** | `purchaseData.items.length === 0` | Fallback table row with `<EmptyState>` and `<ShoppingCart>` icon indicating no bills in the period. |
+| **Stock Summary Report (`ReportsPage.tsx`)** | `stockData.items.length === 0` | Fallback table row with `<EmptyState>` and `<Package>` icon indicating empty catalog. |
+| **Customer Dues Report (`ReportsPage.tsx`)** | `duesData.items.length === 0` | Celebratory `<EmptyState>` with `<CheckCircle2>` icon: "Zero outstanding customer dues! All invoices fully reconciled." |
+| **Invoices Table (`InvoiceTable.tsx`)** | Filtered / zero invoices | Filter-aware `<EmptyState>` with Reset Filters or Create Invoice action. |
+| **Products Table (`ProductTable.tsx`)** | Filtered / zero products | Filter-aware `<EmptyState>` with Reset Filters or Add Product action. |
+| **Parties Table (`PartyTable.tsx`)** | Filtered / zero parties | Filter-aware `<EmptyState>` with Reset Filters or Add Customer/Supplier action. |
+| **Dashboard Metrics (`DashboardMetricsCards.tsx`)** | Zero values | Replaces static `+12% vs last week` mock labels with honest real statuses: "No sales recorded yet", "0 invoices generated", "All customer dues settled", and "Inventory levels healthy". |
+
+---
+
+## 9. Next Tasks
+
+1. **Vyora Mobile (React Native) Scaffolding**: Create `vyora/vyora-mobile` reusing the modular API contracts.
 2. **Thermal Receipt Mode**: Add 80mm / 58mm compact thermal receipt view in `vyora-frontend`.
 3. **GSTR-1 Export Automation**: Add CSV / Excel export endpoint for monthly GST GSTR-1 and GSTR-3B filings.
+

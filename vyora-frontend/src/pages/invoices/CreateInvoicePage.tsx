@@ -219,12 +219,13 @@ export const CreateInvoicePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Button
             variant="outline"
             isLoading={createMutation.isPending}
             onClick={() => createMutation.mutate({ finalize: false })}
             disabled={!customerId || lines.every((l) => !l.productId)}
+            className="flex-1 sm:flex-none justify-center"
           >
             Save Draft
           </Button>
@@ -232,6 +233,7 @@ export const CreateInvoicePage: React.FC = () => {
             isLoading={createMutation.isPending}
             onClick={() => createMutation.mutate({ finalize: true })}
             disabled={!customerId || lines.every((l) => !l.productId)}
+            className="flex-1 sm:flex-none justify-center"
           >
             Create & Finalize
           </Button>
@@ -266,7 +268,7 @@ export const CreateInvoicePage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-[#123B3A] mb-1">
-                  Select Customer *
+                  Select Customer <span className="text-[#B91C1C] font-bold">*</span>
                 </label>
                 <select
                   value={customerId}
@@ -335,8 +337,8 @@ export const CreateInvoicePage: React.FC = () => {
               </Button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-1 sm:mx-0">
+              <table className="w-full text-left text-xs min-w-[650px] whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                     <th className="py-2.5 px-2 w-8">#</th>
@@ -523,14 +525,14 @@ export const CreateInvoicePage: React.FC = () => {
       >
         <div className="space-y-4">
           <Input
-            label="Customer Name *"
+            label="Customer Name"
             value={newCustName}
             onChange={(e) => setNewCustName(e.target.value)}
             placeholder="e.g. Acme Enterprises"
             required
           />
           <Input
-            label="Phone Number *"
+            label="Phone Number"
             value={newCustPhone}
             onChange={(e) => setNewCustPhone(e.target.value)}
             placeholder="e.g. 9876543210"
@@ -549,7 +551,7 @@ export const CreateInvoicePage: React.FC = () => {
             onChange={(e) => setNewCustAddress(e.target.value)}
             placeholder="Street address"
           />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Input
               label="City"
               value={newCustCity}
@@ -564,14 +566,15 @@ export const CreateInvoicePage: React.FC = () => {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsNewCustomerModalOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsNewCustomerModalOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               isLoading={addCustomerMutation.isPending}
               disabled={!newCustName.trim() || !newCustPhone.trim()}
               onClick={() => addCustomerMutation.mutate()}
+              className="w-full sm:w-auto"
             >
               Save Customer
             </Button>

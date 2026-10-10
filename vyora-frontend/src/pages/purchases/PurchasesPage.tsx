@@ -87,8 +87,8 @@ export const PurchasesPage: React.FC = () => {
 
       {/* Bills Table */}
       <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs space-y-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto -mx-1 sm:mx-0">
+          <table className="w-full text-left text-xs min-w-[680px] whitespace-nowrap">
             <thead>
               <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                 <th className="py-3 px-4">Bill No.</th>
@@ -154,10 +154,10 @@ export const PurchasesPage: React.FC = () => {
         maxWidth="2xl"
       >
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#123B3A] mb-1">
-                Select Supplier *
+                Select Supplier <span className="text-[#B91C1C] font-bold">*</span>
               </label>
               <select
                 value={supplierId}
@@ -174,7 +174,7 @@ export const PurchasesPage: React.FC = () => {
             </div>
 
             <Input
-              label="Supplier Invoice / Bill No. *"
+              label="Supplier Invoice / Bill No."
               value={billNumber}
               onChange={(e) => setBillNumber(e.target.value)}
               placeholder="e.g. SUP-2025-081"
@@ -182,9 +182,9 @@ export const PurchasesPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Bill Date *"
+              label="Bill Date"
               type="date"
               value={billDate}
               onChange={(e) => setBillDate(e.target.value)}
@@ -297,14 +297,15 @@ export const PurchasesPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               isLoading={createMutation.isPending}
               disabled={!supplierId || !billNumber.trim() || lines.every((l) => !l.productId)}
               onClick={() => createMutation.mutate()}
+              className="w-full sm:w-auto"
             >
               Commit Purchase & Stock
             </Button>

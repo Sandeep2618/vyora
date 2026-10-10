@@ -92,7 +92,7 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-[#D7E5E2] shadow-2xs w-fit">
+      <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-[#D7E5E2] shadow-2xs w-fit max-w-full overflow-x-auto">
         <button
           onClick={() => setActiveTab('PROFILE')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
@@ -165,7 +165,7 @@ export const SettingsPage: React.FC = () => {
               onChange={(e) => setAddressLine1(e.target.value)}
               required
             />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Input
                 label="City *"
                 value={city}
@@ -189,7 +189,7 @@ export const SettingsPage: React.FC = () => {
 
           <div className="border-t border-[#D7E5E2] pt-6 space-y-4">
             <h3 className="text-sm font-bold text-[#123B3A]">Invoice Numbering & Defaults</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Invoice Prefix"
                 value={invoicePrefix}
@@ -224,6 +224,7 @@ export const SettingsPage: React.FC = () => {
             <Button
               isLoading={updateProfileMutation.isPending}
               onClick={() => updateProfileMutation.mutate()}
+              className="w-full sm:w-auto"
             >
               <Save className="w-4 h-4 mr-1.5" />
               Save Settings
@@ -248,8 +249,8 @@ export const SettingsPage: React.FC = () => {
             </Button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[500px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-4">Name</th>
@@ -285,8 +286,8 @@ export const SettingsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[550px] whitespace-nowrap">
               <thead>
                 <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
                   <th className="py-3 px-4">Timestamp</th>
@@ -325,14 +326,14 @@ export const SettingsPage: React.FC = () => {
       >
         <div className="space-y-4">
           <Input
-            label="Full Name *"
+            label="Full Name"
             value={staffName}
             onChange={(e) => setStaffName(e.target.value)}
             placeholder="e.g. Priya Patel"
             required
           />
           <Input
-            label="Email Address *"
+            label="Email Address"
             type="email"
             value={staffEmail}
             onChange={(e) => setStaffEmail(e.target.value)}
@@ -340,7 +341,7 @@ export const SettingsPage: React.FC = () => {
             required
           />
           <div>
-            <label className="block text-xs font-semibold text-[#123B3A] mb-1">Role *</label>
+            <label className="block text-xs font-semibold text-[#123B3A] mb-1">Role <span className="text-[#B91C1C] font-bold">*</span></label>
             <select
               value={staffRole}
               onChange={(e) => setStaffRole(e.target.value as any)}
@@ -351,14 +352,15 @@ export const SettingsPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsStaffModalOpen(false)}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setIsStaffModalOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
             <Button
               isLoading={addStaffMutation.isPending}
               disabled={!staffName.trim() || !staffEmail.trim()}
               onClick={() => addStaffMutation.mutate()}
+              className="w-full sm:w-auto"
             >
               Add Staff
             </Button>
