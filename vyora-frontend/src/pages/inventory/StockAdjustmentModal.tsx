@@ -57,8 +57,24 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
       onClose={onClose}
       title="Manual Stock Adjustment"
       description="Audited adjustment for physical stock reconciliation, breakage, or damage"
+      footer={
+        <>
+          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="stock-adjust-form"
+            isLoading={adjustMutation.isPending}
+            disabled={!selectedProductId || deltaQty === 0 || !reason.trim()}
+            className="w-full sm:w-auto"
+          >
+            Confirm Adjustment
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="stock-adjust-form" onSubmit={handleSubmit} className="space-y-4">
         <Select
           label="Select Product"
           value={selectedProductId}
@@ -83,20 +99,6 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
           placeholder="e.g. Physical inventory discrepancy or carton damaged in transit"
           required
         />
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            isLoading={adjustMutation.isPending}
-            disabled={!selectedProductId || deltaQty === 0 || !reason.trim()}
-            className="w-full sm:w-auto"
-          >
-            Confirm Adjustment
-          </Button>
-        </div>
       </form>
     </Modal>
   );

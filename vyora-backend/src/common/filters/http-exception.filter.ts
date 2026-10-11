@@ -30,6 +30,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       } else {
         message = res;
       }
+    } else if (
+      exception &&
+      (typeof exception === 'object') &&
+      ((exception as any).name === 'ZodError' || Array.isArray((exception as any).errors))
+    ) {
+      status = HttpStatus.BAD_REQUEST;
+      error = 'Bad Request';
+      message = (exception as any).errors?.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ') || (exception as Error).message;
     } else if (exception instanceof Error) {
       message = exception.message;
       this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);

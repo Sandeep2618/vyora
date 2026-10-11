@@ -78,11 +78,11 @@ export class PartiesController {
 
   @Delete(':id')
   @Roles('OWNER', 'ADMIN')
-  @ApiOperation({ summary: 'Archive/Delete customer or supplier (Owner only)' })
-  async archive(
+  @ApiOperation({ summary: 'Delete customer or supplier (Owner only)' })
+  async delete(
     @CurrentTenant() businessId: string,
     @Param('id') id: string,
   ) {
-    return this.partiesService.archive(businessId, id);
+    return this.partiesService.delete(businessId, id);
   }
 }

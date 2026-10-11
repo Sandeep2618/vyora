@@ -5,6 +5,7 @@ import { api } from '../../lib/api';
 import { formatCurrency, formatDateReadable } from '@vyora/utils';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { PlanPurchaseModal } from '../../components/subscription/PlanPurchaseModal';
 import { useAuth } from '../../context/AuthContext';
 
 export const ReportsPage: React.FC = () => {
@@ -12,6 +13,7 @@ export const ReportsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'SALES' | 'PURCHASES' | 'STOCK' | 'DUES'>('SALES');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
   // 1. Sales Register Query
   const { data: salesData, isLoading: isSalesLoading } = useQuery<{ items: any[]; summary: any }>({
@@ -62,9 +64,16 @@ export const ReportsPage: React.FC = () => {
           Sales Register, Purchase Register, Stock Inventory Valuation, and Debtor Aging are available on Growth (₹499/mo) and Business Pro (₹999/mo) plans.
         </p>
         {isOwner && (
-          <Button onClick={() => updateSubscriptionPlan('growth')} className="mt-2">
-            Upgrade to Growth Plan (₹499/mo)
-          </Button>
+          <>
+            <Button onClick={() => setIsPurchaseModalOpen(true)} className="mt-2">
+              Upgrade to Growth Plan (₹499/mo)
+            </Button>
+            <PlanPurchaseModal
+              isOpen={isPurchaseModalOpen}
+              onClose={() => setIsPurchaseModalOpen(false)}
+              targetPlan="growth"
+            />
+          </>
         )}
       </div>
     );

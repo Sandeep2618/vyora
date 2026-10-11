@@ -8,6 +8,7 @@ export interface ModalProps {
   title: string;
   description?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl';
 }
 
@@ -17,6 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   title,
   description,
   children,
+  footer,
   maxWidth = 'lg',
 }) => {
   useEffect(() => {
@@ -45,28 +47,42 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-black/40 backdrop-blur-xs animate-in fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
         className={cn(
-          'w-full max-w-[95vw] bg-white rounded-2xl shadow-2xl border border-[#D7E5E2] overflow-hidden flex flex-col max-h-[92vh]',
+          'w-full max-w-[95vw] bg-white rounded-2xl shadow-2xl shadow-[#123B3A]/20 border border-[#D7E5E2] overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200',
           widthStyles[maxWidth],
         )}
       >
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D7E5E2] bg-[#F4F8F7]/70">
-          <div>
-            <h3 className="text-sm sm:text-base font-bold text-[#123B3A]">{title}</h3>
-            {description && <p className="text-[11px] sm:text-xs text-[#566B69] mt-0.5">{description}</p>}
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#D7E5E2] bg-white">
+          <div className="pr-4">
+            <h3 className="text-base sm:text-lg font-black text-[#123B3A] tracking-tight">{title}</h3>
+            {description && (
+              <p className="text-xs text-[#566B69] mt-0.5 leading-normal">{description}</p>
+            )}
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#566B69] hover:text-[#123B3A] hover:bg-[#D7E5E2]/50 transition-colors"
+            className="w-8 h-8 rounded-full bg-[#F4F8F7] hover:bg-[#E6F4F2] text-[#566B69] hover:text-[#0F766E] flex items-center justify-center transition-all shrink-0 cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 overflow-y-auto">{children}</div>
+        <div className="p-5 sm:p-6 overflow-y-auto">{children}</div>
+
+        {footer && (
+          <div className="px-5 sm:px-6 py-3.5 bg-[#F4F8F7]/70 border-t border-[#D7E5E2] flex items-center justify-end gap-2.5">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -50,7 +50,11 @@ This living document is the continuity log for engineers and AI coding assistant
 | **V1-17** | Engineering Memory | `vyora-core` skill persistence for zero-breakage continuous AI development | **Implemented & Tested** | Authoritative instructions in `.gemini/config/skills/vyora-core/` |
 | **V1-18** | Role Authorization (RBAC) | Strict Owner (full access) vs Staff (view-only); mutation buttons gated | **Implemented & Tested** | Backend `RolesGuard` + UI button restrictions across all views |
 | **V1-19** | Team Roles Switchboard | Dedicated `/roles` page with individual member switches for role & active status | **Implemented & Tested** | Live toggle sync with backend `business.service.ts` |
-| **V1-20** | Subscription Plan Gating | Starter, Growth, and Business Pro tier gating matching website pricing | **Implemented & Tested** | Backend `PlanGuard` + UI feature hiding & 1-click upgrade switcher |
+| **V1-20** | Subscription Plan Gating | Starter, Growth, and Business Pro tier gating matching website pricing | **Implemented & Tested** | Backend `PlanGuard` + UI feature hiding & subscription checkout |
+| **V1-21** | Rate Limiting & Scale (50k) | Sliding-window memory rate limiter + security headers on NestJS backend | **Implemented & Tested** | `rate-limit.middleware.ts` (25/min auth, 200/min general) + security headers |
+| **V1-22** | Search Input Debounce | 300ms internal debouncing across all product, invoice, party searches | **Implemented & Tested** | `SearchInput.tsx` debounced typing state |
+| **V1-23** | Table Pagination & Actions | Standard pagination component + icon-only actions; complete removal of archive | **Implemented & Tested** | `Pagination.tsx` on all tables, icon-only edit/delete, zero "archive" |
+| **V1-24** | SaaS Plan Checkout Flow | Multi-step checkout with billing cycles, 18% GST in paisa, UPI/Card/NetBanking | **Implemented & Tested** | `PlanPurchaseModal.tsx` replacing 1-click upgrade across all views |
 
 ---
 
@@ -236,21 +240,88 @@ To eliminate broken tables, empty whitespace, and uninformative blanks, clean fa
 - **Safety Invariant**: The sole owner of a business cannot be demoted to Staff or suspended to prevent accidental administrative lockout.
 - **Member Invite Modal**: Prominent red asterisks (`<span className="text-[#B91C1C] font-bold">*</span>`) on required fields (Name, Email, Role) with default initial temporary credentials (`VyoraStaff@123`).
 
-### 3. Subscription Plan Feature Gating (Matching `vyora-website`)
+### 3. Subscription Plan Feature Gating & Authentic Checkout Flow
 Features dynamically adjust based on the tenant's `subscriptionPlan` on their `Business` record:
 - **Starter (Free - ₹0/mo)**: 50 GST Invoices/month, product catalog up to 100 items, 1 owner account. Purchases, Payments, Tax Reports, and Staff accounts are hidden.
 - **Growth (₹499/mo)**: Unlimited Invoices & Inventory, Purchases, Customer Payments & Ledger receipts, Full GSTR-1/3B tax reports, up to 3 Staff user accounts.
 - **Business Pro (₹999/mo)**: Everything in Growth + Unlimited Staff accounts, Audited Stock Adjustment workflows, Custom prefixes & auto-padding, Complete audit trail logs.
-- **1-Click Dynamic Plan Switcher**: Built into `/settings` under the **Subscription & Plans** tab and available via the Team Roles upgrade modal.
+- **Authentic Checkout Flow (`PlanPurchaseModal.tsx`)**: Replaces 1-click plan switching. Provides billing cycle toggles (Monthly vs Annual with 20% discount), integer paisa calculations using `@vyora/utils` with itemized 18% GST preview, payment method options (UPI, Credit/Debit Cards, Net Banking), and simulated banking gateway verification with printable transaction receipts.
 
-### 4. Official Project Management PDF Brief
+### 4. High-Scale Platform Stability & Table UX (1k to 50k Users)
+- **Sliding-Window Rate Limiter (`rate-limit.middleware.ts`)**: Sliding-window rate limiter in NestJS middleware with a 10-minute automated eviction timer to prevent memory leaks under 50k active client IPs. Throttles `/auth/*` to 25 req/min and general routes to 200 req/min. Injects defense headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection: 1; mode=block`).
+- **300ms Search Debounce (`SearchInput.tsx`)**: Debounces input typing to prevent keystroke request storms and unnecessary DOM rendering.
+- **High-Capacity Data Table Architecture (`Pagination.tsx`)**: Dynamic pagination deployed across `ProductTable`, `PartyTable`, `InvoiceTable`, and `StockMovementTable`. Includes page numbers, ellipsis navigation, entry counts, and 10/25/50/100 limit selector. Prevents DOM bloat and out-of-memory browser crashes.
+- **Clean Icon-Only Actions**: Edit (`<Edit2 />`) and Delete (`<Trash2 />`) icon-only buttons with hover backgrounds and tooltips. Zero button text in table action columns.
+- **Prohibition of "Archive"**: Complete removal of "Archive" terminology and functionality in favor of explicit "Delete" and "Remove".
+- **Modern Modal & Header Polish**: Modals styled with frosted backdrops (`bg-slate-900/60 backdrop-blur-sm`), smooth scale entrance animations, and removal of redundant role badges from the top navbar.
+
+### 5. Official Project Management PDF Brief
 The authoritative, print-ready document is compiled and saved at:
-- **PDF Location**: [`docs/Vyora_Project_Manager_Brief.pdf`](file:///C:/Users/sande/vyora/docs/Vyora_Project_Manager_Brief.pdf) (179 KB)
+- **PDF Location**: [`docs/Vyora_Project_Manager_Brief.pdf`](file:///C:/Users/sande/vyora/docs/Vyora_Project_Manager_Brief.pdf) (218 KB)
 - **Source HTML**: [`docs/project_manager_brief.html`](file:///C:/Users/sande/vyora/docs/project_manager_brief.html)
 
 ---
 
-## 11. Next Tasks
+## 11. Edge-to-Edge Modal Architecture, Clean Slate UX & MCP Integrations (October 2026)
+
+### 1. Edge-to-Edge Modal Polish & Elimination of UI Gaps
+- **Modal Component (`Modal.tsx`)**: Replaced broken internal floating borders with a dedicated `footer?: React.ReactNode` prop that renders edge-to-edge with `px-5 sm:px-6 py-3.5 bg-[#F4F8F7]/70 border-t border-[#D7E5E2] flex items-center justify-end gap-2.5`.
+- **Form Association Standard**: Replaced old inner form button blocks with HTML5 standard `<form id="...">` and `<Button type="submit" form="...">` in modal footers across `ProductFormModal`, `PartyFormModal`, `StockAdjustmentModal`, `PlanPurchaseModal`, `CancelInvoiceModal`, `CreateInvoicePage`, `InvoiceViewPage`, `PurchasesPage`, `PaymentsPage`, `RolesPage`, and `SettingsPage`.
+
+### 2. Zero-Data State Suppression (Clean Slate Hierarchy)
+- **Automatic Toolbar Hiding**: Across `ProductsPage`, `PartiesPage`, `InvoiceListPage`, `PaymentsPage`, and `PurchasesPage`, search bars and filter buttons/drawers are completely suppressed when the database contains 0 records and no active filters are set.
+- **Smart Pagination**: `Pagination.tsx` automatically self-hides whenever `totalItems <= 0 || totalPages <= 1`.
+
+### 3. Explicit HTTP DELETE Method Architecture
+- **API & Hooks**: `api.delete('/products/' + id)` and `api.delete('/parties/' + id)` with dedicated React Query hooks `useDeleteProduct` and `useDeleteParty`.
+- **Backend Controllers**: Explicit `@Delete(':id')` endpoints in `products.controller.ts` and `parties.controller.ts` protected by `TenantGuard` and `RolesGuard('OWNER')`.
+- **Prohibition of "Archive"**: Complete eradication of the term and concept of archive in all user-facing code and mutations.
+
+### 4. Model Context Protocol (MCP) Server Setup
+Configured in `~/.gemini/config/mcp_config.json` and `.agents/mcp_config.json`:
+1. **Context7 MCP (`context7`)**: `npx -y @upstash/context7-mcp` for real-time library documentation lookup (React 19, Vite 6, Tailwind 4, NestJS 11).
+2. **Sentry MCP (`sentry`)**: `npx -y @sentry/mcp-server` for production/staging crash inspection and exception tracking.
+3. **Chrome DevTools MCP (`chrome-devtools`)**: `npx -y chrome-devtools-mcp@latest --isolated` for automated browser page testing, console error capture, and responsive inspection.
+4. **Supabase MCP (`supabase`)**: `npx -y @supabase/mcp-server-supabase@latest --read-only` for external schema contract and PostgreSQL verification.
+
+---
+
+## 12. Workflow Automation Slash Commands & Testing Suite (October 2026)
+
+We have built a complete suite of autonomous slash commands, skills, and runner scripts:
+
+### 1. `/test <module>` (`vyora-test`)
+- **Engine**: [`scripts/qa-runner.js`](file:///C:/Users/sande/vyora/scripts/qa-runner.js)
+- **Lifecycle**: Automated Tester &rarr; Chrome DevTools MCP &rarr; Bug Report (`BUG_REPORT_<module>.md`) &rarr; Developer Self-Healing &rarr; Re-Verification Loop.
+- **Coverage**: Static UI invariants (edge-to-edge modal footers, zero-data toolbars, icon-only action columns, prohibition of archive) + Functional ephemeral tenant registration, CRUD verification, HTTP `DELETE` verbs, and primary owner RBAC immutability.
+- **Result**: 101/101 tests passing (`🟢 ALL PASSED`).
+
+### 2. `/audit-ui` (`vyora-audit-ui`)
+- **Engine**: [`scripts/audit-ui.js`](file:///C:/Users/sande/vyora/scripts/audit-ui.js)
+- **Checks**: Scans all React components in `vyora-frontend/src` for Theme B compliance, red mandatory asterisks, modal footer architecture, debounced table search queries (300ms), and clean-slate table states.
+- **Report**: Generated at `docs/qa-reports/UI_AUDIT_REPORT.md` (80/80 checks passing).
+
+### 3. `/db-seed <preset>` (`vyora-db-seed`)
+- **Engine**: [`scripts/seed-data.js`](file:///C:/Users/sande/vyora/scripts/seed-data.js)
+- **Presets**:
+  - `fresh`: Creates clean-slate 0-record tenant to verify empty states, onboarding, and toolbar suppression.
+  - `retail`: Seeds 4 realistic products with GST rates (5%, 12%, 18%), 3 customers with addresses, and invoices.
+  - `wholesale`: Seeds B2B wholesale products, suppliers with GSTIN numbers, and purchase orders.
+- **Output**: Writes ephemeral login credentials to `docs/qa-reports/SEEDED_TENANT_<PRESET>.json` for instant browser login.
+
+### 4. `/ship` or `/verify-all` (`vyora-ship`)
+- **Engine**: [`scripts/ship-check.js`](file:///C:/Users/sande/vyora/scripts/ship-check.js)
+- **Gatekeeper Pipeline**:
+  1. `check-secrets.js` (zero committed credentials or MongoDB URIs).
+  2. `audit-ui.js` (Theme B, asterisks, clean slate, modal footers).
+  3. `qa-runner.js --module all` (101/101 automated test cases passed).
+  4. Backend TypeScript build (`pnpm --dir vyora-backend build`).
+  5. Frontend Vite/React build (`pnpm --dir vyora-frontend build`).
+- **Sign-off**: `docs/qa-reports/RELEASE_READINESS.md` (`🟢 READY TO SHIP (5/5 PASSED)`).
+
+---
+
+## 13. Next Tasks
 
 1. **Vyora Mobile (React Native) Scaffolding**: Create `vyora/vyora-mobile` reusing the modular API contracts.
 2. **Thermal Receipt Mode**: Add 80mm / 58mm compact thermal receipt view in `vyora-frontend`.

@@ -18,6 +18,8 @@ import { ReportsPage } from './pages/reports/ReportsPage';
 import { SettingsPage } from './pages/settings/SettingsPage';
 import { RolesPage } from './pages/roles/RolesPage';
 
+import { ToastProvider } from './components/ui/Toast';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -54,8 +56,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
+      <ToastProvider>
+        <AuthProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -86,8 +89,9 @@ export const App: React.FC = () => {
           </Routes>
         </BrowserRouter>
       </AuthProvider>
-    </QueryClientProvider>
-  );
+    </ToastProvider>
+  </QueryClientProvider>
+);
 };
 
 export default App;

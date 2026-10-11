@@ -8,6 +8,7 @@ import { Party, Product, TaxRatePercent, Invoice, BusinessProfile } from '@vyora
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
+import { Select } from '../../components/ui/Select';
 
 interface LineFormItem {
   productId: string;
@@ -267,21 +268,20 @@ export const CreateInvoicePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#123B3A] mb-1">
-                  Select Customer <span className="text-[#B91C1C] font-bold">*</span>
-                </label>
-                <select
+                <Select
+                  label="Select Customer"
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#D7E5E2] rounded-lg text-[#123B3A] focus:outline-none focus:border-[#0F766E]"
-                >
-                  <option value="">-- Choose a customer --</option>
-                  {customers?.items.map((cust) => (
-                    <option key={cust.id} value={cust.id}>
-                      {cust.name} ({cust.phone})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="-- Choose a customer --"
+                  required
+                  options={[
+                    { label: '-- Choose a customer --', value: '' },
+                    ...(customers?.items.map((cust) => ({
+                      label: `${cust.name} (${cust.phone})`,
+                      value: cust.id,
+                    })) || []),
+                  ]}
+                />
               </div>
             </div>
 
@@ -522,6 +522,21 @@ export const CreateInvoicePage: React.FC = () => {
         onClose={() => setIsNewCustomerModalOpen(false)}
         title="Add New Customer"
         description="Quickly save customer contact and billing address"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsNewCustomerModalOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              isLoading={addCustomerMutation.isPending}
+              disabled={!newCustName.trim() || !newCustPhone.trim()}
+              onClick={() => addCustomerMutation.mutate()}
+              className="w-full sm:w-auto"
+            >
+              Save Customer
+            </Button>
+          </>
+        }
       >
         <div className="space-y-4">
           <Input
@@ -564,20 +579,6 @@ export const CreateInvoicePage: React.FC = () => {
               onChange={(e) => setNewCustState(e.target.value)}
               placeholder="Maharashtra"
             />
-          </div>
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsNewCustomerModalOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              isLoading={addCustomerMutation.isPending}
-              disabled={!newCustName.trim() || !newCustPhone.trim()}
-              onClick={() => addCustomerMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              Save Customer
-            </Button>
           </div>
         </div>
       </Modal>

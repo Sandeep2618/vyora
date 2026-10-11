@@ -8,11 +8,20 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
 import { SearchInput } from '../../components/ui/SearchInput';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { toast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
 
 export const PaymentsPage: React.FC = () => {
@@ -64,6 +73,13 @@ export const PaymentsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['parties'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      toast.success(
+        type === 'RECEIPT' ? 'Receipt Voucher Recorded' : 'Payment Voucher Recorded',
+        `₹${amountMajor.toFixed(2)} recorded in party ledger.`
+      );
+    },
+    onError: (err: any) => {
+      toast.error('Failed to Record Voucher', err?.response?.data?.message || err?.message || 'Could not record payment.');
     },
   });
 
@@ -94,6 +110,7 @@ export const PaymentsPage: React.FC = () => {
   }, [paymentsData?.items, typeFilter, methodFilter, search]);
 
   const hasActiveFilters = typeFilter !== 'ALL' || methodFilter !== 'ALL' || search !== '';
+  const showToolbar = (paymentsData?.items && paymentsData.items.length > 0) || hasActiveFilters;
 
   const clearAllFilters = () => {
     setTypeFilter('ALL');
@@ -126,162 +143,160 @@ export const PaymentsPage: React.FC = () => {
 
       {/* Payments Table Card */}
       <Card className="p-3.5 sm:p-5 space-y-4">
-        {/* Filter Controls Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
-                showFilters || typeFilter !== 'ALL' || methodFilter !== 'ALL'
-                  ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
-                  : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Filters</span>
-              {(typeFilter !== 'ALL' || methodFilter !== 'ALL') && (
-                <span className="w-2 h-2 rounded-full bg-[#0F766E]" />
-              )}
-            </button>
+        {isLoading ? (
+          <div className="py-12 text-center text-xs text-[#566B69]">
+            Loading payment records...
+          </div>
+        ) : !showToolbar ? (
+          <EmptyState
+            icon={CreditCard}
+            title="No payment vouchers recorded"
+            description="Record receipts from customers or payments to vendors to manage cash flow traceably."
+            actionLabel={isOwner ? 'Record Voucher' : undefined}
+            onAction={isOwner ? () => setIsModalOpen(true) : undefined}
+          />
+        ) : (
+          <>
+            {/* Filter Controls Bar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
+                    showFilters || typeFilter !== 'ALL' || methodFilter !== 'ALL'
+                      ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
+                      : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
+                  }`}
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>Filters</span>
+                  {(typeFilter !== 'ALL' || methodFilter !== 'ALL') && (
+                    <span className="w-2 h-2 rounded-full bg-[#0F766E]" />
+                  )}
+                </button>
 
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1"
-              >
-                <X className="w-3 h-3" />
-                <span>Reset</span>
-              </button>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1"
+                  >
+                    <X className="w-3 h-3" />
+                    <span>Reset</span>
+                  </button>
+                )}
+
+                <div className="text-xs text-[#566B69] font-medium hidden sm:block">
+                  Showing <span className="font-bold text-[#123B3A]">{filteredPayments.length}</span> records
+                </div>
+              </div>
+
+              <div className="w-full lg:w-72 shrink-0">
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search voucher, party, UTR..."
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Filter Toolbar Drawer */}
+            {showFilters && (
+              <div className="p-3.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in">
+                <Select
+                  label="Voucher Type"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  options={[
+                    { label: 'All Types', value: 'ALL' },
+                    { label: 'Receipts (From Customers)', value: 'RECEIPT' },
+                    { label: 'Payments (To Suppliers)', value: 'PAYMENT' },
+                  ]}
+                />
+
+                <Select
+                  label="Payment Method"
+                  value={methodFilter}
+                  onChange={(e) => setMethodFilter(e.target.value)}
+                  options={[
+                    { label: 'All Methods', value: 'ALL' },
+                    { label: 'Bank Transfer (NEFT/RTGS/IMPS)', value: 'BANK_TRANSFER' },
+                    { label: 'UPI', value: 'UPI' },
+                    { label: 'Cash', value: 'CASH' },
+                    { label: 'Cheque', value: 'CHEQUE' },
+                    { label: 'Debit / Credit Card', value: 'CARD' },
+                    { label: 'Other', value: 'OTHER' },
+                  ]}
+                />
+              </div>
             )}
 
-            <div className="text-xs text-[#566B69] font-medium hidden sm:block">
-              Showing <span className="font-bold text-[#123B3A]">{filteredPayments.length}</span> records
+            <div className="rounded-xl border border-[#D7E5E2] bg-white overflow-hidden shadow-sm">
+              <Table className="min-w-[700px] whitespace-nowrap">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Voucher No.</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Party Name</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Payment Method</TableHead>
+                    <TableHead>Reference / UTR</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPayments.length > 0 ? (
+                    filteredPayments.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-mono font-bold text-[#0F766E]">
+                          {p.paymentNumber}
+                        </TableCell>
+                        <TableCell>
+                          {p.type === 'RECEIPT' ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#15803D] bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
+                              <ArrowDownLeft className="w-3 h-3" /> Receipt
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] px-2 py-0.5 rounded border border-[#FECACA]">
+                              <ArrowUpRight className="w-3 h-3" /> Payment
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-bold text-[#123B3A]">{p.partyName}</TableCell>
+                        <TableCell className="text-[#566B69]">
+                          {formatDateReadable(p.paymentDate)}
+                        </TableCell>
+                        <TableCell className="text-[#566B69] font-medium">
+                          {p.paymentMethod.replace('_', ' ')}
+                        </TableCell>
+                        <TableCell className="font-mono text-[#566B69]">
+                          {p.referenceNumber || '-'}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-[#123B3A]">
+                          {formatCurrency(p.amountMinor)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="py-6">
+                        <EmptyState
+                          icon={CreditCard}
+                          title="No payments match filters"
+                          description="No payment records match your active search or filters. Reset filters to see all."
+                          actionLabel="Reset Filters"
+                          onAction={clearAllFilters}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          </div>
-
-          <div className="w-full lg:w-72 shrink-0">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search voucher, party, UTR..."
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        {/* Filter Toolbar Drawer */}
-        {showFilters && (
-          <div className="p-3.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in">
-            <div>
-              <label className="block text-[11px] font-semibold text-[#123B3A] mb-1">
-                Voucher Type
-              </label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full px-2.5 py-1.5 text-xs bg-white border border-[#D7E5E2] rounded-lg text-[#123B3A] focus:outline-none focus:border-[#0F766E]"
-              >
-                <option value="ALL">All Types</option>
-                <option value="RECEIPT">Receipts (From Customers)</option>
-                <option value="PAYMENT">Payments (To Suppliers)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-[#123B3A] mb-1">
-                Payment Method
-              </label>
-              <select
-                value={methodFilter}
-                onChange={(e) => setMethodFilter(e.target.value)}
-                className="w-full px-2.5 py-1.5 text-xs bg-white border border-[#D7E5E2] rounded-lg text-[#123B3A] focus:outline-none focus:border-[#0F766E]"
-              >
-                <option value="ALL">All Methods</option>
-                <option value="BANK_TRANSFER">Bank Transfer (NEFT/RTGS/IMPS)</option>
-                <option value="UPI">UPI</option>
-                <option value="CASH">Cash</option>
-                <option value="CHEQUE">Cheque</option>
-                <option value="CARD">Debit / Credit Card</option>
-                <option value="OTHER">Other</option>
-              </select>
-            </div>
-          </div>
+          </>
         )}
-
-        <div className="overflow-x-auto -mx-1 sm:mx-0">
-          <table className="w-full text-left text-xs min-w-[700px] whitespace-nowrap">
-            <thead>
-              <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-                <th className="py-3 px-4">Voucher No.</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Party Name</th>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Payment Method</th>
-                <th className="py-3 px-4">Reference / UTR</th>
-                <th className="py-3 px-4 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#D7E5E2]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-[#566B69]">
-                    Loading payment records...
-                  </td>
-                </tr>
-              ) : filteredPayments.length > 0 ? (
-                filteredPayments.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#0F766E]">
-                      {p.paymentNumber}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {p.type === 'RECEIPT' ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#15803D] bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
-                          <ArrowDownLeft className="w-3 h-3" /> Receipt
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#B91C1C] bg-[#FEF2F2] px-2 py-0.5 rounded border border-[#FECACA]">
-                          <ArrowUpRight className="w-3 h-3" /> Payment
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#123B3A]">{p.partyName}</td>
-                    <td className="py-3.5 px-4 text-[#566B69]">
-                      {formatDateReadable(p.paymentDate)}
-                    </td>
-                    <td className="py-3.5 px-4 text-[#566B69] font-medium">
-                      {p.paymentMethod.replace('_', ' ')}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-[#566B69]">
-                      {p.referenceNumber || '-'}
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-[#123B3A]">
-                      {formatCurrency(p.amountMinor)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-6">
-                    <EmptyState
-                      icon={CreditCard}
-                      title={hasActiveFilters ? 'No payments match filters' : 'No payment vouchers recorded'}
-                      description={
-                        hasActiveFilters
-                          ? 'No payment records match your active search or filters. Reset filters to see all.'
-                          : 'Record receipts from customers or payments to vendors to manage cash flow traceably.'
-                      }
-                      actionLabel={hasActiveFilters ? 'Reset Filters' : isOwner ? 'Record Voucher' : undefined}
-                      onAction={hasActiveFilters ? clearAllFilters : isOwner ? () => setIsModalOpen(true) : undefined}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </Card>
 
       {/* Record Payment Voucher Modal */}
@@ -290,6 +305,21 @@ export const PaymentsPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         title="Record Payment / Receipt Voucher"
         description="Idempotent ledger voucher with customer/supplier balance adjustment"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              isLoading={createMutation.isPending}
+              disabled={!partyId || amountMajor <= 0}
+              onClick={() => createMutation.mutate()}
+              className="w-full sm:w-auto"
+            >
+              Confirm Voucher
+            </Button>
+          </>
+        }
       >
         <div className="space-y-4">
           <div className="flex items-center gap-2 bg-[#F4F8F7] p-1 rounded-lg border border-[#D7E5E2]">
@@ -378,20 +408,6 @@ export const PaymentsPage: React.FC = () => {
             onChange={(e) => setNotes(e.target.value)}
             placeholder="e.g. Advance payment against order"
           />
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              isLoading={createMutation.isPending}
-              disabled={!partyId || amountMajor <= 0}
-              onClick={() => createMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              Confirm Voucher
-            </Button>
-          </div>
         </div>
       </Modal>
     </div>

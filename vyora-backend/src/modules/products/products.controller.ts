@@ -79,8 +79,8 @@ export class ProductsController {
 
   @Delete(':id')
   @Roles('OWNER', 'ADMIN')
-  @ApiOperation({ summary: 'Archive product (Owner only)' })
-  async archive(@CurrentTenant() businessId: string, @Param('id') id: string) {
-    return this.productsService.archive(businessId, id);
+  @ApiOperation({ summary: 'Delete product (Owner only)' })
+  async delete(@CurrentTenant() businessId: string, @Param('id') id: string) {
+    return this.productsService.delete(businessId, id);
   }
 }

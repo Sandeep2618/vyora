@@ -363,6 +363,21 @@ export const InvoiceViewPage: React.FC = () => {
         description={`Record receipt against ${invoice.invoiceNumber}. Outstanding due: ${formatCurrency(
           invoice.dueAmountMinor,
         )}`}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsPaymentModalOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              isLoading={paymentMutation.isPending}
+              disabled={payAmountMajor <= 0}
+              onClick={() => paymentMutation.mutate()}
+              className="w-full sm:w-auto"
+            >
+              Confirm Receipt Voucher
+            </Button>
+          </>
+        }
       >
         <div className="space-y-4">
           <Input
@@ -406,20 +421,6 @@ export const InvoiceViewPage: React.FC = () => {
             onChange={(e) => setPayNotes(e.target.value)}
             placeholder="Optional receipt notes"
           />
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsPaymentModalOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              isLoading={paymentMutation.isPending}
-              disabled={payAmountMajor <= 0}
-              onClick={() => paymentMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              Confirm Receipt Voucher
-            </Button>
-          </div>
         </div>
       </Modal>
     </div>

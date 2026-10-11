@@ -111,8 +111,24 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
           ? 'Update contact details and billing address'
           : 'Enter contact details and billing address'
       }
+      footer={
+        <>
+          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="party-form"
+            isLoading={isPending}
+            disabled={!name.trim() || !phone.trim() || !line1.trim() || !city.trim()}
+            className="w-full sm:w-auto"
+          >
+            {isEditing ? `Update ${label}` : 'Save Record'}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="party-form" onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Legal / Trade Name"
           value={name}
@@ -171,20 +187,6 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
             placeholder="400001"
             required
           />
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            isLoading={isPending}
-            disabled={!name.trim() || !phone.trim() || !line1.trim() || !city.trim()}
-            className="w-full sm:w-auto"
-          >
-            {isEditing ? `Update ${label}` : 'Save Record'}
-          </Button>
         </div>
       </form>
     </Modal>

@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Pagination } from '../../components/ui/Pagination';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 
 export interface MovementItem {
   id: string;
@@ -29,6 +38,13 @@ export const StockMovementTable: React.FC<StockMovementTableProps> = ({
   canAdjust = true,
   onOpenAdjustment,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const paginatedMovements = movements.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
   const getMovementBadge = (type: string, delta: number) => {
     switch (type) {
       case 'PURCHASE':
@@ -66,51 +82,65 @@ export const StockMovementTable: React.FC<StockMovementTableProps> = ({
   }
 
   return (
-    <div className="overflow-x-auto -mx-1 sm:mx-0">
-      <table className="w-full text-left text-xs min-w-[700px] whitespace-nowrap">
-        <thead>
-          <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-            <th className="py-3 px-4">Date & Time</th>
-            <th className="py-3 px-4">Product Name</th>
-            <th className="py-3 px-4">SKU</th>
-            <th className="py-3 px-4 text-center">Movement Type</th>
-            <th className="py-3 px-4 text-center">Change</th>
-            <th className="py-3 px-4 text-center">Resulting Stock</th>
-            <th className="py-3 px-4">Reason / Reference</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#D7E5E2]">
-          {movements.map((m) => (
-            <tr key={m.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-              <td className="py-3.5 px-4 text-[#566B69]">
-                {new Date(m.createdAt).toLocaleString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </td>
-              <td className="py-3.5 px-4 font-bold text-[#123B3A]">{m.productName}</td>
-              <td className="py-3.5 px-4 font-mono font-semibold text-[#0F766E]">{m.sku}</td>
-              <td className="py-3.5 px-4 text-center">
-                <span className="font-semibold text-[#123B3A] text-[11px]">
-                  {m.movementType}
-                </span>
-              </td>
-              <td className="py-3.5 px-4 text-center">
-                {getMovementBadge(m.movementType, m.quantityDelta)}
-              </td>
-              <td className="py-3.5 px-4 text-center font-bold text-[#123B3A]">
-                {m.resultingStock} {m.unit}
-              </td>
-              <td className="py-3.5 px-4 text-[#566B69] italic max-w-xs truncate">
-                {m.reason || m.referenceType || '-'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-3">
+      <div className="rounded-xl border border-[#D7E5E2] bg-white overflow-hidden shadow-sm">
+        <Table className="min-w-[700px] whitespace-nowrap">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date & Time</TableHead>
+              <TableHead>Product Name</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead className="text-center">Movement Type</TableHead>
+              <TableHead className="text-center">Change</TableHead>
+              <TableHead className="text-center">Resulting Stock</TableHead>
+              <TableHead>Reason / Reference</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedMovements.map((m) => (
+              <TableRow key={m.id}>
+                <TableCell className="text-[#566B69]">
+                  {new Date(m.createdAt).toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </TableCell>
+                <TableCell className="font-bold text-[#123B3A]">{m.productName}</TableCell>
+                <TableCell className="font-mono font-semibold text-[#0F766E]">{m.sku}</TableCell>
+                <TableCell className="text-center">
+                  <span className="font-semibold text-[#123B3A] text-[11px]">
+                    {m.movementType}
+                  </span>
+                </TableCell>
+                <TableCell className="text-center">
+                  {getMovementBadge(m.movementType, m.quantityDelta)}
+                </TableCell>
+                <TableCell className="text-center font-bold text-[#123B3A]">
+                  {m.resultingStock} {m.unit}
+                </TableCell>
+                <TableCell className="text-[#566B69] italic max-w-xs truncate">
+                  {m.reason || m.referenceType || '-'}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={movements.length}
+        itemsPerPage={pageSize}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={(limit) => {
+          setPageSize(limit);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[10, 25, 50, 100]}
+      />
     </div>
   );
 };

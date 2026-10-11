@@ -384,8 +384,37 @@
     </tbody>
   </table>
 
-  <!-- SECTION 5: MILESTONE ROADMAP SUMMARY -->
-  <h2>5. Engineering Milestones (V1-01 through V1-20)</h2>
+  <!-- SECTION 5: HIGH-SCALE PLATFORM STABILITY & DATA ARCHITECTURE -->
+  <h2>5. High-Concurrency Platform Stability & Enterprise UX (Scale: 1k - 50k Users)</h2>
+  <p>
+    To ensure flawless operation under concurrent load of 1,000 to 50,000+ active tenant users, comprehensive rate limiting, query throttling, table pagination, and security controls were integrated:
+  </p>
+  <ul>
+    <li>
+      <strong>Sliding-Window Rate Limiting (<code>rate-limit.middleware.ts</code>)</strong>: In-memory sliding-window limiter with a periodic 10-minute sweep to prevent memory leaks under 50k unique IP addresses. Restricts authentication routes (<code>/auth/*</code>) to 25 requests/minute (brute-force defense) and general API endpoints to 200 requests/minute. Injects standard <code>X-RateLimit-*</code>, <code>Retry-After</code>, and defense headers (<code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: SAMEORIGIN</code>, <code>X-XSS-Protection: 1; mode=block</code>).
+    </li>
+    <li>
+      <strong>Client Search Debouncing (<code>SearchInput.tsx</code>)</strong>: 300ms internal keystroke debounce across product, invoice, party, and team queries. Prevents request storms, DOM thrashing, and unnecessary backend database indexing overhead while users type.
+    </li>
+    <li>
+      <strong>High-Capacity Data Table Architecture & Pagination</strong>: Dedicated <code>&lt;Pagination&gt;</code> component deployed across <code>ProductTable</code>, <code>PartyTable</code>, <code>InvoiceTable</code>, and <code>StockMovementTable</code>. Supports dynamic page ranges, ellipsis navigation, entry counts, and configurable page limits (10, 25, 50, 100). Prevents out-of-memory (OOM) browser freezing when businesses manage thousands of ledger items.
+    </li>
+    <li>
+      <strong>Clean Icon-Only Action Buttons</strong>: Table action columns feature minimalist, high-contrast icon-only buttons (<code>&lt;Edit2 /&gt;</code> and <code>&lt;Trash2 /&gt;</code>) with subtle hover pills and tooltips, eliminating button text clutter.
+    </li>
+    <li>
+      <strong>Prohibition of "Archive" Terminology</strong>: In accordance with core requirements, ambiguous "Archive" labeling and functionality has been completely removed across UI and prompts in favor of explicit, unambiguous "Delete" and "Remove".
+    </li>
+    <li>
+      <strong>Modern SaaS Modal System & Navbar Cleanliness</strong>: Modals upgraded with frosted backdrops (<code>bg-slate-900/60 backdrop-blur-sm</code>), smooth <code>zoom-in-95</code> entry animations, and responsive mobile stacks. Top navigation bar cleaned up by removing redundant role badges.
+    </li>
+    <li>
+      <strong>Authentic Plan Purchase & Checkout Flow (<code>PlanPurchaseModal.tsx</code>)</strong>: Replaces direct 1-click plan switching with an authentic checkout experience: Monthly vs Annual (20% discount) billing cycle toggle, strict minor-unit paisa calculation with itemized 18% GST preview, payment method selection (UPI, Credit/Debit Cards, Net Banking), and simulated banking gateway verification with printable transaction receipts.
+    </li>
+  </ul>
+
+  <!-- SECTION 6: MILESTONE ROADMAP SUMMARY -->
+  <h2>6. Engineering Milestones (V1-01 through V1-24)</h2>
   <table>
     <thead>
       <tr>
@@ -514,7 +543,31 @@
         <td>V1-20</td>
         <td>Subscription Plan Gating</td>
         <td><span class="badge badge-green">Completed</span></td>
-        <td>Starter, Growth, and Business Pro tier enforcement with dynamic 1-click plan switching.</td>
+        <td>Starter, Growth, and Business Pro tier enforcement with dynamic feature hiding.</td>
+      </tr>
+      <tr>
+        <td>V1-21</td>
+        <td>Rate Limiting & Stability</td>
+        <td><span class="badge badge-green">Completed</span></td>
+        <td>Sliding-window memory rate limiter + security headers for 1,000 to 50,000+ users.</td>
+      </tr>
+      <tr>
+        <td>V1-22</td>
+        <td>Search Input Debounce</td>
+        <td><span class="badge badge-green">Completed</span></td>
+        <td>300ms internal debouncing across all search inputs to prevent server query spam.</td>
+      </tr>
+      <tr>
+        <td>V1-23</td>
+        <td>Table Pagination & Actions</td>
+        <td><span class="badge badge-green">Completed</span></td>
+        <td>Pagination component, icon-only edit/delete actions, complete removal of archive.</td>
+      </tr>
+      <tr>
+        <td>V1-24</td>
+        <td>Plan Purchase Checkout</td>
+        <td><span class="badge badge-green">Completed</span></td>
+        <td>Multi-step checkout modal with cycle toggles, 18% GST calculation, and UPI/Cards.</td>
       </tr>
     </tbody>
   </table>

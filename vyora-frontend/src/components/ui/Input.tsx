@@ -36,12 +36,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           required={isRequired}
           className={cn(
-            'w-full px-3 py-2 text-xs bg-white border rounded-lg text-[#123B3A] placeholder-[#566B69]/60 transition-colors',
+            'flex h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs font-semibold text-[#123B3A] shadow-2xs transition-all',
+            'placeholder:text-[#566B69]/60 placeholder:font-normal',
             'focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E]',
             error
               ? 'border-[#B91C1C] bg-[#FEF2F2]/30 focus:border-[#B91C1C] focus:ring-[#B91C1C]/20'
               : 'border-[#D7E5E2] hover:border-[#A0BDB8]',
-            'disabled:bg-[#F4F8F7] disabled:text-[#566B69] disabled:cursor-not-allowed',
+            'disabled:bg-[#F4F8F7] disabled:text-[#566B69]/60 disabled:cursor-not-allowed',
             className,
           )}
           {...props}

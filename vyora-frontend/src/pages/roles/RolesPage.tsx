@@ -20,6 +20,7 @@ import { StaffMember, UserRole, SubscriptionPlan } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { PlanPurchaseModal } from '../../components/subscription/PlanPurchaseModal';
 import { cn } from '../../lib/utils';
 
 export const RolesPage: React.FC = () => {
@@ -669,7 +670,7 @@ export const RolesPage: React.FC = () => {
             </div>
             <ul className="space-y-1 text-[#566B69] list-disc list-inside">
               <li>Add, Edit, and Finalize GST Invoices</li>
-              <li>Add and Archive Products & Catalog Items</li>
+              <li>Add, Edit, and Delete Products & Catalog Items</li>
               <li>Add, Edit, and Manage Customers & Suppliers</li>
               <li>Record Purchases, Supplier Bills, and Payments</li>
               <li>Perform Audited Stock Adjustments (Enterprise)</li>
@@ -703,8 +704,28 @@ export const RolesPage: React.FC = () => {
         title="Add Team Member"
         description="Invite a team member to your Vyora business. Required fields are marked with an asterisk."
         maxWidth="md"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsAddModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="add-member-form"
+              isLoading={isSubmitting}
+              className="w-full sm:w-auto"
+            >
+              Add Member
+            </Button>
+          </>
+        }
       >
-        <form onSubmit={handleAddMember} className="p-4 sm:p-6 space-y-4">
+        <form id="add-member-form" onSubmit={handleAddMember} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-[#123B3A] mb-1">
               Full Name <span className="text-[#B91C1C] font-bold">*</span>
@@ -780,24 +801,6 @@ export const RolesPage: React.FC = () => {
               Default password set for new accounts is <code className="bg-gray-100 px-1 py-0.5 rounded text-[#123B3A]">VyoraStaff@123</code>.
             </p>
           </div>
-
-          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-3 border-t border-[#D7E5E2]">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsAddModalOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              isLoading={isSubmitting}
-              className="w-full sm:w-auto"
-            >
-              Add Member
-            </Button>
-          </div>
         </form>
       </Modal>
 
@@ -807,15 +810,12 @@ export const RolesPage: React.FC = () => {
         onClose={() => setMemberToDelete(null)}
         title="Remove Team Member"
         maxWidth="sm"
-      >
-        <div className="p-4 sm:p-6 space-y-4">
-          <p className="text-xs sm:text-sm text-[#566B69]">
-            Are you sure you want to remove <strong className="text-[#123B3A]">{memberToDelete?.name}</strong> from your business? They will immediately lose all access.
-          </p>
-          <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-2 border-t border-[#D7E5E2]">
+        footer={
+          <>
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setMemberToDelete(null)}
               className="w-full sm:w-auto"
             >
@@ -824,75 +824,35 @@ export const RolesPage: React.FC = () => {
             <Button
               type="button"
               variant="danger"
+              size="sm"
               isLoading={isDeleting}
               onClick={handleDeleteMember}
               className="w-full sm:w-auto"
             >
               Remove Member
             </Button>
-          </div>
-        </div>
+          </>
+        }
+      >
+        <p className="text-xs sm:text-sm text-[#566B69] leading-relaxed">
+          Are you sure you want to remove <strong className="text-[#123B3A]">{memberToDelete?.name}</strong> from your business? They will immediately lose all access.
+        </p>
       </Modal>
 
-      {/* Modal: Upgrade Plan */}
-      <Modal
+      {/* Plan Purchase & Checkout Modal */}
+      <PlanPurchaseModal
         isOpen={isUpgradeModalOpen}
         onClose={() => setIsUpgradeModalOpen(false)}
-        title="Upgrade Business Plan"
-        description="Choose a plan with team collaboration to add multiple staff members."
-        maxWidth="lg"
-      >
-        <div className="p-4 sm:p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="border border-[#0F766E] rounded-xl p-4 bg-teal-50/40 relative">
-              <span className="absolute -top-2.5 right-4 bg-[#0F766E] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Most Popular
-              </span>
-              <h4 className="text-base font-bold text-[#123B3A]">Growth Plan</h4>
-              <p className="text-2xl font-black text-[#0F766E] mt-1">₹499<span className="text-xs font-normal text-[#566B69]">/month</span></p>
-              <ul className="text-xs text-[#566B69] space-y-1.5 my-4">
-                <li>✓ Up to 3 Staff user accounts</li>
-                <li>✓ Role-based permissions switch</li>
-                <li>✓ Unlimited Invoices & Inventory</li>
-                <li>✓ Supplier purchases & payments</li>
-                <li>✓ GSTR-1 & GSTR-3B tax reports</li>
-              </ul>
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() => handlePlanUpgrade('growth')}
-              >
-                Switch to Growth
-              </Button>
-            </div>
-
-            <div className="border border-purple-300 rounded-xl p-4 bg-purple-50/40">
-              <h4 className="text-base font-bold text-[#123B3A]">Business Pro</h4>
-              <p className="text-2xl font-black text-purple-700 mt-1">₹999<span className="text-xs font-normal text-[#566B69]">/month</span></p>
-              <ul className="text-xs text-[#566B69] space-y-1.5 my-4">
-                <li>✓ Unlimited Staff accounts</li>
-                <li>✓ Audited Stock Adjustments</li>
-                <li>✓ Custom Prefixes & Auto-padding</li>
-                <li>✓ Complete audit trail history</li>
-                <li>✓ Priority 24/7 dedicated support</li>
-              </ul>
-              <Button
-                size="sm"
-                className="w-full bg-purple-700 hover:bg-purple-800 text-white"
-                onClick={() => handlePlanUpgrade('enterprise')}
-              >
-                Switch to Business Pro
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button variant="outline" size="sm" onClick={() => setIsUpgradeModalOpen(false)}>
-              Close
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        targetPlan="growth"
+        onSuccess={(newPlan) => {
+          setSuccessMsg(
+            `Successfully upgraded subscription to ${
+              newPlan === 'enterprise' ? 'Business Pro' : 'Growth Plan'
+            }! All tier privileges unlocked.`,
+          );
+          setTimeout(() => setSuccessMsg(null), 5000);
+        }}
+      />
     </div>
   );
 };

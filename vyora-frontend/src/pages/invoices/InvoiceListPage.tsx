@@ -90,62 +90,64 @@ export const InvoiceListPage: React.FC = () => {
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
-        {/* Responsive Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          {/* Status Tabs and Filter Button */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 bg-[#F4F8F7] p-1 rounded-xl border border-[#D7E5E2] overflow-x-auto max-w-full">
-              {(['ALL', 'PAID', 'PENDING', 'OVERDUE', 'CANCELLED'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize whitespace-nowrap ${
-                    activeTab === tab
-                      ? 'bg-[#0F766E] text-white shadow-2xs'
-                      : 'text-[#566B69] hover:text-[#123B3A]'
-                  }`}
-                >
-                  {tab.toLowerCase()}
-                </button>
-              ))}
-            </div>
+        {/* Responsive Toolbar: Only displayed when invoices exist or active filters are set */}
+        {Boolean((data?.items && data.items.length > 0) || hasActiveFilters) && (
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Status Tabs and Filter Button */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 bg-[#F4F8F7] p-1 rounded-xl border border-[#D7E5E2] overflow-x-auto max-w-full">
+                {(['ALL', 'PAID', 'PENDING', 'OVERDUE', 'CANCELLED'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize whitespace-nowrap ${
+                      activeTab === tab
+                        ? 'bg-[#0F766E] text-white shadow-2xs'
+                        : 'text-[#566B69] hover:text-[#123B3A]'
+                    }`}
+                  >
+                    {tab.toLowerCase()}
+                  </button>
+                ))}
+              </div>
 
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 shrink-0 ${
-                showFilters || timeFilter !== 'ALL'
-                  ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
-                  : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Date Filter</span>
-              {timeFilter !== 'ALL' && <span className="w-2 h-2 rounded-full bg-[#0F766E]" />}
-            </button>
-
-            {hasActiveFilters && (
               <button
                 type="button"
-                onClick={clearAllFilters}
-                className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 shrink-0 ${
+                  showFilters || timeFilter !== 'ALL'
+                    ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
+                    : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
+                }`}
               >
-                <X className="w-3 h-3" />
-                <span>Reset</span>
+                <Filter className="w-3.5 h-3.5" />
+                <span>Date Filter</span>
+                {timeFilter !== 'ALL' && <span className="w-2 h-2 rounded-full bg-[#0F766E]" />}
               </button>
-            )}
-          </div>
 
-          {/* Search Bar: Full width on mobile/tablet, right aligned on desktop */}
-          <div className="w-full lg:w-72 shrink-0">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search invoice number, customer..."
-            />
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1 shrink-0"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
+
+            {/* Search Bar: Full width on mobile/tablet, right aligned on desktop */}
+            <div className="w-full lg:w-72 shrink-0">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Search invoice number, customer..."
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Date Filter Toolbar Drawer */}
         {showFilters && (

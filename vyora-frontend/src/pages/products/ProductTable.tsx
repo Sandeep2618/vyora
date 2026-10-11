@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { Product } from '../../types';
 import { formatCurrency } from '../../utils';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Pagination } from '../../components/ui/Pagination';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 
 interface ProductTableProps {
   products: Product[];
@@ -26,6 +35,14 @@ export const ProductTable: React.FC<ProductTableProps> = ({
   onDelete,
   onAddFirst,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Reset to page 1 whenever list length changes (e.g. searching/filtering)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [products.length, hasActiveFilters]);
+
   if (isLoading) {
     return (
       <div className="py-12 text-center text-xs text-[#566B69]">
@@ -50,84 +67,102 @@ export const ProductTable: React.FC<ProductTableProps> = ({
     );
   }
 
+  const paginatedProducts = products.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   return (
-    <div className="overflow-x-auto -mx-1 sm:mx-0">
-      <table className="w-full text-left text-xs min-w-[680px] whitespace-nowrap">
-        <thead>
-          <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-            <th className="py-3 px-4">Product / Item</th>
-            <th className="py-3 px-4">SKU</th>
-            <th className="py-3 px-4">HSN</th>
-            <th className="py-3 px-4 text-right">Selling Price</th>
-            <th className="py-3 px-4 text-center">Tax %</th>
-            <th className="py-3 px-4 text-center">Current Stock</th>
-            <th className="py-3 px-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#D7E5E2]">
-          {products.map((prod) => {
-            const isLow = prod.currentStock <= prod.reorderLevel;
-            return (
-              <tr key={prod.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-                <td className="py-3.5 px-4 font-bold text-[#123B3A]">
-                  {prod.name}
-                  <span className="text-[10px] text-[#566B69] font-normal block">
-                    Unit: {prod.unit}
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 font-mono font-bold text-[#0F766E]">
-                  {prod.sku}
-                </td>
-                <td className="py-3.5 px-4 font-mono text-[#566B69]">
-                  {prod.hsnCode || '-'}
-                </td>
-                <td className="py-3.5 px-4 text-right font-bold text-[#123B3A]">
-                  {formatCurrency(prod.sellingPriceMinor)}
-                </td>
-                <td className="py-3.5 px-4 text-center font-medium">
-                  {prod.taxRatePercent}%
-                </td>
-                <td className="py-3.5 px-4 text-center">
-                  <div className="inline-flex items-center gap-1.5">
-                    <span className={`font-bold ${isLow ? 'text-[#B91C1C]' : 'text-[#123B3A]'}`}>
-                      {prod.currentStock} {prod.unit}
+    <div className="space-y-3">
+      <div className="rounded-xl border border-[#D7E5E2] bg-white overflow-hidden shadow-sm">
+        <Table className="min-w-[680px] whitespace-nowrap">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product / Item</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead>HSN</TableHead>
+              <TableHead className="text-right">Selling Price</TableHead>
+              <TableHead className="text-center">Tax %</TableHead>
+              <TableHead className="text-center">Current Stock</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedProducts.map((prod) => {
+              const isLow = prod.currentStock <= prod.reorderLevel;
+              return (
+                <TableRow key={prod.id}>
+                  <TableCell className="font-bold text-[#123B3A]">
+                    {prod.name}
+                    <span className="text-[10px] text-[#566B69] font-normal block">
+                      Unit: {prod.unit}
                     </span>
-                    {isLow && (
-                      <Badge variant="overdue" className="text-[9px] px-1 py-0">
-                        Low
-                      </Badge>
-                    )}
-                  </div>
-                </td>
-                <td className="py-3.5 px-4 text-right">
-                  {isOwner ? (
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => onEdit(prod)}
-                        title="Edit product"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#0F766E] bg-[#E6F4F2] hover:bg-[#0F766E] hover:text-white rounded-lg transition-colors"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => onDelete(prod)}
-                        title="Delete product"
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#B91C1C] bg-[#FEE2E2] hover:bg-[#B91C1C] hover:text-white rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete</span>
-                      </button>
+                  </TableCell>
+                  <TableCell className="font-mono font-bold text-[#0F766E]">
+                    {prod.sku}
+                  </TableCell>
+                  <TableCell className="font-mono text-[#566B69]">
+                    {prod.hsnCode || '-'}
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-[#123B3A]">
+                    {formatCurrency(prod.sellingPriceMinor)}
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {prod.taxRatePercent}%
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="inline-flex items-center gap-1.5">
+                      <span className={`font-bold ${isLow ? 'text-[#B91C1C]' : 'text-[#123B3A]'}`}>
+                        {prod.currentStock} {prod.unit}
+                      </span>
+                      {isLow && (
+                        <Badge variant="overdue" className="text-[9px] px-1 py-0">
+                          Low
+                        </Badge>
+                      )}
                     </div>
-                  ) : (
-                    <span className="text-[11px] text-[#566B69] italic">--</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {isOwner ? (
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => onEdit(prod)}
+                          title="Edit product"
+                          className="p-1.5 rounded-lg text-[#0F766E] hover:bg-[#E6F4F2] hover:text-[#0D665F] transition-colors"
+                          aria-label="Edit product"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDelete(prod)}
+                          title="Delete product"
+                          className="p-1.5 rounded-lg text-[#B91C1C] hover:bg-[#FEE2E2] hover:text-[#991B1B] transition-colors"
+                          aria-label="Delete product"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-[#566B69] italic">--</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={products.length}
+        itemsPerPage={pageSize}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={(limit) => {
+          setPageSize(limit);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[10, 25, 50, 100]}
+      />
     </div>
   );
 };

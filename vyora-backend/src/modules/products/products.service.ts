@@ -135,7 +135,7 @@ export class ProductsService {
     };
   }
 
-  async archive(businessId: string, id: string) {
+  async delete(businessId: string, id: string) {
     const product = await this.productModel.findOneAndUpdate(
       { _id: id, businessId },
       { isArchived: true },
@@ -144,7 +144,11 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    return { success: true, message: 'Product archived successfully' };
+    return { success: true, message: 'Product deleted successfully' };
+  }
+
+  async archive(businessId: string, id: string) {
+    return this.delete(businessId, id);
   }
 
   private mapProduct(doc: ProductDocument) {

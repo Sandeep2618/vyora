@@ -7,8 +7,18 @@ import { Party, Product, PurchaseBill, TaxRatePercent } from '@vyora/shared-type
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { toast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
 
 export const PurchasesPage: React.FC = () => {
@@ -66,6 +76,10 @@ export const PurchasesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-movements'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      toast.success('Purchase Bill Recorded', 'Inventory increased and supplier ledger updated.');
+    },
+    onError: (err: any) => {
+      toast.error('Failed to Record Bill', err?.response?.data?.message || err?.message || 'Could not record purchase bill.');
     },
   });
 
@@ -90,70 +104,64 @@ export const PurchasesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Bills Table */}
+      {/* Bills Table Card */}
       <div className="bg-white border border-[#D7E5E2] rounded-xl p-4 shadow-2xs space-y-4">
-        <div className="overflow-x-auto -mx-1 sm:mx-0">
-          <table className="w-full text-left text-xs min-w-[680px] whitespace-nowrap">
-            <thead>
-              <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-                <th className="py-3 px-4">Bill No.</th>
-                <th className="py-3 px-4">Supplier</th>
-                <th className="py-3 px-4">Bill Date</th>
-                <th className="py-3 px-4 text-center">Items</th>
-                <th className="py-3 px-4 text-right">Subtotal</th>
-                <th className="py-3 px-4 text-right">Tax</th>
-                <th className="py-3 px-4 text-right">Total Amount</th>
-                <th className="py-3 px-4 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#D7E5E2]">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={8} className="py-8 text-center text-[#566B69]">
-                    Loading purchase bills...
-                  </td>
-                </tr>
-              ) : bills?.items && bills.items.length > 0 ? (
-                bills.items.map((b) => (
-                  <tr key={b.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#0F766E]">
+        {isLoading ? (
+          <div className="py-12 text-center text-xs text-[#566B69]">
+            Loading purchase bills...
+          </div>
+        ) : bills?.items && bills.items.length > 0 ? (
+          <div className="rounded-xl border border-[#D7E5E2] bg-white overflow-hidden shadow-sm">
+            <Table className="min-w-[680px] whitespace-nowrap">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Bill No.</TableHead>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead>Bill Date</TableHead>
+                  <TableHead className="text-center">Items</TableHead>
+                  <TableHead className="text-right">Subtotal</TableHead>
+                  <TableHead className="text-right">Tax</TableHead>
+                  <TableHead className="text-right">Total Amount</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bills.items.map((b) => (
+                  <TableRow key={b.id}>
+                    <TableCell className="font-mono font-bold text-[#0F766E]">
                       {b.billNumber}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#123B3A]">
+                    </TableCell>
+                    <TableCell className="font-bold text-[#123B3A]">
                       {b.supplierSnapshot.name}
-                    </td>
-                    <td className="py-3.5 px-4 text-[#566B69]">{formatDateReadable(b.billDate)}</td>
-                    <td className="py-3.5 px-4 text-center font-medium">{b.items.length}</td>
-                    <td className="py-3.5 px-4 text-right font-medium text-[#566B69]">
+                    </TableCell>
+                    <TableCell className="text-[#566B69]">{formatDateReadable(b.billDate)}</TableCell>
+                    <TableCell className="text-center font-medium">{b.items.length}</TableCell>
+                    <TableCell className="text-right font-medium text-[#566B69]">
                       {formatCurrency(b.subtotalMinor)}
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-medium text-[#566B69]">
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-[#566B69]">
                       {formatCurrency(b.totalTaxMinor)}
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-black text-[#123B3A]">
+                    </TableCell>
+                    <TableCell className="text-right font-black text-[#123B3A]">
                       {formatCurrency(b.grandTotalMinor)}
-                    </td>
-                    <td className="py-3.5 px-4 text-center">
+                    </TableCell>
+                    <TableCell className="text-center">
                       <Badge variant="paid">{b.status}</Badge>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={8} className="py-6">
-                    <EmptyState
-                      icon={ShoppingCart}
-                      title="No purchase bills recorded yet"
-                      description="Record supplier invoices to track inventory additions and vendor payables."
-                      actionLabel={isOwner ? "Record Purchase Bill" : undefined}
-                      onAction={isOwner ? () => setIsModalOpen(true) : undefined}
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <EmptyState
+            icon={ShoppingCart}
+            title="No purchase bills recorded yet"
+            description="Record supplier invoices to track inventory additions and vendor payables."
+            actionLabel={isOwner ? "Record Purchase Bill" : undefined}
+            onAction={isOwner ? () => setIsModalOpen(true) : undefined}
+          />
+        )}
       </div>
 
       {/* Record Purchase Bill Modal */}
@@ -163,26 +171,38 @@ export const PurchasesPage: React.FC = () => {
         title="Record Supplier Purchase Bill"
         description="Increases stock inventory traceably and logs supplier payable"
         maxWidth="2xl"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              isLoading={createMutation.isPending}
+              disabled={!supplierId || !billNumber.trim() || lines.every((l) => !l.productId)}
+              onClick={() => createMutation.mutate()}
+              className="w-full sm:w-auto"
+            >
+              Commit Purchase & Stock
+            </Button>
+          </>
+        }
       >
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-[#123B3A] mb-1">
-                Select Supplier <span className="text-[#B91C1C] font-bold">*</span>
-              </label>
-              <select
-                value={supplierId}
-                onChange={(e) => setSupplierId(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white border border-[#D7E5E2] rounded-lg text-[#123B3A] focus:outline-none focus:border-[#0F766E]"
-              >
-                <option value="">-- Choose Supplier --</option>
-                {suppliers?.items.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.phone})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label="Select Supplier"
+              value={supplierId}
+              onChange={(e) => setSupplierId(e.target.value)}
+              placeholder="-- Choose Supplier --"
+              required
+              options={[
+                { label: '-- Choose Supplier --', value: '' },
+                ...(suppliers?.items.map((s) => ({
+                  label: `${s.name} (${s.phone})`,
+                  value: s.id,
+                })) || []),
+              ]}
+            />
 
             <Input
               label="Supplier Invoice / Bill No."
@@ -308,19 +328,6 @@ export const PurchasesPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              isLoading={createMutation.isPending}
-              disabled={!supplierId || !billNumber.trim() || lines.every((l) => !l.productId)}
-              onClick={() => createMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              Commit Purchase & Stock
-            </Button>
-          </div>
         </div>
       </Modal>
     </div>

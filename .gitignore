@@ -35,3 +35,4 @@ Thumbs.db
 # Test coverage & logs
 coverage/
 *.log
+docs/qa-reports/SEEDED_TENANT_*.json

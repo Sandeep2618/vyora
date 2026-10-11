@@ -111,8 +111,24 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           ? 'Update catalog item details, pricing, and GST tax rate'
           : 'Add a catalog item with pricing, tax rate, and opening inventory'
       }
+      footer={
+        <>
+          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="product-form"
+            isLoading={isPending}
+            disabled={!name.trim() || !sku.trim()}
+            className="w-full sm:w-auto"
+          >
+            {isEditing ? 'Update Product' : 'Save Product'}
+          </Button>
+        </>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
         <Input
           label="Product Name"
           value={name}
@@ -200,20 +216,6 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             value={reorderLevel}
             onChange={(e) => setReorderLevel(parseInt(e.target.value, 10) || 0)}
           />
-        </div>
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-          <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            isLoading={isPending}
-            disabled={!name.trim() || !sku.trim()}
-            className="w-full sm:w-auto"
-          >
-            {isEditing ? 'Update Product' : 'Save Product'}
-          </Button>
         </div>
       </form>
     </Modal>

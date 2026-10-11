@@ -9,6 +9,10 @@
     "dev:frontend": "pnpm --dir vyora-frontend dev",
     "test:backend": "pnpm --dir vyora-backend test",
     "test:frontend": "pnpm --dir vyora-frontend test",
-    "check-secrets": "node scripts/check-secrets.js"
+    "test:qa": "node scripts/qa-runner.js",
+    "check-secrets": "node scripts/check-secrets.js",
+    "audit:ui": "node scripts/audit-ui.js",
+    "db:seed": "node scripts/seed-data.js",
+    "ship:check": "node scripts/ship-check.js"
   }
 }

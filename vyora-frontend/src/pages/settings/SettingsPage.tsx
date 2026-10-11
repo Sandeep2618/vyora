@@ -9,6 +9,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
+import { PlanPurchaseModal } from '../../components/subscription/PlanPurchaseModal';
 
 export const SettingsPage: React.FC = () => {
   const { user, business, refreshBusiness, isOwner, plan, updateSubscriptionPlan } = useAuth();
@@ -17,6 +18,7 @@ export const SettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'PLANS' | 'STAFF' | 'AUDIT'>('PROFILE');
   const [planSuccessMsg, setPlanSuccessMsg] = useState<string | null>(null);
   const [isSwitchingPlan, setIsSwitchingPlan] = useState(false);
+  const [purchaseModalPlan, setPurchaseModalPlan] = useState<SubscriptionPlan | null>(null);
 
   // Business profile form state
   const [name, setName] = useState(business?.name || '');
@@ -388,11 +390,10 @@ export const SettingsPage: React.FC = () => {
                 ) : isOwner ? (
                   <Button
                     size="sm"
-                    isLoading={isSwitchingPlan}
-                    onClick={() => handlePlanChange('growth')}
+                    onClick={() => setPurchaseModalPlan('growth')}
                     className="w-full"
                   >
-                    Switch to Growth
+                    Upgrade to Growth
                   </Button>
                 ) : (
                   <Button size="sm" variant="outline" disabled className="w-full">
@@ -441,11 +442,10 @@ export const SettingsPage: React.FC = () => {
                 ) : isOwner ? (
                   <Button
                     size="sm"
-                    isLoading={isSwitchingPlan}
-                    onClick={() => handlePlanChange('enterprise')}
+                    onClick={() => setPurchaseModalPlan('enterprise')}
                     className="w-full bg-purple-700 hover:bg-purple-800 text-white"
                   >
-                    Switch to Business Pro
+                    Upgrade to Business Pro
                   </Button>
                 ) : (
                   <Button size="sm" variant="outline" disabled className="w-full">
@@ -563,6 +563,21 @@ export const SettingsPage: React.FC = () => {
         onClose={() => setIsStaffModalOpen(false)}
         title="Invite Staff Member"
         description="Add a member with role-based access"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsStaffModalOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              isLoading={addStaffMutation.isPending}
+              disabled={!staffName.trim() || !staffEmail.trim()}
+              onClick={() => addStaffMutation.mutate()}
+              className="w-full sm:w-auto"
+            >
+              Add Staff
+            </Button>
+          </>
+        }
       >
         <div className="space-y-4">
           <Input
@@ -591,22 +606,23 @@ export const SettingsPage: React.FC = () => {
               <option value="OWNER">Owner / Admin (Full Access)</option>
             </select>
           </div>
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setIsStaffModalOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              isLoading={addStaffMutation.isPending}
-              disabled={!staffName.trim() || !staffEmail.trim()}
-              onClick={() => addStaffMutation.mutate()}
-              className="w-full sm:w-auto"
-            >
-              Add Staff
-            </Button>
-          </div>
         </div>
       </Modal>
+
+      {/* Plan Purchase & Checkout Modal */}
+      <PlanPurchaseModal
+        isOpen={!!purchaseModalPlan}
+        onClose={() => setPurchaseModalPlan(null)}
+        targetPlan={purchaseModalPlan || 'growth'}
+        onSuccess={(newPlan) => {
+          setPlanSuccessMsg(
+            `Business subscription upgraded to ${
+              newPlan === 'enterprise' ? 'Business Pro' : 'Growth Plan'
+            }! Features activated.`,
+          );
+          setTimeout(() => setPlanSuccessMsg(null), 5000);
+        }}
+      />
     </div>
   );
 };

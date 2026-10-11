@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, CheckCircle2, XCircle } from 'lucide-react';
 import { Invoice, InvoiceStatus } from '../../types';
 import { formatCurrency, formatDateReadable } from '../../utils';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Pagination } from '../../components/ui/Pagination';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '../../components/ui/Table';
 
 interface InvoiceTableProps {
   invoices: Invoice[];
@@ -27,6 +36,13 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onCancelClick,
   onCreateClick,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [invoices.length, hasActiveFilters]);
+
   const getStatusVariant = (status: InvoiceStatus) => {
     switch (status) {
       case 'PAID':
@@ -67,70 +83,86 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
     );
   }
 
+  const paginatedInvoices = invoices.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   return (
-    <div className="overflow-x-auto -mx-1 sm:mx-0">
-      <table className="w-full text-left text-xs min-w-[640px] whitespace-nowrap">
-        <thead>
-          <tr className="border-b border-[#D7E5E2] text-[#566B69] font-semibold bg-[#F4F8F7]/50">
-            <th className="py-3 px-4">Invoice No.</th>
-            <th className="py-3 px-4">Customer</th>
-            <th className="py-3 px-4">Date</th>
-            <th className="py-3 px-4 text-right">Amount</th>
-            <th className="py-3 px-4 text-center">Status</th>
-            <th className="py-3 px-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#D7E5E2]">
-          {invoices.map((inv) => (
-            <tr key={inv.id} className="hover:bg-[#F4F8F7]/60 transition-colors">
-              <td className="py-3.5 px-4 font-bold text-[#0F766E]">
-                <Link to={`/invoices/${inv.id}`}>{inv.invoiceNumber}</Link>
-              </td>
-              <td className="py-3.5 px-4 font-medium text-[#123B3A]">
-                {inv.customerSnapshot.name}
-              </td>
-              <td className="py-3.5 px-4 text-[#566B69]">
-                {formatDateReadable(inv.issueDate)}
-              </td>
-              <td className="py-3.5 px-4 font-bold text-[#123B3A] text-right">
-                {formatCurrency(inv.grandTotalMinor)}
-              </td>
-              <td className="py-3.5 px-4 text-center">
-                <Badge variant={getStatusVariant(inv.status)}>{inv.status}</Badge>
-              </td>
-              <td className="py-3.5 px-4 text-right">
-                <div className="flex items-center justify-end gap-2">
-                  <Link
-                    to={`/invoices/${inv.id}`}
-                    title="View / Print Invoice"
-                    className="p-1.5 text-[#566B69] hover:text-[#0F766E] hover:bg-[#E6F4F2] rounded-md transition-colors"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Link>
-                  {isOwner && inv.status === 'DRAFT' && (
-                    <button
-                      onClick={() => onFinalize(inv.id)}
-                      title="Finalize Invoice"
-                      className="p-1.5 text-[#15803D] hover:bg-[#DCFCE7] rounded-md transition-colors"
+    <div className="space-y-3">
+      <div className="rounded-xl border border-[#D7E5E2] bg-white overflow-hidden shadow-sm">
+        <Table className="min-w-[640px] whitespace-nowrap">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice No.</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedInvoices.map((inv) => (
+              <TableRow key={inv.id}>
+                <TableCell className="font-bold text-[#0F766E]">
+                  <Link to={`/invoices/${inv.id}`}>{inv.invoiceNumber}</Link>
+                </TableCell>
+                <TableCell className="font-medium text-[#123B3A]">
+                  {inv.customerSnapshot.name}
+                </TableCell>
+                <TableCell className="text-[#566B69]">
+                  {formatDateReadable(inv.issueDate)}
+                </TableCell>
+                <TableCell className="font-bold text-[#123B3A] text-right">
+                  {formatCurrency(inv.grandTotalMinor)}
+                </TableCell>
+                <TableCell className="text-center">
+                  <Badge variant={getStatusVariant(inv.status)}>{inv.status}</Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Link
+                      to={`/invoices/${inv.id}`}
+                      title="View / Print Invoice"
+                      className="p-1.5 text-[#566B69] hover:text-[#0F766E] hover:bg-[#E6F4F2] rounded-md transition-colors"
                     >
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  )}
-                  {isOwner && inv.status !== 'CANCELLED' && inv.paidAmountMinor === 0 && (
-                    <button
-                      onClick={() => onCancelClick(inv)}
-                      title="Cancel Invoice"
-                      className="p-1.5 text-[#B91C1C] hover:bg-[#FEE2E2] rounded-md transition-colors"
-                    >
-                      <XCircle className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                      <Eye className="w-4 h-4" />
+                    </Link>
+                    {isOwner && inv.status === 'DRAFT' && (
+                      <button
+                        onClick={() => onFinalize(inv.id)}
+                        title="Finalize Invoice"
+                        className="p-1.5 text-[#15803D] hover:bg-[#DCFCE7] rounded-md transition-colors"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </button>
+                    )}
+                    {isOwner && inv.status !== 'CANCELLED' && inv.paidAmountMinor === 0 && (
+                      <button
+                        onClick={() => onCancelClick(inv)}
+                        title="Cancel Invoice"
+                        className="p-1.5 text-[#B91C1C] hover:bg-[#FEE2E2] rounded-md transition-colors"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalItems={invoices.length}
+        itemsPerPage={pageSize}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={(limit) => {
+          setPageSize(limit);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[10, 25, 50, 100]}
+      />
     </div>
   );
 };

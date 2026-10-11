@@ -36,17 +36,8 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
       onClose={onClose}
       title="Cancel Invoice"
       description={`Cancel invoice ${invoice?.invoiceNumber}. This action is audited and reverses allocated stock and customer ledger balances.`}
-    >
-      <div className="space-y-4">
-        <Input
-          label="Reason for Cancellation"
-          placeholder="e.g. Order cancelled by client or wrong billing details entered"
-          value={cancelReason}
-          onChange={(e) => setCancelReason(e.target.value)}
-          required
-        />
-
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+      footer={
+        <>
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             Back
           </Button>
@@ -59,7 +50,17 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
           >
             Confirm Cancellation
           </Button>
-        </div>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input
+          label="Reason for Cancellation"
+          placeholder="e.g. Order cancelled by client or wrong billing details entered"
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+          required
+        />
       </div>
     </Modal>
   );

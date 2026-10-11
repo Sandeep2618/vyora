@@ -38,7 +38,7 @@ export const productsApi = {
     return api.put<Product>(`/products/${id}`, data);
   },
 
-  archive: (id: string): Promise<{ success: boolean; message: string }> => {
+  delete: (id: string): Promise<{ success: boolean; message: string }> => {
     return api.delete<{ success: boolean; message: string }>(`/products/${id}`);
   },
 };
