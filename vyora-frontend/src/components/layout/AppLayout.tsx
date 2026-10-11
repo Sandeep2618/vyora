@@ -531,7 +531,7 @@ export const AppLayout: React.FC = () => {
               <a
                 href={
                   qrMode === 'apk'
-                    ? 'https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk'
+                    ? 'https://expo.dev/artifacts/eas/NG8TDrBmDkayZsoCEwQ4QGlGxRGtj33smuxRk_xPpyE.apk'
                     : 'https://vyora-app-alpha.vercel.app'
                 }
                 download={qrMode === 'apk' ? 'vyora-v1.0.0.apk' : undefined}
