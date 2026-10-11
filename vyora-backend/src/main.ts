@@ -46,7 +46,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, document);
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   logger.log(`Vyora API Monolith running on http://localhost:${port}/api/v1`);
   logger.log(`Interactive Swagger docs available on http://localhost:${port}/api/v1/docs`);
 }
