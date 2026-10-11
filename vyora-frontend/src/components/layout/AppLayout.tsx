@@ -450,47 +450,47 @@ export const AppLayout: React.FC = () => {
             <div className="flex flex-col items-center justify-center p-4 bg-[#F4F8F7] rounded-2xl border border-[#D7E5E2]">
               <div className="bg-white p-3 rounded-xl border border-[#D7E5E2] shadow-xs mb-2">
                 <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=exp://192.168.1.14:8081"
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://vyora-app-alpha.vercel.app"
                   alt="Vyora Mobile QR Code"
                   className="w-44 h-44 object-contain"
                 />
               </div>
               <p className="text-[11px] font-bold text-[#0F766E] flex items-center gap-1">
                 <QrCode className="w-3.5 h-3.5" />
-                <span>Scan with Expo Go on your Phone</span>
+                <span>Scan with Camera to Open & Install App</span>
               </p>
             </div>
 
             <div className="space-y-2 text-xs text-[#123B3A]">
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-                <p>Install <strong>Expo Go</strong> from Play Store (Android) or App Store (iOS).</p>
+                <p>Scan the QR code above on your phone or open the link directly.</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-                <p>Ensure phone is on the same Wi-Fi network (IP: <strong>192.168.1.14</strong>).</p>
+                <p>Tap <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong> in Chrome.</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-                <p>Scan the QR code above or open in browser preview.</p>
+                <p>All data stays 100% synchronized with your desktop database in real time!</p>
               </div>
             </div>
 
             <div className="flex gap-2 pt-2">
               <a
-                href="http://localhost:8081"
+                href="https://vyora-app-alpha.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors"
               >
-                <span>Open Browser Preview</span>
+                <span>Launch Mobile App</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText('exp://192.168.1.14:8081');
+                  navigator.clipboard.writeText('https://vyora-app-alpha.vercel.app');
                   setCopiedLink(true);
                   setTimeout(() => setCopiedLink(false), 3000);
                 }}
@@ -503,13 +503,13 @@ export const AppLayout: React.FC = () => {
 
             {/* Direct APK Link */}
             <a
-              href="http://localhost:3001/download"
+              href="https://vyora-website-smoky.vercel.app/download"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 bg-[#E6F4F2] hover:bg-[#D7EBE8] text-[#0F766E] text-xs font-bold py-2.5 rounded-xl border border-[#A0D2CA] transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download Direct Android APK via Chrome</span>
+              <span>Download Standalone Android APK</span>
             </a>
           </div>
         </div>

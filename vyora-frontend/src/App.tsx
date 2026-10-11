@@ -18,6 +18,7 @@ import { ReportsPage } from './pages/reports/ReportsPage';
 import { AccountHubPage } from './pages/account/AccountHubPage';
 
 import { ToastProvider } from './components/ui/Toast';
+import { Analytics } from '@vercel/analytics/react';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +88,7 @@ export const App: React.FC = () => {
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Analytics />
         </BrowserRouter>
       </AuthProvider>
     </ToastProvider>
