@@ -265,15 +265,16 @@ export const AppLayout: React.FC = () => {
               {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth' : 'Starter'}
             </span>
 
-            {/* Mobile App Sync Button */}
-            <button
-              onClick={() => setIsMobileModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#E6F4F2] text-[#0F766E] border border-[#A0D2CA] rounded-lg text-xs font-bold hover:bg-[#D7EBE8] transition-colors shrink-0"
-              title="Connect mobile phone to this business"
+            {/* Direct Mobile App Download */}
+            <a
+              href="https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk"
+              download="vyora-v1.0.0.apk"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#E6F4F2] text-[#0F766E] border border-[#A0D2CA] rounded-lg text-xs font-bold hover:bg-[#D7EBE8] transition-colors shrink-0 shadow-2xs"
+              title="Download Vyora Mobile App (APK)"
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">📱 Mobile App</span>
-            </button>
+              <span className="hidden sm:inline">📱 Get Mobile App</span>
+            </a>
           </div>
 
           {/* Right Header: User Profile */}
@@ -503,9 +504,8 @@ export const AppLayout: React.FC = () => {
 
             {/* Direct APK Link */}
             <a
-              href="https://vyora-website-smoky.vercel.app/download"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk"
+              download="vyora-v1.0.0.apk"
               className="w-full inline-flex items-center justify-center gap-2 bg-[#E6F4F2] hover:bg-[#D7EBE8] text-[#0F766E] text-xs font-bold py-2.5 rounded-xl border border-[#A0D2CA] transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
