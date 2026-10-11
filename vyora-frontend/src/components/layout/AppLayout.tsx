@@ -35,6 +35,7 @@ export const AppLayout: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [qrMode, setQrMode] = useState<'apk' | 'web'>('apk');
   const navigate = useNavigate();
 
   const allNavItems: {
@@ -265,16 +266,15 @@ export const AppLayout: React.FC = () => {
               {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth' : 'Starter'}
             </span>
 
-            {/* Direct Mobile App Download */}
-            <a
-              href="https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk"
-              download="vyora-v1.0.0.apk"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#E6F4F2] text-[#0F766E] border border-[#A0D2CA] rounded-lg text-xs font-bold hover:bg-[#D7EBE8] transition-colors shrink-0 shadow-2xs"
-              title="Download Vyora Mobile App (APK)"
+            {/* Mobile App Sync & QR Scanner Button */}
+            <button
+              onClick={() => setIsMobileModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#E6F4F2] text-[#0F766E] border border-[#A0D2CA] rounded-lg text-xs font-bold hover:bg-[#D7EBE8] transition-colors shrink-0 shadow-2xs cursor-pointer"
+              title="Connect mobile phone or download APK"
             >
               <Smartphone className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">📱 Get Mobile App</span>
-            </a>
+            </button>
           </div>
 
           {/* Right Header: User Profile */}
@@ -425,7 +425,7 @@ export const AppLayout: React.FC = () => {
           onClick={() => setIsMobileModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#D7E5E2] space-y-5 animate-in zoom-in-95"
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#D7E5E2] space-y-4 animate-in zoom-in-95"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between">
@@ -442,75 +442,119 @@ export const AppLayout: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsMobileModalOpen(false)}
-                className="p-1 rounded-lg text-[#566B69] hover:bg-[#F4F8F7]"
+                className="p-1 rounded-lg text-[#566B69] hover:bg-[#F4F8F7] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex flex-col items-center justify-center p-4 bg-[#F4F8F7] rounded-2xl border border-[#D7E5E2]">
-              <div className="bg-white p-3 rounded-xl border border-[#D7E5E2] shadow-xs mb-2">
+            {/* Mode Selector Tabs */}
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F4F8F7] rounded-xl border border-[#D7E5E2] text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setQrMode('apk')}
+                className={`py-2 px-2.5 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+                  qrMode === 'apk'
+                    ? 'bg-[#0F766E] text-white shadow-xs'
+                    : 'text-[#566B69] hover:text-[#123B3A]'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download APK</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setQrMode('web')}
+                className={`py-2 px-2.5 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer ${
+                  qrMode === 'web'
+                    ? 'bg-[#0F766E] text-white shadow-xs'
+                    : 'text-[#566B69] hover:text-[#123B3A]'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Web / Expo</span>
+              </button>
+            </div>
+
+            {/* QR Scanner Display Box with Viewfinder Target Brackets */}
+            <div className="relative flex flex-col items-center justify-center p-4 bg-[#F4F8F7] rounded-2xl border border-[#D7E5E2]">
+              <div className="relative bg-white p-3 rounded-xl border border-[#D7E5E2] shadow-xs mb-2">
+                <div className="absolute top-1.5 left-1.5 w-4 h-4 border-t-2 border-l-2 border-[#0F766E] rounded-tl pointer-events-none" />
+                <div className="absolute top-1.5 right-1.5 w-4 h-4 border-t-2 border-r-2 border-[#0F766E] rounded-tr pointer-events-none" />
+                <div className="absolute bottom-1.5 left-1.5 w-4 h-4 border-b-2 border-l-2 border-[#0F766E] rounded-bl pointer-events-none" />
+                <div className="absolute bottom-1.5 right-1.5 w-4 h-4 border-b-2 border-r-2 border-[#0F766E] rounded-br pointer-events-none" />
+
                 <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://vyora-app-alpha.vercel.app"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                    qrMode === 'apk'
+                      ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.0.apk'
+                      : 'https://vyora-app-alpha.vercel.app'
+                  )}`}
                   alt="Vyora Mobile QR Code"
                   className="w-44 h-44 object-contain"
                 />
               </div>
-              <p className="text-[11px] font-bold text-[#0F766E] flex items-center gap-1">
-                <QrCode className="w-3.5 h-3.5" />
-                <span>Scan with Camera to Open & Install App</span>
+              <p className="text-[11px] font-bold text-[#0F766E] flex items-center gap-1 text-center">
+                <QrCode className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {qrMode === 'apk'
+                    ? 'Scan with Camera to Download APK (~73 MB)'
+                    : 'Scan with Camera or Expo Go to Open'}
+                </span>
               </p>
             </div>
 
-            <div className="space-y-2 text-xs text-[#123B3A]">
+            {/* Step instructions */}
+            <div className="space-y-1.5 text-xs text-[#123B3A]">
               <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-                <p>Scan the QR code above on your phone or open the link directly.</p>
+                <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                <p>Point phone camera at the QR code above or tap download below.</p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-                <p>Tap <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong> in Chrome.</p>
+                <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                <p>{qrMode === 'apk' ? 'Chrome will download vyora-v1.0.0.apk directly.' : 'Tap "Add to Home screen" in Chrome or open via Expo Go.'}</p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-                <p>All data stays 100% synchronized with your desktop database in real time!</p>
+                <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                <p>All sales and inventory stay 100% synchronized in real time!</p>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            {/* Direct Action Buttons */}
+            <div className="flex gap-2 pt-1">
               <a
-                href="https://vyora-app-alpha.vercel.app"
-                target="_blank"
+                href={
+                  qrMode === 'apk'
+                    ? 'https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk'
+                    : 'https://vyora-app-alpha.vercel.app'
+                }
+                download={qrMode === 'apk' ? 'vyora-v1.0.0.apk' : undefined}
+                target={qrMode === 'web' ? '_blank' : undefined}
                 rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors shadow-xs"
               >
-                <span>Launch Mobile App</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                {qrMode === 'apk' ? <Download className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                <span>{qrMode === 'apk' ? 'Download Standalone APK (~73 MB)' : 'Launch Mobile Web App'}</span>
               </a>
 
               <button
                 type="button"
                 onClick={() => {
-                  navigator.clipboard.writeText('https://vyora-app-alpha.vercel.app');
+                  const url =
+                    qrMode === 'apk'
+                      ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.0.apk'
+                      : 'https://vyora-app-alpha.vercel.app';
+                  navigator.clipboard.writeText(url);
                   setCopiedLink(true);
                   setTimeout(() => setCopiedLink(false), 3000);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 bg-[#F4F8F7] hover:bg-[#E5EFEB] text-[#123B3A] text-xs font-bold px-3 py-2.5 rounded-xl border border-[#D7E5E2] transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 bg-[#F4F8F7] hover:bg-[#E5EFEB] text-[#123B3A] text-xs font-bold px-3 py-2.5 rounded-xl border border-[#D7E5E2] transition-colors cursor-pointer"
+                title="Copy Link"
               >
                 {copiedLink ? <Check className="w-3.5 h-3.5 text-[#15803D]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedLink ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-
-            {/* Direct APK Link */}
-            <a
-              href="https://expo.dev/artifacts/eas/-AWvfa9dtDCZ36Jqe-4e4Yfoo500Ww9Yx7Aj4jTbFZA.apk"
-              download="vyora-v1.0.0.apk"
-              className="w-full inline-flex items-center justify-center gap-2 bg-[#E6F4F2] hover:bg-[#D7EBE8] text-[#0F766E] text-xs font-bold py-2.5 rounded-xl border border-[#A0D2CA] transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download Standalone Android APK</span>
-            </a>
           </div>
         </div>
       )}
