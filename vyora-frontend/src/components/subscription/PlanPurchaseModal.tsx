@@ -352,19 +352,42 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
             {/* Payment Details Sub-form */}
             <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
               {paymentMethod === 'UPI' && (
-                <div className="space-y-2">
-                  <label className="block text-xs font-medium text-[#123B3A]">
-                    UPI ID / VPA
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="mobile@upi or yourname@okhdfcbank"
-                    value={upiId}
-                    onChange={(e) => setUpiId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs rounded-lg border border-[#D7E5E2] bg-white focus:outline-none focus:ring-1 focus:ring-[#0F766E]"
-                  />
-                  <div className="flex items-center gap-2 pt-1 text-[11px] text-[#566B69]">
+                <div className="space-y-3">
+                  <div className="bg-white p-3.5 rounded-xl border border-[#D7E5E2] flex flex-col items-center justify-center text-center">
+                    <p className="text-xs font-bold text-[#123B3A] mb-2">
+                      Scan with any UPI App to Pay {formatCurrency(pricing.total)}
+                    </p>
+                    <div className="p-2 bg-white rounded-lg border border-[#D7E5E2] shadow-xs inline-block">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                          `upi://pay?pa=vyora.billing@icici&pn=Vyora%20Cloud&am=${(pricing.total / 100).toFixed(2)}&tr=VYORA-${selectedPlan.toUpperCase()}&cu=INR`
+                        )}`}
+                        alt="Vyora UPI QR Code"
+                        className="w-36 h-36"
+                      />
+                    </div>
+                    <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-[#566B69]">
+                      <span>UPI VPA:</span>
+                      <span className="font-mono font-bold text-[#0F766E] bg-teal-50 px-2 py-0.5 rounded text-[11px] border border-teal-200">
+                        vyora.billing@icici
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-[#123B3A] mb-1">
+                      Or Enter UPI ID / VPA for Collect Request
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="mobile@upi or yourname@okhdfcbank"
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      className="w-full px-3 py-2 text-xs rounded-lg border border-[#D7E5E2] bg-white focus:outline-none focus:ring-1 focus:ring-[#0F766E]"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2 pt-0.5 text-[11px] text-[#566B69]">
                     <span className="bg-white px-2 py-0.5 rounded border border-[#D7E5E2]">Google Pay</span>
                     <span className="bg-white px-2 py-0.5 rounded border border-[#D7E5E2]">PhonePe</span>
                     <span className="bg-white px-2 py-0.5 rounded border border-[#D7E5E2]">Paytm</span>

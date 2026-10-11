@@ -15,8 +15,7 @@ import { InventoryPage } from './pages/inventory/InventoryPage';
 import { PurchasesPage } from './pages/purchases/PurchasesPage';
 import { PaymentsPage } from './pages/payments/PaymentsPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
-import { SettingsPage } from './pages/settings/SettingsPage';
-import { RolesPage } from './pages/roles/RolesPage';
+import { AccountHubPage } from './pages/account/AccountHubPage';
 
 import { ToastProvider } from './components/ui/Toast';
 
@@ -81,8 +80,9 @@ export const App: React.FC = () => {
               <Route path="purchases" element={<PurchasesPage />} />
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="reports" element={<ReportsPage />} />
-              <Route path="roles" element={<RolesPage />} />
-              <Route path="settings" element={<SettingsPage />} />
+              <Route path="account" element={<AccountHubPage />} />
+              <Route path="roles" element={<AccountHubPage />} />
+              <Route path="settings" element={<AccountHubPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

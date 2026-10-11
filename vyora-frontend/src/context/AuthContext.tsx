@@ -28,6 +28,7 @@ interface AuthContextType {
   logout: () => void;
   refreshBusiness: () => Promise<void>;
   updateSubscriptionPlan: (plan: SubscriptionPlan) => Promise<void>;
+  updateStaffPermissions: (permissions: Record<string, boolean>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -115,6 +116,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const plan: SubscriptionPlan = (business?.subscriptionPlan as SubscriptionPlan) || 'growth';
 
   const hasFeature = (feature: FeatureKey): boolean => {
+    // If user is Staff, check owner-configured staff permissions
+    if (isStaff) {
+      if (feature === 'ROLES') return false; // Staff never gets Roles & Rights management
+      const perms = (business as any)?.staffPermissions;
+      if (perms) {
+        const modKey = feature.toLowerCase();
+        if (perms[modKey] === false) return false;
+      }
+    }
+
     switch (feature) {
       case 'INVOICES':
       case 'PRODUCTS':
@@ -138,6 +149,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setBusiness(updated);
   };
 
+  const updateStaffPermissions = async (permissions: Record<string, boolean>) => {
+    const updated = await api.put<BusinessProfile>('/business/permissions', permissions);
+    setBusiness(updated);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -154,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         refreshBusiness,
         updateSubscriptionPlan,
+        updateStaffPermissions,
       }}
     >
       {children}

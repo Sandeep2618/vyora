@@ -336,6 +336,45 @@ export const InvoiceViewPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Dynamic UPI Payment QR Code */}
+        {invoice.dueAmountMinor > 0 && invoice.status !== 'CANCELLED' && (
+          <div className="mt-6 p-4 rounded-xl border border-[#D7E5E2] bg-[#F4F8F7]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-1.5 bg-white rounded-lg border border-[#D7E5E2] shrink-0 shadow-2xs">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(
+                    `upi://pay?pa=vyora.merchant@icici&pn=${encodeURIComponent(
+                      invoice.businessSnapshot?.name || 'Vyora Business'
+                    )}&am=${(invoice.dueAmountMinor / 100).toFixed(2)}&tr=${invoice.invoiceNumber}&cu=INR`
+                  )}`}
+                  alt="Invoice UPI QR"
+                  className="w-24 h-24"
+                />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-[#123B3A]">Instant UPI Counter Payment</p>
+                <p className="text-[11px] text-[#566B69] mt-0.5">
+                  Scan with GPay, PhonePe, Paytm, or BHIM to pay outstanding amount of{' '}
+                  <strong className="text-[#0F766E]">{formatCurrency(invoice.dueAmountMinor)}</strong>.
+                </p>
+                <p className="text-[10px] font-mono text-[#0F766E] mt-1">
+                  VPA: vyora.merchant@icici • Invoice: {invoice.invoiceNumber}
+                </p>
+              </div>
+            </div>
+            {isOwner && invoice.status !== 'PAID' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="shrink-0"
+              >
+                Record Payment
+              </Button>
+            )}
+          </div>
+        )}
+
         {/* Footer Terms & Signatory */}
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-[#D7E5E2] grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 text-xs">
           <div>

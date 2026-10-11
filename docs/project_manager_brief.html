@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vyora - Project Management & Architecture Brief</title>
+  <title>Vyora - Strategic Architecture, RBAC & V1 Roadmap Brief</title>
   <style>
     @page {
       size: A4;
-      margin: 16mm 14mm 16mm 14mm;
+      margin: 14mm 12mm 14mm 12mm;
     }
     * {
       box-sizing: border-box;
@@ -19,13 +19,13 @@
       background: #FFFFFF;
       margin: 0;
       padding: 0;
-      font-size: 11pt;
-      line-height: 1.5;
+      font-size: 10pt;
+      line-height: 1.45;
     }
     .header-bar {
       border-bottom: 3px solid #0F766E;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -48,83 +48,95 @@
       border-radius: 8px;
     }
     .brand-title {
-      font-size: 22pt;
+      font-size: 20pt;
       font-weight: 800;
       color: #123B3A;
       margin: 0;
       line-height: 1;
     }
     .brand-subtitle {
-      font-size: 9pt;
+      font-size: 8.5pt;
       color: #566B69;
       margin: 3px 0 0 0;
     }
     .meta-box {
       text-align: right;
-      font-size: 8.5pt;
+      font-size: 8pt;
       color: #566B69;
       line-height: 1.35;
     }
     h2 {
-      font-size: 14pt;
+      font-size: 13pt;
       color: #0F766E;
       border-bottom: 1px solid #D7E5E2;
       padding-bottom: 4px;
-      margin-top: 22px;
-      margin-bottom: 10px;
+      margin-top: 18px;
+      margin-bottom: 8px;
       font-weight: 700;
+      break-after: avoid;
     }
     h3 {
-      font-size: 11.5pt;
+      font-size: 10.5pt;
       color: #123B3A;
-      margin-top: 14px;
-      margin-bottom: 6px;
+      margin-top: 12px;
+      margin-bottom: 5px;
       font-weight: 700;
+      break-after: avoid;
     }
     p {
-      margin: 0 0 8px 0;
-      font-size: 10pt;
+      margin: 0 0 7px 0;
+      font-size: 9.5pt;
       color: #334A48;
+    }
+    ul, ol {
+      margin: 0 0 8px 0;
+      padding-left: 18px;
+      font-size: 9.5pt;
+      color: #334A48;
+    }
+    li {
+      margin-bottom: 3px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 10px 0 16px 0;
-      font-size: 9pt;
+      margin: 8px 0 12px 0;
+      font-size: 8.5pt;
+      break-inside: avoid;
     }
     th, td {
       border: 1px solid #D7E5E2;
-      padding: 6px 9px;
+      padding: 5px 8px;
       text-align: left;
+      vertical-align: top;
     }
     th {
-      background: #F4F8F7;
+      background-color: #F4F8F7;
       color: #123B3A;
       font-weight: 700;
-      text-transform: uppercase;
-      font-size: 8pt;
-      letter-spacing: 0.5px;
+      font-size: 8.5pt;
     }
     tr:nth-child(even) td {
-      background: #FAFCFB;
+      background-color: #FAFCFB;
     }
     .badge {
       display: inline-block;
-      padding: 2px 7px;
-      border-radius: 10px;
+      padding: 2px 6px;
       font-size: 7.5pt;
       font-weight: 700;
+      border-radius: 4px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .badge-teal {
       background: #E6F4F2;
       color: #0F766E;
-      border: 1px solid #A0D2CA;
+      border: 1px solid #B2DDD7;
     }
     .badge-amber {
-      background: #FEF9C3;
-      color: #A16207;
-      border: 1px solid #FEF08A;
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FDE68A;
     }
     .badge-purple {
       background: #F3E8FF;
@@ -136,47 +148,75 @@
       color: #15803D;
       border: 1px solid #BBF7D0;
     }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 10px 0;
+    .badge-red {
+      background: #FEE2E2;
+      color: #B91C1C;
+      border: 1px solid #FECACA;
     }
     .card {
+      background: #F4F8F7;
       border: 1px solid #D7E5E2;
       border-radius: 8px;
       padding: 10px 12px;
-      background: #FAFCFB;
+      margin-bottom: 10px;
+      break-inside: avoid;
     }
     .card-title {
       font-weight: 700;
-      font-size: 10pt;
+      font-size: 9.5pt;
       color: #123B3A;
       margin-bottom: 4px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
     }
-    ul {
-      margin: 4px 0 8px 18px;
-      padding: 0;
-      font-size: 9.5pt;
-      color: #334A48;
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    li {
-      margin-bottom: 3px;
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .callout {
+      border-left: 3px solid #0F766E;
+      background: #F4F8F7;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 9pt;
+      border-radius: 0 6px 6px 0;
+    }
+    .callout-alert {
+      border-left: 3px solid #B91C1C;
+      background: #FEF2F2;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 9pt;
+      border-radius: 0 6px 6px 0;
     }
     .page-break {
-      page-break-before: always;
+      page-break-after: always;
     }
     .footer {
       border-top: 1px solid #D7E5E2;
+      margin-top: 16px;
       padding-top: 8px;
-      margin-top: 20px;
+      font-size: 8pt;
+      color: #566B69;
       display: flex;
       justify-content: space-between;
-      font-size: 8pt;
-      color: #7A918E;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 8.5pt;
+      background: #EBEFEF;
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: #0F766E;
     }
   </style>
 </head>
@@ -187,134 +227,397 @@
     <div class="brand">
       <div class="logo-box">V</div>
       <div>
-        <h1 class="brand-title">Vyora</h1>
-        <p class="brand-subtitle">Project Management Brief & System Architecture Documentation</p>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Small Business Billing, Inventory & Management Platform</p>
       </div>
     </div>
     <div class="meta-box">
-      <strong>Version:</strong> 1.4.0 (Enterprise Ready)<br>
-      <strong>Date:</strong> October 2026<br>
-      <strong>Environment:</strong> Hybrid Multi-Tenant Monolith
+      <strong>Document:</strong> Strategic V1 Architecture & Roadmap Brief<br>
+      <strong>Release Track:</strong> Version 1.0 (Production Core)<br>
+      <strong>Target:</strong> Indian MSMEs, Retailers & Wholesalers<br>
+      <strong>Updated:</strong> October 2026
     </div>
   </div>
 
   <!-- SECTION 1: EXECUTIVE SUMMARY -->
-  <h2>1. Executive Summary & Product Architecture</h2>
+  <h2>1. Executive Summary & Core Product Architecture</h2>
   <p>
-    <strong>Vyora</strong> is a production-grade multi-tenant GST billing, receivables, supplier payables, and traceable inventory management platform for Indian small-to-medium businesses (retailers, wholesalers, manufacturing, and distributors).
+    <strong>Vyora</strong> is an all-in-one cloud billing, receivables, supplier payables, and traceable inventory management platform purpose-built for Indian micro, small, and medium enterprises (MSMEs). Our core mission is delivering <strong>data security, rapid user adoption, Theme B (Teal Ledger) visual clarity, and flawless concurrency stability</strong> (1,000 to 50,000+ tenants) without over-engineering.
   </p>
 
   <div class="grid-2">
     <div class="card">
       <div class="card-title">
-        <span>vyora-backend</span>
+        <span>vyora-backend (REST API Core)</span>
         <span class="badge badge-teal">NestJS 11 + Mongoose 8</span>
       </div>
       <p style="font-size: 8.5pt; margin: 0;">
-        Decoupled modular REST service. Multi-tenant boundary isolation enforced via <code>TenantGuard</code>, <code>RolesGuard</code>, and <code>PlanGuard</code>. Minor currency integer precision across all ledgers.
+        Stateless modular API. Enforces tenant boundaries via <code>TenantGuard</code>, role controls via <code>RolesGuard</code>, and quota limits via <code>PlanGuard</code>. Minor currency integer precision across ledgers.
       </p>
     </div>
     <div class="card">
       <div class="card-title">
-        <span>vyora-frontend</span>
-        <span class="badge badge-teal">React 19 + Vite 6 + Tailwind 4</span>
+        <span>vyora-frontend (Web Admin App)</span>
+        <span class="badge badge-teal">React 19 + shadcn/ui + Vite 6</span>
       </div>
       <p style="font-size: 8.5pt; margin: 0;">
-        Mobile-first administrative dashboard using Theme B — Teal Ledger design system. Dynamic feature gating, responsive tables with horizontal scroll safeguards, and real-time role switchboard.
+        Responsive SPA built on Theme B (Teal Ledger), Radix UI popovers, shadcn/ui Table suite, and Toast feedback. Debounced search, edge-to-edge modal footers, and icon-only table actions.
       </p>
     </div>
   </div>
   <div class="grid-2">
     <div class="card">
       <div class="card-title">
-        <span>vyora-website</span>
-        <span class="badge badge-purple">Next.js Marketing & Blog</span>
+        <span>vyora-website (Marketing & Tools)</span>
+        <span class="badge badge-purple">Port 3001 • 10 MSME Tools + SEO</span>
       </div>
       <p style="font-size: 8.5pt; margin: 0;">
-        Public marketing site at <code>D:\project\vyora-website</code> featuring product capabilities, pricing plans (Starter, Growth, Business Pro), and SEO content blog.
+        High-converting marketing hub featuring live pricing plans, SEO blog articles, and 10 interactive utility tools (QR generator, GST calculator, currency converter, HSN finder, loan EMI).
       </p>
     </div>
     <div class="card">
       <div class="card-title">
-        <span>vyora-mobile</span>
-        <span class="badge badge-amber">Planned React Native</span>
+        <span>vyora-mobile (Mobile POS & Billing)</span>
+        <span class="badge badge-amber">Flutter / React Native Monorepo</span>
       </div>
       <p style="font-size: 8.5pt; margin: 0;">
-        Upcoming cross-platform mobile POS & counter invoicing app consuming the existing authenticated backend API.
+        Upcoming cross-platform counter app consuming the <strong>exact same NestJS backend and APIs</strong> via shared types, Bearer JWT authentication, and local offline cache.
       </p>
     </div>
   </div>
 
-  <!-- SECTION 2: ROLES & AUTHORIZATION (RBAC) -->
-  <h2>2. Role-Based Access Control (RBAC) System</h2>
+  <!-- SECTION 2: ROLES & RIGHTS & DEMOTING ISSUE -->
+  <h2>2. Roles & Rights: Analysis of the Demotion Issue & Clean Resolution</h2>
   <p>
-    The platform strictly separates authority between business owners and operational staff to protect financials, catalog integrity, and audit compliance.
+    In the recent team management audit (referenced in user incident screenshot <code>media_1791700339539_0dcc8fac.png</code>), a business owner attempting to demote a secondary team member from <strong>Owner</strong> to <strong>Staff</strong> encountered the blocking error:
   </p>
+  <div class="callout-alert">
+    <strong>Observed Error:</strong> <code>"Cannot demote the last remaining owner. Assign another owner first."</code><br>
+    <em>Context:</em> The business had 2 total members — both marked as Owners (Rahul Sharma as "Primary Owner" and Sandip Yadav as "Owner"). When Rahul Sharma toggled Sandip Yadav to Staff, the request was rejected.
+  </div>
 
+  <h3>Root Cause Analysis</h3>
+  <ul>
+    <li>
+      <strong>Collection Query Disconnect:</strong> The backend rule in <code>business.service.ts</code> checked <code>membershipModel.countDocuments({ businessId, role: 'OWNER', isActive: true })</code>.
+    </li>
+    <li>
+      <strong>Legacy & Undefined Field Exclusion:</strong> In MongoDB, querying <code>{ isActive: true }</code> strictly filters for documents containing explicit boolean <code>true</code>. Seeded records or memberships created before the schema update had <code>isActive: undefined</code>, causing MongoDB to count only 1 active owner instead of 2.
+    </li>
+    <li>
+      <strong>Primary Owner vs Promoted Owner Disregard:</strong> The database stores the root account creator inside <code>business.ownerUserId</code>. The primary owner is permanently immune to role changes. Therefore, even if all secondary owners are demoted to Staff, the Primary Owner <em>always</em> remains, guaranteeing that a business is never left without an owner.
+    </li>
+  </ul>
+
+  <h3>The Robust V1 Invariant Rule & Architecture Fix</h3>
   <table>
     <thead>
       <tr>
-        <th style="width: 18%;">User Role</th>
-        <th style="width: 22%;">Permission Level</th>
-        <th style="width: 32%;">Permitted Capabilities</th>
-        <th style="width: 28%;">Restrictions & Safeguards</th>
+        <th style="width: 25%;">User Type</th>
+        <th style="width: 25%;">Immutability Status</th>
+        <th style="width: 50%;">Promotion / Demotion Permissions</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><strong style="color: #0F766E;">OWNER / ADMIN</strong></td>
-        <td><span class="badge badge-teal">Full Management Control</span></td>
+        <td><strong>Primary Owner</strong><br><code>business.ownerUserId</code></td>
+        <td><span class="badge badge-green">Permanently Immune</span></td>
         <td>
-          • Create, Edit, Finalize, and Cancel Invoices<br>
-          • Add and Archive Products & Catalog Items<br>
-          • Add and Edit Customers & Suppliers<br>
-          • Record Purchases & Payment Vouchers<br>
-          • Adjust Stock (Business Pro Plan)<br>
-          • Switch user roles and toggle active status<br>
-          • Upgrade or change subscription plans
-        </td>
-        <td>
-          • Cannot demote or suspend the last remaining owner in the business.<br>
-          • Audit trail logs identity for all modifications.
+          • Can promote any Staff member to Owner anytime.<br>
+          • <strong>Can demote any promoted Owner back to Staff anytime</strong> without triggering the "last owner" block.<br>
+          • Cannot demote or delete their own primary account.
         </td>
       </tr>
       <tr>
-        <td><strong style="color: #A16207;">STAFF</strong></td>
-        <td><span class="badge badge-amber">View-Only Operational</span></td>
+        <td><strong>Promoted Owner</strong><br><code>role: 'OWNER'</code> in Membership</td>
+        <td><span class="badge badge-teal">Full Workspace Admin</span></td>
         <td>
-          • View Dashboard revenue metrics & stats<br>
-          • View & Search Invoices, preview & print PDFs<br>
-          • Browse Product catalog, units & prices<br>
-          • Browse Customer & Supplier ledgers<br>
-          • Inspect stock levels and movement logs
+          • Full access to invoices, catalog, purchases, payments, and reports.<br>
+          • Cannot demote or modify the Primary Owner.<br>
+          • Cannot demote other promoted Owners (only Primary Owner holds demote rights).
         </td>
+      </tr>
+      <tr>
+        <td><strong>Operational Staff</strong><br><code>role: 'STAFF'</code></td>
+        <td><span class="badge badge-amber">Configurable Access</span></td>
         <td>
-          • <strong>Zero mutation rights:</strong> All Add, Edit, Delete, Finalize, Cancel buttons hidden.<br>
-          • Backend <code>RolesGuard</code> rejects mutation requests with 403 Forbidden.
+          • Subject to module visibility matrix and action rights (View, Create, Edit).<br>
+          • Cannot access team management, subscription upgrades, or company deletion.
         </td>
       </tr>
     </tbody>
   </table>
 
-  <!-- SECTION 3: DEDICATED ROLES PAGE -->
-  <h2>3. Dedicated Team & Roles Management (`/roles`)</h2>
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- SECTION 3: RE-ORGANIZED ACCOUNT HUB FLOW -->
+  <h2>3. Re-Organized Flow: Consolidated Account & Workspace Hub</h2>
   <p>
-    A centralized management screen allowing business owners to monitor staff accounts, invite team members, and toggle roles instantly with live database synchronization.
+    Currently, user information, team permissions, and billing actions are dispersed across multiple screens. In Version 1, we organize these into a unified, elegant <strong>"Account & Workspace"</strong> hub with intuitive nested tabs.
   </p>
-  <ul>
-    <li><strong>Interactive Role Switch:</strong> Each team member has a dedicated switch toggle. Switching ON grants <code>OWNER (Full Access)</code>; switching OFF sets <code>STAFF (View Only)</code>. Changes apply immediately via <code>PATCH /business/staff/:id/role</code>.</li>
-    <li><strong>Access Status Toggle:</strong> An active status switch allows owners to temporarily suspend or re-activate member access via <code>PATCH /business/staff/:id/status</code> without deleting their records.</li>
-    <li><strong>Protective Guardrails:</strong> The last remaining owner is protected by backend invariants preventing demotion or suspension, ensuring the business is never locked out.</li>
-    <li><strong>Member Invitation Modal:</strong> Owners can invite new staff members with required fields marked with prominent red asterisks (<code>*</code>). System sets standard initial credentials for frictionless onboarding.</li>
-  </ul>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">
+        <span>1. Roles & Permissions</span>
+        <span class="badge badge-teal">Nested Tab A</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        • Team member invitations (Email/Phone).<br>
+        • Role Switchboard (Promote / Demote).<br>
+        • Custom Role Builder with module visibility.<br>
+        • Active / Suspended access toggle.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>2. Billing & Subscription</span>
+        <span class="badge badge-purple">Nested Tab B</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        • Current Plan badge (Starter, Growth, Pro).<br>
+        • Usage meters (Invoices, Staff, Storage).<br>
+        • Secure checkout with dynamic UPI QR.<br>
+        • GST invoice history for tax credit.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>3. Business & Profile</span>
+        <span class="badge badge-green">Nested Tab C</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        • Legal Name, Trade Name, GSTIN, PAN.<br>
+        • Billing address & State code (POS rules).<br>
+        • Bank details & UPI ID for invoice QR.<br>
+        • Company Logo & Digital Signature.
+      </p>
+    </div>
+  </div>
+
+  <!-- SECTION 4: CUSTOM ROLES & PERMISSION MATRIX -->
+  <h2>4. Custom Roles & Granular Module Visibility Matrix</h2>
+  <p>
+    Small businesses require role flexibility without technical complexity. Vyora provides clean <strong>Module Visibility (Hide/Show)</strong> coupled with <strong>Action Toggles (View, Create, Edit, Delete)</strong> per module.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 20%;">Module</th>
+        <th style="width: 20%;">Owner / Admin</th>
+        <th style="width: 20%;">Accountant (Custom)</th>
+        <th style="width: 20%;">Billing Operator (Custom)</th>
+        <th style="width: 20%;">Stock Incharge (Custom)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Invoices & Billing</strong></td>
+        <td><span class="badge badge-green">Full CRUD + Cancel</span></td>
+        <td><span class="badge badge-teal">View + Export</span></td>
+        <td><span class="badge badge-green">Create + Print Only</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+      </tr>
+      <tr>
+        <td><strong>Products & Catalog</strong></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-teal">View Prices</span></td>
+        <td><span class="badge badge-teal">View Only</span></td>
+        <td><span class="badge badge-green">Full Stock Edit</span></td>
+      </tr>
+      <tr>
+        <td><strong>Customers & Dues</strong></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-green">Full Ledger View</span></td>
+        <td><span class="badge badge-teal">View & Select Only</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+      </tr>
+      <tr>
+        <td><strong>Suppliers & Purchases</strong></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+        <td><span class="badge badge-teal">Record Inward Stock</span></td>
+      </tr>
+      <tr>
+        <td><strong>Payments & Receipts</strong></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-green">Full CRUD</span></td>
+        <td><span class="badge badge-teal">Record Receipt Only</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+      </tr>
+      <tr>
+        <td><strong>Tax Reports & Analytics</strong></td>
+        <td><span class="badge badge-green">Full Access</span></td>
+        <td><span class="badge badge-green">Full Access (CA/Tax)</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+      </tr>
+      <tr>
+        <td><strong>Account & Roles</strong></td>
+        <td><span class="badge badge-green">Owner Only</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+        <td><span class="badge badge-red">Module Hidden</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 5: COMPETITOR STRATEGY: VYAPAR VS VYORA -->
+  <h2>5. Competitor Strategy: How Vyapar Manages Roles & What Vyora Does Better</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <span>How Competitor "Vyapar" Operates</span>
+        <span class="badge badge-amber">Desktop-First Legacy</span>
+      </div>
+      <ul style="font-size: 8.5pt; margin: 0; padding-left: 14px;">
+        <li><strong>Role Presets:</strong> Offers Admin, Salesman, Biller, CA/Accountant, and Delivery Boy.</li>
+        <li><strong>Binary Restriction Checkboxes:</strong> Uses simple toggles: <em>"Can see purchase prices? NO"</em>, <em>"Can edit old invoices? NO"</em>, <em>"Can give discounts? NO"</em>.</li>
+        <li><strong>Local-First Sync:</strong> Runs on a local desktop database that syncs to cloud drive, leading to sync conflicts when multiple devices write simultaneously.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>Vyora's Enhanced V1 Strategy</span>
+        <span class="badge badge-teal">Cloud-Native Modern</span>
+      </div>
+      <ul style="font-size: 8.5pt; margin: 0; padding-left: 14px;">
+        <li><strong>Zero Sync Conflicts:</strong> Real-time cloud persistence with optimistic locking on MongoDB Atlas.</li>
+        <li><strong>Module Hiding:</strong> If an operator doesn't need Reports or Purchases, the navigation link completely disappears — zero distraction or confusion for staff.</li>
+        <li><strong>Instant Role Switchboard:</strong> 1-click active/suspend and role switch toggles without requiring manual app re-installation or complex permissions wizards.</li>
+      </ul>
+    </div>
+  </div>
 
   <!-- PAGE BREAK -->
   <div class="page-break"></div>
 
-  <!-- SECTION 4: BILLING PLANS FEATURE GATING -->
-  <h2>4. Subscription Tiers & Feature Gating Matrix</h2>
+  <!-- SECTION 6: BILLING MANAGEMENT & UPI QR CODE -->
+  <h2>6. Billing Management & Secure UPI QR Code Flow</h2>
   <p>
-    Features throughout the application are gated based on the active <code>subscriptionPlan</code> on the <code>Business</code> record, aligning exactly with the public marketing website:
+    Billing occurs across two distinct domains: <strong>Subscription Billing</strong> (tenants paying Vyora) and <strong>Customer Invoicing Billing</strong> (buyers paying tenants). Both must adhere to secure, standardized payment flows.
+  </p>
+
+  <h3>A. Subscription Checkout & Missing QR Fix</h3>
+  <div class="callout">
+    <strong>Resolution for Subscription Modal UPI:</strong> When users select UPI/QR in <code>PlanPurchaseModal.tsx</code>, instead of showing a blank state, the system renders a dynamic Bharat UPI QR code encoded with merchant VPA, exact plan amount in minor units, and unique idempotency reference.
+  </div>
+  <ul>
+    <li><strong>Standard Indian VPA Format:</strong> <code>upi://pay?pa=vyora.billing@icici&pn=Vyora%20Cloud&am=2999.00&tr=TXN_98231&cu=INR</code></li>
+    <li><strong>Production Payment Gateway (Roadmap):</strong> Integration with Razorpay / Cashfree Standard Hosted Checkout for automatic webhook reconciliation, recurring renewals, and automated GST input tax credit (B2B Tax Invoice generation for the subscriber).</li>
+  </ul>
+
+  <h3>B. Counter Invoicing Dynamic UPI QR Code</h3>
+  <ul>
+    <li><strong>Per-Invoice Dynamic QR:</strong> When a counter cashier creates a sales bill, the app displays a dynamic QR code on screen or prints it on thermal/A4 invoices.</li>
+    <li><strong>Automatic Settlement Tagging:</strong> Customer scans with Google Pay, PhonePe, or Paytm. Cashier clicks <em>"Payment Received via UPI"</em> to generate an idempotent payment voucher and mark the invoice paid.</li>
+  </ul>
+
+  <!-- SECTION 7: URL SLUGS EVALUATION -->
+  <h2>7. URL Slugs: Evaluation & Strategic Recommendation</h2>
+  <p>
+    The user enquired: <em>"also i think to manage the slug in our app that was a good for us or not so think about that"</em>. Here is the architectural analysis:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Approach</th>
+        <th style="width: 35%;">Pros</th>
+        <th style="width: 40%;">Cons & Recommendation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Option A: Slugs in App URLs</strong><br><code>app.vyora.in/:slug/invoices</code></td>
+        <td>
+          • Clear tenant identity in browser tab.<br>
+          • Accountants can open multiple client tabs side-by-side.
+        </td>
+        <td>
+          <span class="badge badge-amber">Complex & Fragile for V1</span><br>
+          • Routing breaks if tenant renames trade name.<br>
+          • Route collision risk (e.g. business named "settings" or "reports").<br>
+          • Requires route guard checking slug ownership on every click.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Option B: Clean URLs + Tenant Switcher</strong><br><code>app.vyora.in/invoices</code> (JWT Context)</td>
+        <td>
+          • Clean, rock-solid, bookmarkable URLs.<br>
+          • Business context managed via JWT + dropdown.<br>
+          • <strong>Used by Vyapar, Khatabook, Zoho Books, and Stripe.</strong>
+        </td>
+        <td>
+          <span class="badge badge-green">STRONGLY RECOMMENDED FOR V1</span><br>
+          • Zero frontend routing bugs.<br>
+          • Frictionless multi-business switching from navbar.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Option C: Public Slugs for Customers</strong><br><code>vyora.in/pay/:invoice-slug</code></td>
+        <td>
+          • Customers can view and pay invoices online.<br>
+          • Future online catalog storefront: <code>vyora.in/store/:slug</code>.
+        </td>
+        <td>
+          <span class="badge badge-teal">PERFECT USE CASE FOR SLUGS</span><br>
+          • Keeps public links human-readable while keeping internal app clean and robust.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 8: SEPARATE MOBILE APP ARCHITECTURE -->
+  <h2>8. Cross-Platform Mobile App: Architecture Consuming the Same Backend</h2>
+  <p>
+    The user requested: <em>"i want to create a seprate mobile app and want to use the same backend and api so how we can manage this this is possible or not"</em>.
+  </p>
+  <div class="callout">
+    <strong>Architectural Verdict:</strong> <strong>100% Possible and Recommended.</strong> The Vyora NestJS backend is completely decoupled, stateless, and REST-compliant. Both Web and Mobile consume the exact same backend endpoints without code duplication.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <span>Shared Monorepo Foundation</span>
+        <span class="badge badge-teal">@vyora/shared-types</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        Data models (<code>Invoice</code>, <code>Product</code>, <code>Party</code>, <code>PaymentRecord</code>) and validation schemas live in shared monorepo packages. Mobile app directly imports the same contracts.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>Authentication & Device Security</span>
+        <span class="badge badge-teal">JWT Bearer + Refresh Token</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        Mobile uses the same <code>/auth/login</code> endpoint. Access tokens stored in EncryptedSharedPreferences (Android) / Keychain (iOS) with biometric unlock (Fingerprint / Face ID).
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>Offline Counter Billing (Inspired by Vyapar)</span>
+      <span class="badge badge-purple">High-Value Mobile Capability</span>
+    </div>
+    <p style="font-size: 8.5pt; margin: 0;">
+      Indian retail counters frequently experience spotty internet. By integrating a local SQLite / WatermelonDB cache on the mobile device, cashiers can generate bills offline. Bills queue locally and automatically sync to MongoDB via idempotent endpoints (<code>idempotencyKey</code>) as soon as Wi-Fi/4G reconnects.
+    </p>
+  </div>
+
+  <!-- PAGE BREAK -->
+  <div class="page-break"></div>
+
+  <!-- SECTION 9: SUBSCRIPTION MATRIX -->
+  <h2>9. Subscription Tiers & Feature Gating Matrix</h2>
+  <p>
+    All tenants register on the <strong>Starter (Free Forever)</strong> tier upon signup. As business volume scales, upgrade gates gently nudge owners toward Growth and Business Pro tiers.
   </p>
 
   <table>
@@ -322,260 +625,121 @@
       <tr>
         <th style="width: 22%;">Feature Module</th>
         <th style="width: 26%;">Starter (₹0 / Free)</th>
-        <th style="width: 26%;">Growth (₹499 / mo)</th>
-        <th style="width: 26%;">Business Pro (₹999 / mo)</th>
+        <th style="width: 26%;">Growth (₹2,999 / yr)</th>
+        <th style="width: 26%;">Business Pro (₹4,999 / yr)</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td><strong>GST Invoicing</strong></td>
-        <td><span class="badge badge-green">Included (50 / mo)</span></td>
-        <td><span class="badge badge-green">Unlimited</span></td>
-        <td><span class="badge badge-green">Unlimited</span></td>
+        <td><strong>Sales Invoicing</strong></td>
+        <td><span class="badge badge-green">50 Invoices / Month</span></td>
+        <td><span class="badge badge-green">Unlimited GST Bills</span></td>
+        <td><span class="badge badge-green">Unlimited + Barcode</span></td>
       </tr>
       <tr>
-        <td><strong>Product Catalog & Inventory</strong></td>
+        <td><strong>Product Catalog & Stock</strong></td>
         <td><span class="badge badge-green">Up to 100 Products</span></td>
-        <td><span class="badge badge-green">Unlimited + Stock Alerts</span></td>
-        <td><span class="badge badge-green">Unlimited + Stock Alerts</span></td>
+        <td><span class="badge badge-green">Unlimited + Low Stock Alerts</span></td>
+        <td><span class="badge badge-green">Unlimited + Multi-Unit HSN</span></td>
       </tr>
       <tr>
-        <td><strong>Customer Directory & Dues</strong></td>
+        <td><strong>Party Directory & Balances</strong></td>
         <td><span class="badge badge-green">Basic Balances</span></td>
-        <td><span class="badge badge-green">Credit Limits & Ledgers</span></td>
-        <td><span class="badge badge-green">Credit Limits & Ledgers</span></td>
+        <td><span class="badge badge-green">Full Ledgers & Credit Limits</span></td>
+        <td><span class="badge badge-green">Full Ledgers & Reminders</span></td>
       </tr>
       <tr>
-        <td><strong>Supplier Purchases & Payables</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Hidden (Upgrade)</span></td>
+        <td><strong>Purchases & Payables</strong></td>
+        <td><span class="badge badge-red">Hidden (Upgrade Gate)</span></td>
+        <td><span class="badge badge-green">Inbound Supplier Bills</span></td>
         <td><span class="badge badge-green">Full Inbound Bills</span></td>
-        <td><span class="badge badge-green">Full Inbound Bills</span></td>
       </tr>
       <tr>
-        <td><strong>Payments & Receipts Vouchers</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Hidden (Upgrade)</span></td>
+        <td><strong>Payments & Vouchers</strong></td>
+        <td><span class="badge badge-red">Hidden (Upgrade Gate)</span></td>
+        <td><span class="badge badge-green">Receipts & Payment Vouchers</span></td>
         <td><span class="badge badge-green">Full Cash/Bank Vouchers</span></td>
-        <td><span class="badge badge-green">Full Cash/Bank Vouchers</span></td>
       </tr>
       <tr>
-        <td><strong>Tax Reports (GSTR-1, 3B, Valuation)</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Hidden (Upgrade)</span></td>
-        <td><span class="badge badge-green">Full Tax Registers</span></td>
-        <td><span class="badge badge-green">Full Tax Registers</span></td>
+        <td><strong>Tax Reports & Analytics</strong></td>
+        <td><span class="badge badge-red">Hidden (Upgrade Gate)</span></td>
+        <td><span class="badge badge-green">GSTR-1, 3B, Valuation</span></td>
+        <td><span class="badge badge-green">Full CA Tax Export</span></td>
       </tr>
       <tr>
-        <td><strong>Team Staff Delegation (`/roles`)</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">1 Solo Owner Only</span></td>
+        <td><strong>Team Staff Delegation</strong></td>
+        <td><span class="badge badge-amber">1 Solo Owner Only</span></td>
         <td><span class="badge badge-teal">Up to 3 Staff Accounts</span></td>
-        <td><span class="badge badge-purple">Unlimited Staff Accounts</span></td>
+        <td><span class="badge badge-purple">Unlimited Custom Roles</span></td>
       </tr>
       <tr>
         <td><strong>Audited Stock Adjustments</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Hidden</span></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Hidden</span></td>
+        <td><span class="badge badge-red">Hidden</span></td>
+        <td><span class="badge badge-red">Hidden</span></td>
         <td><span class="badge badge-purple">Full Audited Adjustments</span></td>
       </tr>
-      <tr>
-        <td><strong>Financial Audit Trail Logs</strong></td>
-        <td><span class="badge badge-amber" style="background:#FEE2E2;color:#B91C1C;border-color:#FECACA;">Standard Logs</span></td>
-        <td><span class="badge badge-green">Standard Logs</span></td>
-        <td><span class="badge badge-purple">Complete Audit Trail</span></td>
-      </tr>
     </tbody>
   </table>
 
-  <!-- SECTION 5: HIGH-SCALE PLATFORM STABILITY & DATA ARCHITECTURE -->
-  <h2>5. High-Concurrency Platform Stability & Enterprise UX (Scale: 1k - 50k Users)</h2>
+  <!-- SECTION 10: HIGH-CONCURRENCY STABILITY -->
+  <h2>10. Concurrency Stability, Security & Data Protection (1k - 50k Users)</h2>
   <p>
-    To ensure flawless operation under concurrent load of 1,000 to 50,000+ active tenant users, comprehensive rate limiting, query throttling, table pagination, and security controls were integrated:
+    Indian billing platforms must never crash during month-end or festive shopping surges. Vyora integrates enterprise stability controls:
   </p>
   <ul>
-    <li>
-      <strong>Sliding-Window Rate Limiting (<code>rate-limit.middleware.ts</code>)</strong>: In-memory sliding-window limiter with a periodic 10-minute sweep to prevent memory leaks under 50k unique IP addresses. Restricts authentication routes (<code>/auth/*</code>) to 25 requests/minute (brute-force defense) and general API endpoints to 200 requests/minute. Injects standard <code>X-RateLimit-*</code>, <code>Retry-After</code>, and defense headers (<code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: SAMEORIGIN</code>, <code>X-XSS-Protection: 1; mode=block</code>).
-    </li>
-    <li>
-      <strong>Client Search Debouncing (<code>SearchInput.tsx</code>)</strong>: 300ms internal keystroke debounce across product, invoice, party, and team queries. Prevents request storms, DOM thrashing, and unnecessary backend database indexing overhead while users type.
-    </li>
-    <li>
-      <strong>High-Capacity Data Table Architecture & Pagination</strong>: Dedicated <code>&lt;Pagination&gt;</code> component deployed across <code>ProductTable</code>, <code>PartyTable</code>, <code>InvoiceTable</code>, and <code>StockMovementTable</code>. Supports dynamic page ranges, ellipsis navigation, entry counts, and configurable page limits (10, 25, 50, 100). Prevents out-of-memory (OOM) browser freezing when businesses manage thousands of ledger items.
-    </li>
-    <li>
-      <strong>Clean Icon-Only Action Buttons</strong>: Table action columns feature minimalist, high-contrast icon-only buttons (<code>&lt;Edit2 /&gt;</code> and <code>&lt;Trash2 /&gt;</code>) with subtle hover pills and tooltips, eliminating button text clutter.
-    </li>
-    <li>
-      <strong>Prohibition of "Archive" Terminology</strong>: In accordance with core requirements, ambiguous "Archive" labeling and functionality has been completely removed across UI and prompts in favor of explicit, unambiguous "Delete" and "Remove".
-    </li>
-    <li>
-      <strong>Modern SaaS Modal System & Navbar Cleanliness</strong>: Modals upgraded with frosted backdrops (<code>bg-slate-900/60 backdrop-blur-sm</code>), smooth <code>zoom-in-95</code> entry animations, and responsive mobile stacks. Top navigation bar cleaned up by removing redundant role badges.
-    </li>
-    <li>
-      <strong>Authentic Plan Purchase & Checkout Flow (<code>PlanPurchaseModal.tsx</code>)</strong>: Replaces direct 1-click plan switching with an authentic checkout experience: Monthly vs Annual (20% discount) billing cycle toggle, strict minor-unit paisa calculation with itemized 18% GST preview, payment method selection (UPI, Credit/Debit Cards, Net Banking), and simulated banking gateway verification with printable transaction receipts.
-    </li>
+    <li><strong>Sliding-Window Rate Limiting (<code>rate-limit.middleware.ts</code>):</strong> Restricts auth endpoints to 25 req/min (anti-brute-force) and general API endpoints to 200 req/min. Sweeps memory every 10 minutes to support 50k unique IPs without leaking heap.</li>
+    <li><strong>Client Search Debouncing (<code>SearchInput.tsx</code>):</strong> 300ms debounce eliminates query hammering while users search products, invoices, or parties.</li>
+    <li><strong>High-Capacity Data Table Architecture (<code>&lt;Pagination&gt;</code> + <code>Table.tsx</code>):</strong> Virtualized page chunks (10, 25, 50, 100) ensure zero browser freezing even with 50,000+ customer records.</li>
+    <li><strong>Zero Floating-Point Ledger Precision:</strong> All currency stored in minor integer units (paisa) prevents rounding drift across multi-line tax calculations.</li>
   </ul>
 
-  <!-- SECTION 6: MILESTONE ROADMAP SUMMARY -->
-  <h2>6. Engineering Milestones (V1-01 through V1-24)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 10%;">ID</th>
-        <th style="width: 25%;">Feature Module</th>
-        <th style="width: 15%;">Status</th>
-        <th style="width: 50%;">Implementation Details</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>V1-01</td>
-        <td>Auth & Multi-Tenancy</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>JWT Bearer authentication, tenant header (<code>x-business-id</code>), membership isolation.</td>
-      </tr>
-      <tr>
-        <td>V1-02</td>
-        <td>Party Directory (CRM)</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Customers & Suppliers with GSTIN, 2-digit state codes, running balance ledger.</td>
-      </tr>
-      <tr>
-        <td>V1-03</td>
-        <td>Product Catalog</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>SKU, HSN code, units, minor pricing (paisa), statutory GST tax rates (0-28%).</td>
-      </tr>
-      <tr>
-        <td>V1-04</td>
-        <td>GST Tax Calculations</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Intra-state (CGST+SGST) vs Inter-state (IGST) split, zero floating-point rounding error.</td>
-      </tr>
-      <tr>
-        <td>V1-05</td>
-        <td>Invoices & Sequence</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Immutable draft/finalized sequence numbers, atomic stock deductions, PDF generation.</td>
-      </tr>
-      <tr>
-        <td>V1-06</td>
-        <td>Traceable Inventory</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Audit log ledger for sales, purchases, cancellations, and manual adjustments.</td>
-      </tr>
-      <tr>
-        <td>V1-07</td>
-        <td>Purchases & Bills</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Inbound supplier purchase entry, inventory replenishment, and accounts payable.</td>
-      </tr>
-      <tr>
-        <td>V1-08</td>
-        <td>Payments & Vouchers</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Idempotent receipts and payment vouchers with automatic party balance reconciliation.</td>
-      </tr>
-      <tr>
-        <td>V1-09</td>
-        <td>Core Tax Reports</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Sales Register, Purchase Register, Stock Valuation, and Customer Debtor Aging.</td>
-      </tr>
-      <tr>
-        <td>V1-10</td>
-        <td>Business Settings</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Custom invoice prefixing, digit padding, legal terms, and audit log inspection.</td>
-      </tr>
-      <tr>
-        <td>V1-11</td>
-        <td>Database Persistence</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Full live connection to MongoDB Atlas Cloud cluster; static mock data eliminated.</td>
-      </tr>
-      <tr>
-        <td>V1-12</td>
-        <td>Fallback Empty States</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Contextual <code>EmptyState</code> components across all tables and charts.</td>
-      </tr>
-      <tr>
-        <td>V1-13</td>
-        <td>Form Validation & Badges</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Mandatory fields highlighted with red asterisks (<code>*</code>); Zod schema validations.</td>
-      </tr>
-      <tr>
-        <td>V1-14</td>
-        <td>Theme B: Teal Ledger</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Deep teal palette (<code>#0F766E</code>, <code>#123B3A</code>, <code>#F4F8F7</code>) across all components.</td>
-      </tr>
-      <tr>
-        <td>V1-15</td>
-        <td>Mobile Responsiveness</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Fixed thumb navigation bar, table horizontal scrolling safeguards, stacked buttons.</td>
-      </tr>
-      <tr>
-        <td>V1-16</td>
-        <td>Marketing Website</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Live public site at port 3001 with interactive pricing table and SEO blog.</td>
-      </tr>
-      <tr>
-        <td>V1-17</td>
-        <td>Automated AI Skill</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td><code>vyora-core</code> skill providing architectural blueprint and engineering memory.</td>
-      </tr>
-      <tr>
-        <td>V1-18</td>
-        <td>Role Authorization (RBAC)</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Owner full access vs Staff view-only access enforced on both backend and frontend.</td>
-      </tr>
-      <tr>
-        <td>V1-19</td>
-        <td>Roles Switchboard Page</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Dedicated <code>/roles</code> page with individual role switches and access toggles.</td>
-      </tr>
-      <tr>
-        <td>V1-20</td>
-        <td>Subscription Plan Gating</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Starter, Growth, and Business Pro tier enforcement with dynamic feature hiding.</td>
-      </tr>
-      <tr>
-        <td>V1-21</td>
-        <td>Rate Limiting & Stability</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Sliding-window memory rate limiter + security headers for 1,000 to 50,000+ users.</td>
-      </tr>
-      <tr>
-        <td>V1-22</td>
-        <td>Search Input Debounce</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>300ms internal debouncing across all search inputs to prevent server query spam.</td>
-      </tr>
-      <tr>
-        <td>V1-23</td>
-        <td>Table Pagination & Actions</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Pagination component, icon-only edit/delete actions, complete removal of archive.</td>
-      </tr>
-      <tr>
-        <td>V1-24</td>
-        <td>Plan Purchase Checkout</td>
-        <td><span class="badge badge-green">Completed</span></td>
-        <td>Multi-step checkout modal with cycle toggles, 18% GST calculation, and UPI/Cards.</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- SECTION 11: ACTIONABLE SUGGESTIONS FOR V1 -->
+  <h2>11. Actionable Strategic Suggestions for Vyora V1 Launch</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <span>1. WhatsApp Invoice Dispatch</span>
+        <span class="badge badge-green">High Demand in India</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        Indian retailers love sending bill PDFs directly over WhatsApp. Add a 1-click <code>wa.me/?text=...</code> button on invoice finalization with pre-filled customer message and link.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>2. Barcode Scanner Support (USB/Camera)</span>
+        <span class="badge badge-teal">Essential for Retail</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        Enable automatic product lookup when a USB barcode scanner enters a SKU code into the invoice item row, speeding counter checkout by 5x.
+      </p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">
+        <span>3. Thermal Printer (2-inch / 3-inch) Support</span>
+        <span class="badge badge-purple">POS Receipt Format</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        In addition to regular A4 GST tax invoices, provide a compact 80mm thermal receipt print stylesheet for grocery stores and small retail shops.
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">
+        <span>4. Daily Auto-Backup to Google Drive</span>
+        <span class="badge badge-amber">Data Peace of Mind</span>
+      </div>
+      <p style="font-size: 8.5pt; margin: 0;">
+        Allow owners to download encrypted JSON/Excel backups of their full ledgers with a single click, providing absolute data sovereignty.
+      </p>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <div class="footer">
-    <span>Vyora Cloud Technologies • Confidential Product Brief</span>
-    <span>Generated for Project Management & Architecture Continuity</span>
+    <span>Vyora Cloud Technologies • Confidential Product Management Brief</span>
+    <span>Document Certified for Architecture Continuity & Release Gatekeeping</span>
   </div>
 
 </body>

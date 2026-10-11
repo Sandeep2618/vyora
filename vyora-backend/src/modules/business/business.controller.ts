@@ -44,6 +44,16 @@ export class BusinessController {
     return this.businessService.updateSubscriptionPlan(businessId, body.plan);
   }
 
+  @Put('permissions')
+  @Roles('OWNER', 'ADMIN')
+  @ApiOperation({ summary: 'Update module access permissions for staff roles (Owner only)' })
+  async updatePermissions(
+    @CurrentTenant() businessId: string,
+    @Body() body: Record<string, boolean>,
+  ) {
+    return this.businessService.updateStaffPermissions(businessId, body);
+  }
+
   @Get('staff')
   @ApiOperation({ summary: 'List all staff members and roles for this business' })
   async getStaff(@CurrentTenant() businessId: string) {

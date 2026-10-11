@@ -67,6 +67,29 @@ export class Business {
 
   @Prop({ type: String, enum: ['starter', 'growth', 'enterprise'], default: 'growth' })
   subscriptionPlan: 'starter' | 'growth' | 'enterprise';
+
+  @Prop({
+    type: Object,
+    default: {
+      invoices: true,
+      parties: true,
+      products: true,
+      inventory: true,
+      purchases: true,
+      payments: true,
+      reports: false,
+    },
+  })
+  staffPermissions?: {
+    invoices: boolean;
+    parties: boolean;
+    products: boolean;
+    inventory: boolean;
+    purchases: boolean;
+    payments: boolean;
+    reports: boolean;
+  };
 }
 
 export const BusinessSchema = SchemaFactory.createForClass(Business);
+

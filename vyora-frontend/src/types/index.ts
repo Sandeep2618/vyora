@@ -53,6 +53,15 @@ export interface BusinessProfile {
   nextPurchaseNumber: number;
   termsAndConditions?: string;
   subscriptionPlan?: SubscriptionPlan;
+  staffPermissions?: {
+    invoices?: boolean;
+    parties?: boolean;
+    products?: boolean;
+    inventory?: boolean;
+    purchases?: boolean;
+    payments?: boolean;
+    reports?: boolean;
+  };
   createdAt: string;
   updatedAt: string;
 }

@@ -30,8 +30,13 @@ export const businessApi = {
     return api.patch<StaffMember>(`/business/staff/${membershipId}/status`, { isActive });
   },
 
+  updatePermissions: (permissions: Record<string, boolean>): Promise<BusinessProfile> => {
+    return api.put<BusinessProfile>('/business/permissions', permissions);
+  },
+
   removeStaff: (membershipId: string): Promise<{ success: boolean }> => {
     return api.delete<{ success: boolean }>(`/business/staff/${membershipId}`);
   },
 };
+
 

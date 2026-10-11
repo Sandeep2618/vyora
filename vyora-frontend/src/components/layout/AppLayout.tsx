@@ -19,6 +19,12 @@ import {
   ShieldCheck,
   UserCheck,
   Sparkles,
+  Smartphone,
+  QrCode,
+  ExternalLink,
+  Copy,
+  Check,
+  Download,
 } from 'lucide-react';
 import { useAuth, FeatureKey } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
@@ -27,6 +33,8 @@ export const AppLayout: React.FC = () => {
   const { user, business, logout, isOwner, plan, hasFeature } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const navigate = useNavigate();
 
   const allNavItems: {
@@ -43,8 +51,7 @@ export const AppLayout: React.FC = () => {
     { label: 'Purchase', icon: ShoppingCart, path: '/purchases', feature: 'PURCHASES' },
     { label: 'Payments', icon: CreditCard, path: '/payments', feature: 'PAYMENTS' },
     { label: 'Reports', icon: BarChart3, path: '/reports', feature: 'REPORTS' },
-    { label: 'Team & Roles', icon: ShieldCheck, path: '/roles', feature: 'ROLES' },
-    { label: 'Settings', icon: Settings, path: '/settings' },
+    { label: 'Account & Roles', icon: ShieldCheck, path: '/account' },
   ];
 
   const navItems = allNavItems.filter((item) => !item.feature || hasFeature(item.feature));
@@ -257,6 +264,16 @@ export const AppLayout: React.FC = () => {
             >
               {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth' : 'Starter'}
             </span>
+
+            {/* Mobile App Sync Button */}
+            <button
+              onClick={() => setIsMobileModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#E6F4F2] text-[#0F766E] border border-[#A0D2CA] rounded-lg text-xs font-bold hover:bg-[#D7EBE8] transition-colors shrink-0"
+              title="Connect mobile phone to this business"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">📱 Mobile App</span>
+            </button>
           </div>
 
           {/* Right Header: User Profile */}
@@ -286,16 +303,36 @@ export const AppLayout: React.FC = () => {
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
-                      navigate('/settings');
+                      navigate('/account?tab=PROFILE');
                     }}
                     className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
                   >
-                    <Settings className="w-3.5 h-3.5" />
-                    Business Settings
+                    <Building2 className="w-3.5 h-3.5 text-[#0F766E]" />
+                    Business Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate('/account?tab=ROLES');
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                    Roles & Permissions
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      navigate('/account?tab=BILLING');
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
+                  >
+                    <CreditCard className="w-3.5 h-3.5 text-[#0F766E]" />
+                    Billing & Plans
                   </button>
                   <button
                     onClick={logout}
-                    className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] hover:bg-[#FEE2E2] flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] hover:bg-[#FEE2E2] flex items-center gap-2 border-t border-[#D7E5E2] mt-1"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Sign Out
@@ -379,6 +416,105 @@ export const AppLayout: React.FC = () => {
           </button>
         </nav>
       </div>
+
+      {/* Mobile App QR & Connection Modal */}
+      {isMobileModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
+          onClick={() => setIsMobileModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#D7E5E2] space-y-5 animate-in zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#0F766E] text-white flex items-center justify-center font-bold">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-base font-bold text-[#123B3A]">Connect Mobile Counter</h3>
+                </div>
+                <p className="text-xs text-[#566B69] mt-1">
+                  Run Vyora Mobile on your Android or iPhone device.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsMobileModalOpen(false)}
+                className="p-1 rounded-lg text-[#566B69] hover:bg-[#F4F8F7]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center p-4 bg-[#F4F8F7] rounded-2xl border border-[#D7E5E2]">
+              <div className="bg-white p-3 rounded-xl border border-[#D7E5E2] shadow-xs mb-2">
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=exp://192.168.1.14:8081"
+                  alt="Vyora Mobile QR Code"
+                  className="w-44 h-44 object-contain"
+                />
+              </div>
+              <p className="text-[11px] font-bold text-[#0F766E] flex items-center gap-1">
+                <QrCode className="w-3.5 h-3.5" />
+                <span>Scan with Expo Go on your Phone</span>
+              </p>
+            </div>
+
+            <div className="space-y-2 text-xs text-[#123B3A]">
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                <p>Install <strong>Expo Go</strong> from Play Store (Android) or App Store (iOS).</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                <p>Ensure phone is on the same Wi-Fi network (IP: <strong>192.168.1.14</strong>).</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                <p>Scan the QR code above or open in browser preview.</p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <a
+                href="http://localhost:8081"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors"
+              >
+                <span>Open Browser Preview</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText('exp://192.168.1.14:8081');
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 3000);
+                }}
+                className="inline-flex items-center justify-center gap-1.5 bg-[#F4F8F7] hover:bg-[#E5EFEB] text-[#123B3A] text-xs font-bold px-3 py-2.5 rounded-xl border border-[#D7E5E2] transition-colors"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-[#15803D]" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            {/* Direct APK Link */}
+            <a
+              href="http://localhost:3001/download"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full inline-flex items-center justify-center gap-2 bg-[#E6F4F2] hover:bg-[#D7EBE8] text-[#0F766E] text-xs font-bold py-2.5 rounded-xl border border-[#A0D2CA] transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download Direct Android APK via Chrome</span>
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

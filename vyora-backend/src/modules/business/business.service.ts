@@ -46,6 +46,18 @@ export class BusinessService {
     return this.mapBusiness(business);
   }
 
+  async updateStaffPermissions(businessId: string, permissions: Record<string, boolean>) {
+    const business = await this.businessModel.findByIdAndUpdate(
+      businessId,
+      { $set: { staffPermissions: permissions } },
+      { new: true },
+    );
+    if (!business) {
+      throw new NotFoundException('Business not found');
+    }
+    return this.mapBusiness(business);
+  }
+
   private mapBusiness(business: BusinessDocument) {
     return {
       id: business._id.toString(),
@@ -70,6 +82,15 @@ export class BusinessService {
       nextPurchaseNumber: business.nextPurchaseNumber,
       termsAndConditions: business.termsAndConditions,
       subscriptionPlan: business.subscriptionPlan || 'growth',
+      staffPermissions: (business as any).staffPermissions || {
+        invoices: true,
+        parties: true,
+        products: true,
+        inventory: true,
+        purchases: true,
+        payments: true,
+        reports: false,
+      },
       createdAt: (business as any).createdAt,
       updatedAt: (business as any).updatedAt,
     };
@@ -171,13 +192,18 @@ export class BusinessService {
 
     // Rule 3: Protection against zero active owners
     if (membership.role === 'OWNER' && newRole === 'STAFF') {
-      const ownerCount = await this.membershipModel.countDocuments({
-        businessId,
-        role: 'OWNER',
-        isActive: true,
-      });
-      if (ownerCount <= 1) {
-        throw new ConflictException('Cannot demote the last remaining owner. Assign another owner first.');
+      const hasOtherPermanentOwner = Boolean(
+        business && business.ownerUserId && business.ownerUserId !== membership.userId,
+      );
+      if (!hasOtherPermanentOwner) {
+        const ownerCount = await this.membershipModel.countDocuments({
+          businessId,
+          role: 'OWNER',
+          isActive: { $ne: false },
+        });
+        if (ownerCount <= 1) {
+          throw new ConflictException('Cannot demote the last remaining owner. Assign another owner first.');
+        }
       }
     }
 
@@ -223,13 +249,18 @@ export class BusinessService {
     }
 
     if (!isActive && membership.role === 'OWNER') {
-      const activeOwners = await this.membershipModel.countDocuments({
-        businessId,
-        role: 'OWNER',
-        isActive: true,
-      });
-      if (activeOwners <= 1) {
-        throw new ConflictException('Cannot deactivate the last active owner.');
+      const hasOtherPermanentOwner = Boolean(
+        business && business.ownerUserId && business.ownerUserId !== membership.userId,
+      );
+      if (!hasOtherPermanentOwner) {
+        const activeOwners = await this.membershipModel.countDocuments({
+          businessId,
+          role: 'OWNER',
+          isActive: { $ne: false },
+        });
+        if (activeOwners <= 1) {
+          throw new ConflictException('Cannot deactivate the last active owner.');
+        }
       }
     }
 
@@ -267,12 +298,17 @@ export class BusinessService {
     }
 
     if (membership.role === 'OWNER') {
-      const activeOwners = await this.membershipModel.countDocuments({
-        businessId,
-        role: 'OWNER',
-      });
-      if (activeOwners <= 1) {
-        throw new ConflictException('Cannot remove the primary business owner.');
+      const hasOtherPermanentOwner = Boolean(
+        business && business.ownerUserId && business.ownerUserId !== membership.userId,
+      );
+      if (!hasOtherPermanentOwner) {
+        const activeOwners = await this.membershipModel.countDocuments({
+          businessId,
+          role: 'OWNER',
+        });
+        if (activeOwners <= 1) {
+          throw new ConflictException('Cannot remove the primary business owner.');
+        }
       }
     }
 

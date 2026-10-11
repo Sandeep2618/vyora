@@ -439,9 +439,11 @@ export const RolesPage: React.FC = () => {
                 {filteredMembers.map((member) => {
                   const isCurrentLoggedUser = member.userId === user?.id;
                   const isMemberOwner = member.role === 'OWNER' || member.role === 'ADMIN';
-                  const isLastOwner = isMemberOwner && ownerCount <= 1;
-                  const isRowUpdating = updatingId === member.id;
                   const isMemberPrimaryOwner = Boolean(member.isPrimaryOwner);
+                  const hasPrimaryOwner = members.some((m) => m.isPrimaryOwner);
+                  // A member is only the "last owner" if they are the primary owner alone or if no primary owner exists and ownerCount is 1
+                  const isLastOwner = isMemberOwner && (!hasPrimaryOwner ? ownerCount <= 1 : isMemberPrimaryOwner && ownerCount <= 1);
+                  const isRowUpdating = updatingId === member.id;
 
                   // Role toggle permissions
                   const canToggleRole =
