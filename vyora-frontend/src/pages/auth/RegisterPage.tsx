@@ -3,14 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Eye, EyeOff } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState('Rahul Sharma');
-  const [businessName, setBusinessName] = useState('Sharma Retail & Supplies');
-  const [email, setEmail] = useState('rahul@sharmaretail.com');
-  const [password, setPassword] = useState('password123');
+  const [name, setName] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -84,11 +86,22 @@ export const RegisterPage: React.FC = () => {
 
           <Input
             label="Password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Minimum 6 characters"
+            rightElement={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="p-1 text-[#566B69] hover:text-[#123B3A] transition-colors focus:outline-none"
+                title={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            }
           />
 
           <Button type="submit" className="w-full" isLoading={isLoading}>

@@ -1,4 +1,21 @@
-const API_BASE = (import.meta.env.VITE_API_URL || '/api/v1').replace(/\/+$/, '');
+function getApiBase(): string {
+  const envUrl = import.meta.env.VITE_API_URL;
+  // If invalid placeholder containing '<' or '>', fallback to live Render URL
+  if (envUrl && (envUrl.includes('<') || envUrl.includes('>'))) {
+    return 'https://vyora-backend-gmx6.onrender.com/api/v1';
+  }
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  // Production fallback to live Render backend
+  if (import.meta.env.PROD) {
+    return 'https://vyora-backend-gmx6.onrender.com/api/v1';
+  }
+  return '/api/v1';
+}
+
+const API_BASE = getApiBase();
+
 
 export class ApiError extends Error {
   statusCode: number;

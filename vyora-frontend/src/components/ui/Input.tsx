@@ -5,10 +5,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   helperText?: string;
+  rightElement?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, required, className, id, ...props }, ref) => {
+  ({ label, error, helperText, required, className, id, rightElement, ...props }, ref) => {
     const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined);
 
     // Clean label text: if label contains a trailing '*', remove it and render our styled red asterisk
@@ -31,22 +32,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
 
-        <input
-          ref={ref}
-          id={inputId}
-          required={isRequired}
-          className={cn(
-            'flex h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs font-semibold text-[#123B3A] shadow-2xs transition-all',
-            'placeholder:text-[#566B69]/60 placeholder:font-normal',
-            'focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E]',
-            error
-              ? 'border-[#B91C1C] bg-[#FEF2F2]/30 focus:border-[#B91C1C] focus:ring-[#B91C1C]/20'
-              : 'border-[#D7E5E2] hover:border-[#A0BDB8]',
-            'disabled:bg-[#F4F8F7] disabled:text-[#566B69]/60 disabled:cursor-not-allowed',
-            className,
+        <div className="relative">
+          <input
+            ref={ref}
+            id={inputId}
+            required={isRequired}
+            className={cn(
+              'flex h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs font-semibold text-[#123B3A] shadow-2xs transition-all',
+              'placeholder:text-[#566B69]/60 placeholder:font-normal',
+              'focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E]',
+              error
+                ? 'border-[#B91C1C] bg-[#FEF2F2]/30 focus:border-[#B91C1C] focus:ring-[#B91C1C]/20'
+                : 'border-[#D7E5E2] hover:border-[#A0BDB8]',
+              'disabled:bg-[#F4F8F7] disabled:text-[#566B69]/60 disabled:cursor-not-allowed',
+              rightElement && 'pr-10',
+              className,
+            )}
+            {...props}
+          />
+          {rightElement && (
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
+              {rightElement}
+            </div>
           )}
-          {...props}
-        />
+        </div>
 
         {error && (
           <p className="text-[11px] font-medium text-[#B91C1C] flex items-center gap-1 mt-0.5">
