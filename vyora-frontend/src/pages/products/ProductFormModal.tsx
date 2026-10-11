@@ -24,11 +24,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [sku, setSku] = useState('');
   const [hsnCode, setHsnCode] = useState('');
   const [unit, setUnit] = useState<ItemUnit>('PCS');
-  const [sellingRate, setSellingRate] = useState<number>(0);
-  const [purchaseRate, setPurchaseRate] = useState<number>(0);
+  const [sellingRate, setSellingRate] = useState<number | string>('');
+  const [purchaseRate, setPurchaseRate] = useState<number | string>('');
   const [taxRate, setTaxRate] = useState<TaxRatePercent>(18);
-  const [openingStock, setOpeningStock] = useState<number>(0);
-  const [reorderLevel, setReorderLevel] = useState<number>(5);
+  const [openingStock, setOpeningStock] = useState<number | string>('');
+  const [reorderLevel, setReorderLevel] = useState<number | string>(5);
 
   useEffect(() => {
     if (productToEdit) {
@@ -37,19 +37,19 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setHsnCode(productToEdit.hsnCode || '');
       setUnit(productToEdit.unit);
       setSellingRate(minorToMajor(productToEdit.sellingPriceMinor));
-      setPurchaseRate(productToEdit.purchasePriceMinor ? minorToMajor(productToEdit.purchasePriceMinor) : 0);
+      setPurchaseRate(productToEdit.purchasePriceMinor ? minorToMajor(productToEdit.purchasePriceMinor) : '');
       setTaxRate(productToEdit.taxRatePercent);
-      setOpeningStock(productToEdit.openingStock || 0);
+      setOpeningStock(productToEdit.openingStock ?? '');
       setReorderLevel(productToEdit.reorderLevel ?? 5);
     } else {
       setName('');
       setSku('');
       setHsnCode('');
       setUnit('PCS');
-      setSellingRate(0);
-      setPurchaseRate(0);
+      setSellingRate('');
+      setPurchaseRate('');
       setTaxRate(18);
-      setOpeningStock(0);
+      setOpeningStock('');
       setReorderLevel(5);
     }
   }, [productToEdit, isOpen]);
@@ -58,9 +58,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setName('');
     setSku('');
     setHsnCode('');
-    setSellingRate(0);
-    setPurchaseRate(0);
-    setOpeningStock(0);
+    setSellingRate('');
+    setPurchaseRate('');
+    setOpeningStock('');
   };
 
   const createMutation = useCreateProduct(() => {
@@ -82,11 +82,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       sku,
       hsnCode: hsnCode || undefined,
       unit,
-      sellingPriceMinor: majorToMinor(sellingRate),
-      purchasePriceMinor: majorToMinor(purchaseRate),
+      sellingPriceMinor: majorToMinor(Number(sellingRate) || 0),
+      purchasePriceMinor: majorToMinor(Number(purchaseRate) || 0),
       taxRatePercent: taxRate,
-      openingStock: Number(openingStock),
-      reorderLevel: Number(reorderLevel),
+      openingStock: Number(openingStock) || 0,
+      reorderLevel: Number(reorderLevel) || 0,
     };
 
     if (isEditing && productToEdit) {
@@ -190,16 +190,18 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             label="Selling Price (₹)"
             type="number"
             step="0.01"
+            placeholder="0.00"
             value={sellingRate}
-            onChange={(e) => setSellingRate(parseFloat(e.target.value) || 0)}
+            onChange={(e) => setSellingRate(e.target.value)}
             required
           />
           <Input
             label="Purchase Cost Price (₹)"
             type="number"
             step="0.01"
+            placeholder="0.00"
             value={purchaseRate}
-            onChange={(e) => setPurchaseRate(parseFloat(e.target.value) || 0)}
+            onChange={(e) => setPurchaseRate(e.target.value)}
           />
         </div>
 
@@ -207,14 +209,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           <Input
             label="Opening Stock Quantity"
             type="number"
+            placeholder="0"
             value={openingStock}
-            onChange={(e) => setOpeningStock(parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => setOpeningStock(e.target.value)}
           />
           <Input
             label="Reorder Alert Threshold"
             type="number"
+            placeholder="5"
             value={reorderLevel}
-            onChange={(e) => setReorderLevel(parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => setReorderLevel(e.target.value)}
           />
         </div>
       </form>

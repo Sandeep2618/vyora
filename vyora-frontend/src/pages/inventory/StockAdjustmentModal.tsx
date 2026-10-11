@@ -16,14 +16,14 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
   onClose,
 }) => {
   const [selectedProductId, setSelectedProductId] = useState('');
-  const [deltaQty, setDeltaQty] = useState<number>(0);
+  const [deltaQty, setDeltaQty] = useState<number | string>('');
   const [reason, setReason] = useState('');
 
   const { data: productsData } = useProducts();
 
   const resetForm = () => {
     setSelectedProductId('');
-    setDeltaQty(0);
+    setDeltaQty('');
     setReason('');
   };
 
@@ -34,7 +34,7 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProductId || deltaQty === 0 || !reason.trim()) return;
+    if (!selectedProductId || !deltaQty || Number(deltaQty) === 0 || !reason.trim()) return;
 
     adjustMutation.mutate({
       productId: selectedProductId,
@@ -66,7 +66,7 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
             type="submit"
             form="stock-adjust-form"
             isLoading={adjustMutation.isPending}
-            disabled={!selectedProductId || deltaQty === 0 || !reason.trim()}
+            disabled={!selectedProductId || !deltaQty || Number(deltaQty) === 0 || !reason.trim()}
             className="w-full sm:w-auto"
           >
             Confirm Adjustment
@@ -87,7 +87,7 @@ export const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
           label="Quantity Delta (+ for Inward, - for Outward/Loss)"
           type="number"
           value={deltaQty}
-          onChange={(e) => setDeltaQty(parseInt(e.target.value, 10) || 0)}
+          onChange={(e) => setDeltaQty(e.target.value)}
           placeholder="e.g. +10 or -2"
           required
         />

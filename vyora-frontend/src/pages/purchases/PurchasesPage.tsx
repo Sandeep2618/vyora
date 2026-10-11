@@ -33,8 +33,8 @@ export const PurchasesPage: React.FC = () => {
   const [notes, setNotes] = useState('');
 
   const [lines, setLines] = useState<
-    { productId: string; quantity: number; unitPriceMajor: number; taxRatePercent: TaxRatePercent }[]
-  >([{ productId: '', quantity: 1, unitPriceMajor: 0, taxRatePercent: 18 }]);
+    { productId: string; quantity: number | string; unitPriceMajor: number | string; taxRatePercent: TaxRatePercent }[]
+  >([{ productId: '', quantity: 1, unitPriceMajor: '', taxRatePercent: 18 }]);
 
   const { data: suppliers } = useQuery<{ items: Party[] }>({
     queryKey: ['parties', 'SUPPLIER'],
@@ -59,11 +59,11 @@ export const PurchasesPage: React.FC = () => {
         billDate,
         notes,
         items: lines
-          .filter((l) => l.productId && l.quantity > 0)
+          .filter((l) => l.productId && (Number(l.quantity) || 0) > 0)
           .map((l) => ({
             productId: l.productId,
-            quantity: Number(l.quantity),
-            unitPriceMinor: majorToMinor(Number(l.unitPriceMajor)),
+            quantity: Number(l.quantity) || 1,
+            unitPriceMinor: majorToMinor(Number(l.unitPriceMajor) || 0),
             taxRatePercent: l.taxRatePercent,
           })),
       }),
@@ -71,7 +71,7 @@ export const PurchasesPage: React.FC = () => {
       setIsModalOpen(false);
       setSupplierId('');
       setBillNumber('');
-      setLines([{ productId: '', quantity: 1, unitPriceMajor: 0, taxRatePercent: 18 }]);
+      setLines([{ productId: '', quantity: 1, unitPriceMajor: '', taxRatePercent: 18 }]);
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-movements'] });
@@ -238,7 +238,7 @@ export const PurchasesPage: React.FC = () => {
                 onClick={() =>
                   setLines((p) => [
                     ...p,
-                    { productId: '', quantity: 1, unitPriceMajor: 0, taxRatePercent: 18 },
+                    { productId: '', quantity: 1, unitPriceMajor: '', taxRatePercent: 18 },
                   ])
                 }
                 className="text-xs font-semibold text-[#0F766E] hover:underline"
@@ -280,15 +280,24 @@ export const PurchasesPage: React.FC = () => {
                     min="1"
                     placeholder="Qty"
                     value={line.quantity}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => {
-                      const qty = parseInt(e.target.value, 10) || 1;
+                      const val = e.target.value;
+                      setLines((prev) => {
+                        const c = [...prev];
+                        c[idx].quantity = val;
+                        return c;
+                      });
+                    }}
+                    onBlur={(e) => {
+                      const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
                       setLines((prev) => {
                         const c = [...prev];
                         c[idx].quantity = qty;
                         return c;
                       });
                     }}
-                    className="w-full px-2 py-1.5 bg-white border border-[#D7E5E2] rounded text-xs text-center"
+                    className="w-full px-2 py-1.5 bg-white border border-[#D7E5E2] rounded text-xs text-center focus:outline-none focus:border-[#0F766E]"
                   />
                 </div>
                 <div className="col-span-3">
@@ -297,15 +306,16 @@ export const PurchasesPage: React.FC = () => {
                     step="0.01"
                     placeholder="Rate (₹)"
                     value={line.unitPriceMajor}
+                    onFocus={(e) => e.target.select()}
                     onChange={(e) => {
-                      const rate = parseFloat(e.target.value) || 0;
+                      const val = e.target.value;
                       setLines((prev) => {
                         const c = [...prev];
-                        c[idx].unitPriceMajor = rate;
+                        c[idx].unitPriceMajor = val;
                         return c;
                       });
                     }}
-                    className="w-full px-2 py-1.5 bg-white border border-[#D7E5E2] rounded text-xs text-right"
+                    className="w-full px-2 py-1.5 bg-white border border-[#D7E5E2] rounded text-xs text-right focus:outline-none focus:border-[#0F766E]"
                   />
                 </div>
                 <div className="col-span-1 text-center">

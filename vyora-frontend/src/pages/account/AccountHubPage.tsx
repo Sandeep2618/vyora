@@ -73,7 +73,7 @@ export const AccountHubPage: React.FC = () => {
   const [state, setState] = useState(business?.state || 'Maharashtra');
   const [pincode, setPincode] = useState(business?.pincode || '400001');
   const [invoicePrefix, setInvoicePrefix] = useState(business?.invoicePrefix || 'INV-');
-  const [invoicePadding, setInvoicePadding] = useState(business?.invoiceNumberPadding || 4);
+  const [invoicePadding, setInvoicePadding] = useState<number | string>(business?.invoiceNumberPadding || 4);
   const [purchasePrefix, setPurchasePrefix] = useState(business?.purchasePrefix || 'BILL-');
   const [terms, setTerms] = useState(business?.termsAndConditions || '');
 
@@ -161,7 +161,7 @@ export const AccountHubPage: React.FC = () => {
         state,
         pincode,
         invoicePrefix,
-        invoiceNumberPadding: Number(invoicePadding),
+        invoiceNumberPadding: Number(invoicePadding) || 4,
         purchasePrefix,
         termsAndConditions: terms || undefined,
       }),
@@ -475,8 +475,8 @@ export const AccountHubPage: React.FC = () => {
               <Input
                 label="Invoice Number Digits (Padding)"
                 type="number"
-                value={String(invoicePadding)}
-                onChange={(e) => setInvoicePadding(Number(e.target.value))}
+                value={invoicePadding}
+                onChange={(e) => setInvoicePadding(e.target.value)}
                 placeholder="4 (e.g. 0001)"
                 disabled={!isOwner}
               />

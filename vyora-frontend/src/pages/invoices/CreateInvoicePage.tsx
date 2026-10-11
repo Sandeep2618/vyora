@@ -15,8 +15,8 @@ interface LineFormItem {
   productName: string;
   sku: string;
   hsnCode?: string;
-  quantity: number;
-  rateMajor: number; // in Rupees for user entry
+  quantity: number | string;
+  rateMajor: number | string; // in Rupees for user entry
   discountPercent: number;
   taxRatePercent: TaxRatePercent;
 }
@@ -122,7 +122,7 @@ export const CreateInvoicePage: React.FC = () => {
 
   // Authoritative live preview query
   useEffect(() => {
-    const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+    const validLines = lines.filter((l) => l.productId && (Number(l.quantity) || 0) > 0);
     if (!customerId || validLines.length === 0) {
       setPreviewTotals(null);
       setPreviewError(null);
@@ -136,9 +136,9 @@ export const CreateInvoicePage: React.FC = () => {
       roundOff: true,
       items: validLines.map((l) => ({
         productId: l.productId,
-        quantity: Number(l.quantity),
-        unitPriceMinor: majorToMinor(Number(l.rateMajor)),
-        discountPercent: Number(l.discountPercent),
+        quantity: Number(l.quantity) || 1,
+        unitPriceMinor: majorToMinor(Number(l.rateMajor) || 0),
+        discountPercent: Number(l.discountPercent) || 0,
         taxRatePercent: l.taxRatePercent,
       })),
     };
@@ -157,7 +157,7 @@ export const CreateInvoicePage: React.FC = () => {
   // Mutations
   const createMutation = useMutation({
     mutationFn: ({ finalize }: { finalize: boolean }) => {
-      const validLines = lines.filter((l) => l.productId && l.quantity > 0);
+      const validLines = lines.filter((l) => l.productId && (Number(l.quantity) || 0) > 0);
       const payload = {
         customerId,
         issueDate,
@@ -166,9 +166,9 @@ export const CreateInvoicePage: React.FC = () => {
         roundOff: true,
         items: validLines.map((l) => ({
           productId: l.productId,
-          quantity: Number(l.quantity),
-          unitPriceMinor: majorToMinor(Number(l.rateMajor)),
-          discountPercent: Number(l.discountPercent),
+          quantity: Number(l.quantity) || 1,
+          unitPriceMinor: majorToMinor(Number(l.rateMajor) || 0),
+          discountPercent: Number(l.discountPercent) || 0,
           taxRatePercent: l.taxRatePercent,
         })),
       };
@@ -352,7 +352,9 @@ export const CreateInvoicePage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-[#D7E5E2]">
                   {lines.map((line, idx) => {
-                    const lineTotal = line.quantity * line.rateMajor;
+                    const qtyNum = typeof line.quantity === 'number' ? line.quantity : Number(line.quantity) || 0;
+                    const rateNum = typeof line.rateMajor === 'number' ? line.rateMajor : Number(line.rateMajor) || 0;
+                    const lineTotal = qtyNum * rateNum;
                     return (
                       <tr key={idx} className="hover:bg-[#F4F8F7]/40">
                         <td className="py-2 px-2 text-[#566B69] font-medium">{idx + 1}</td>
@@ -390,7 +392,16 @@ export const CreateInvoicePage: React.FC = () => {
                             type="number"
                             min="1"
                             value={line.quantity}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => {
+                              const val = e.target.value;
+                              setLines((prev) => {
+                                const c = [...prev];
+                                c[idx].quantity = val;
+                                return c;
+                              });
+                            }}
+                            onBlur={(e) => {
                               const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
                               setLines((prev) => {
                                 const c = [...prev];
@@ -398,7 +409,7 @@ export const CreateInvoicePage: React.FC = () => {
                                 return c;
                               });
                             }}
-                            className="w-16 px-2 py-1 bg-white border border-[#D7E5E2] rounded text-xs text-center"
+                            className="w-16 px-2 py-1 bg-white border border-[#D7E5E2] rounded text-xs text-center focus:outline-none focus:border-[#0F766E]"
                           />
                         </td>
                         <td className="py-2 px-2 text-right">
@@ -406,16 +417,18 @@ export const CreateInvoicePage: React.FC = () => {
                             type="number"
                             min="0"
                             step="0.01"
+                            placeholder="0.00"
                             value={line.rateMajor}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => {
-                              const rate = parseFloat(e.target.value) || 0;
+                              const val = e.target.value;
                               setLines((prev) => {
                                 const c = [...prev];
-                                c[idx].rateMajor = rate;
+                                c[idx].rateMajor = val;
                                 return c;
                               });
                             }}
-                            className="w-20 px-2 py-1 bg-white border border-[#D7E5E2] rounded text-xs text-right"
+                            className="w-20 px-2 py-1 bg-white border border-[#D7E5E2] rounded text-xs text-right focus:outline-none focus:border-[#0F766E]"
                           />
                         </td>
                         <td className="py-2 px-2 text-right font-bold text-[#123B3A]">

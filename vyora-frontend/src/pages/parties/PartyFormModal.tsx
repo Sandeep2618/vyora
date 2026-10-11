@@ -70,9 +70,12 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
     onClose();
   });
 
+  const isPhoneValid = phone.length === 10 && /^[6-9]/.test(phone);
+  const isFormValid = Boolean(name.trim() && isPhoneValid && line1.trim() && city.trim());
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !line1.trim() || !city.trim()) return;
+    if (!isFormValid) return;
 
     const payload = {
       type: partyType,
@@ -120,7 +123,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
             type="submit"
             form="party-form"
             isLoading={isPending}
-            disabled={!name.trim() || !phone.trim() || !line1.trim() || !city.trim()}
+            disabled={!isFormValid}
             className="w-full sm:w-auto"
           >
             {isEditing ? `Update ${label}` : 'Save Record'}
@@ -140,8 +143,14 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
           <Input
             label="Phone Number"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            maxLength={10}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+              setPhone(val);
+            }}
             placeholder="e.g. 9820012345"
+            helperText={phone && phone.length < 10 ? `Must be 10 digits (${phone.length}/10)` : undefined}
+            error={phone && phone.length > 0 && !/^[6-9]/.test(phone) ? 'Must start with 6, 7, 8, or 9' : undefined}
             required
           />
           <Input

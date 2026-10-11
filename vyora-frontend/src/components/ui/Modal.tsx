@@ -48,16 +48,15 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200 cursor-pointer"
+      onClick={onClose}
     >
       <div
         className={cn(
-          'w-full max-w-[95vw] bg-white rounded-2xl shadow-2xl shadow-[#123B3A]/20 border border-[#D7E5E2] overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200',
+          'w-full max-w-[95vw] bg-white rounded-2xl shadow-2xl shadow-[#123B3A]/20 border border-[#D7E5E2] overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200 cursor-default',
           widthStyles[maxWidth],
         )}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#D7E5E2] bg-white">
           <div className="pr-4">

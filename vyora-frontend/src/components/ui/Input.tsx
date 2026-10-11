@@ -37,6 +37,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             required={isRequired}
+            onFocus={(e) => {
+              if (props.type === 'number') {
+                e.target.select();
+              }
+              props.onFocus?.(e);
+            }}
             className={cn(
               'flex h-10 w-full rounded-xl border bg-white px-3.5 py-2 text-xs font-semibold text-[#123B3A] shadow-2xs transition-all',
               'placeholder:text-[#566B69]/60 placeholder:font-normal',

@@ -30,7 +30,7 @@ export const SettingsPage: React.FC = () => {
   const [state, setState] = useState(business?.state || 'Maharashtra');
   const [pincode, setPincode] = useState(business?.pincode || '400001');
   const [invoicePrefix, setInvoicePrefix] = useState(business?.invoicePrefix || 'INV-');
-  const [invoicePadding, setInvoicePadding] = useState(business?.invoiceNumberPadding || 4);
+  const [invoicePadding, setInvoicePadding] = useState<number | string>(business?.invoiceNumberPadding || 4);
   const [terms, setTerms] = useState(business?.termsAndConditions || '');
 
   // Staff Modal
@@ -77,7 +77,7 @@ export const SettingsPage: React.FC = () => {
         state,
         pincode,
         invoicePrefix,
-        invoiceNumberPadding: Number(invoicePadding),
+        invoiceNumberPadding: Number(invoicePadding) || 4,
         termsAndConditions: terms || undefined,
       }),
     onSuccess: async () => {
@@ -230,8 +230,9 @@ export const SettingsPage: React.FC = () => {
                 type="number"
                 min="1"
                 max="8"
+                placeholder="4"
                 value={invoicePadding}
-                onChange={(e) => setInvoicePadding(parseInt(e.target.value, 10) || 4)}
+                onChange={(e) => setInvoicePadding(e.target.value)}
                 helperText="4 outputs INV-0001"
               />
             </div>

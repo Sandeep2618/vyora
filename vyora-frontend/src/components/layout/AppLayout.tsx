@@ -296,49 +296,55 @@ export const AppLayout: React.FC = () => {
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-[#D7E5E2] rounded-xl shadow-lg py-1 z-50 animate-in fade-in">
-                  <div className="px-4 py-2 border-b border-[#D7E5E2]">
-                    <p className="text-xs font-semibold text-[#123B3A] truncate">{user?.name}</p>
-                    <p className="text-[10px] text-[#566B69] truncate">{user?.email}</p>
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsUserMenuOpen(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-[#D7E5E2] rounded-xl shadow-lg py-1 z-50 animate-in fade-in">
+                    <div className="px-4 py-2 border-b border-[#D7E5E2]">
+                      <p className="text-xs font-semibold text-[#123B3A] truncate">{user?.name}</p>
+                      <p className="text-[10px] text-[#566B69] truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        navigate('/account?tab=PROFILE');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
+                    >
+                      <Building2 className="w-3.5 h-3.5 text-[#0F766E]" />
+                      Business Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        navigate('/account?tab=ROLES');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
+                      Roles & Permissions
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        navigate('/account?tab=BILLING');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-[#0F766E]" />
+                      Billing & Plans
+                    </button>
+                    <button
+                      onClick={logout}
+                      className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] hover:bg-[#FEE2E2] flex items-center gap-2 border-t border-[#D7E5E2] mt-1"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sign Out
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      navigate('/account?tab=PROFILE');
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
-                  >
-                    <Building2 className="w-3.5 h-3.5 text-[#0F766E]" />
-                    Business Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      navigate('/account?tab=ROLES');
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E]" />
-                    Roles & Permissions
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsUserMenuOpen(false);
-                      navigate('/account?tab=BILLING');
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-[#123B3A] hover:bg-[#F4F8F7] flex items-center gap-2"
-                  >
-                    <CreditCard className="w-3.5 h-3.5 text-[#0F766E]" />
-                    Billing & Plans
-                  </button>
-                  <button
-                    onClick={logout}
-                    className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] hover:bg-[#FEE2E2] flex items-center gap-2 border-t border-[#D7E5E2] mt-1"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Sign Out
-                  </button>
-                </div>
+                </>
               )}
             </div>
           </div>

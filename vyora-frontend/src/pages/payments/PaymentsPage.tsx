@@ -36,7 +36,7 @@ export const PaymentsPage: React.FC = () => {
   // Form State
   const [type, setType] = useState<PaymentType>('RECEIPT');
   const [partyId, setPartyId] = useState('');
-  const [amountMajor, setAmountMajor] = useState<number>(0);
+  const [amountMajor, setAmountMajor] = useState<number | string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -57,7 +57,7 @@ export const PaymentsPage: React.FC = () => {
       api.post('/payments', {
         type,
         partyId,
-        amountMinor: majorToMinor(amountMajor),
+        amountMinor: majorToMinor(Number(amountMajor) || 0),
         paymentMethod,
         referenceNumber: referenceNumber || undefined,
         paymentDate,
@@ -67,7 +67,7 @@ export const PaymentsPage: React.FC = () => {
     onSuccess: () => {
       setIsModalOpen(false);
       setPartyId('');
-      setAmountMajor(0);
+      setAmountMajor('');
       setReferenceNumber('');
       setNotes('');
       queryClient.invalidateQueries({ queryKey: ['payments'] });
@@ -75,7 +75,7 @@ export const PaymentsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       toast.success(
         type === 'RECEIPT' ? 'Receipt Voucher Recorded' : 'Payment Voucher Recorded',
-        `₹${amountMajor.toFixed(2)} recorded in party ledger.`
+        `₹${(Number(amountMajor) || 0).toFixed(2)} recorded in party ledger.`
       );
     },
     onError: (err: any) => {
@@ -312,7 +312,7 @@ export const PaymentsPage: React.FC = () => {
             </Button>
             <Button
               isLoading={createMutation.isPending}
-              disabled={!partyId || amountMajor <= 0}
+              disabled={!partyId || !amountMajor || Number(amountMajor) <= 0}
               onClick={() => createMutation.mutate()}
               className="w-full sm:w-auto"
             >
@@ -365,8 +365,9 @@ export const PaymentsPage: React.FC = () => {
             label="Payment Amount (₹)"
             type="number"
             step="0.01"
+            placeholder="0.00"
             value={amountMajor}
-            onChange={(e) => setAmountMajor(parseFloat(e.target.value) || 0)}
+            onChange={(e) => setAmountMajor(e.target.value)}
             required
           />
 

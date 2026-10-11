@@ -18,7 +18,7 @@ export const InvoiceViewPage: React.FC = () => {
   const { isOwner } = useAuth();
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [payAmountMajor, setPayAmountMajor] = useState<number>(0);
+  const [payAmountMajor, setPayAmountMajor] = useState<number | string>('');
   const [payMethod, setPayMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [payRef, setPayRef] = useState('');
   const [payNotes, setPayNotes] = useState('');
@@ -35,7 +35,7 @@ export const InvoiceViewPage: React.FC = () => {
         type: 'RECEIPT',
         partyId: invoice?.customerId,
         invoiceId: invoice?.id,
-        amountMinor: majorToMinor(payAmountMajor),
+        amountMinor: majorToMinor(Number(payAmountMajor) || 0),
         paymentMethod: payMethod,
         referenceNumber: payRef,
         notes: payNotes,
@@ -366,7 +366,10 @@ export const InvoiceViewPage: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsPaymentModalOpen(true)}
+                onClick={() => {
+                  setPayAmountMajor(minorToMajor(invoice.dueAmountMinor));
+                  setIsPaymentModalOpen(true);
+                }}
                 className="shrink-0"
               >
                 Record Payment
@@ -409,7 +412,7 @@ export const InvoiceViewPage: React.FC = () => {
             </Button>
             <Button
               isLoading={paymentMutation.isPending}
-              disabled={payAmountMajor <= 0}
+              disabled={!payAmountMajor || Number(payAmountMajor) <= 0}
               onClick={() => paymentMutation.mutate()}
               className="w-full sm:w-auto"
             >
@@ -423,9 +426,10 @@ export const InvoiceViewPage: React.FC = () => {
             label="Payment Amount (₹)"
             type="number"
             step="0.01"
+            placeholder="0.00"
             max={minorToMajor(invoice.dueAmountMinor)}
             value={payAmountMajor}
-            onChange={(e) => setPayAmountMajor(parseFloat(e.target.value) || 0)}
+            onChange={(e) => setPayAmountMajor(e.target.value)}
             required
           />
 
