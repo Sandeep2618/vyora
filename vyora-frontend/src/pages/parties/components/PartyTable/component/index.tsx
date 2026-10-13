@@ -14,7 +14,7 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { PartyTableProps } from '../config/interface';
-import { DEFAULT_PAGE_SIZE } from '../config/constant';
+const DEFAULT_PAGE_SIZE = 10;
 import { getBalanceVariant } from '../util';
 
 export const PartyTable: React.FC<PartyTableProps> = ({

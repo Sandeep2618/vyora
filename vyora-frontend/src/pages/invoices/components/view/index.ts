@@ -1,2 +1,2 @@
 export * from './InvoicePrintTemplate';
-export * from './RecordPaymentModal';
+export * from './modal';

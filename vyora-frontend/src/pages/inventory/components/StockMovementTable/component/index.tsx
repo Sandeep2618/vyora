@@ -12,7 +12,7 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { StockMovementTableProps } from '../config/interface';
-import { DEFAULT_PAGE_SIZE } from '../config/constant';
+const DEFAULT_PAGE_SIZE = 10;
 import { getMovementBadgeVariant } from '../util';
 
 export const StockMovementTable: React.FC<StockMovementTableProps> = ({

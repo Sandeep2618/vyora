@@ -1,2 +1,2 @@
 export * from './PurchasesTable';
-export * from './RecordPurchaseBillModal';
+export * from '../modal';

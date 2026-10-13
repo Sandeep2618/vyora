@@ -86,7 +86,7 @@ for (const file of tsxFiles) {
   }
 
   // Rule 4: Clean Slate Zero-data Table Toolbars
-  if (rel.endsWith('Page.tsx') && content.includes('Table') && content.includes('.length === 0')) {
+  if ((rel.endsWith('Page.tsx') || rel.includes('pages')) && content.includes('Table') && content.includes('.length === 0')) {
     // Checks if the page handles empty state gracefully
     recordFinding(file, 'Clean Slate Empty State Handling', true, {
       description: 'Suppresses table filters/pagination when 0 records exist',

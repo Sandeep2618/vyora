@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { PurchasesTableProps } from '../config/interface';
-import { DEFAULT_PAGE_SIZE } from '../config/constant';
+const DEFAULT_PAGE_SIZE = 10;
 
 export const PurchasesTable: React.FC<PurchasesTableProps> = ({ bills }) => {
   const { t } = useTranslation(['purchases', 'common']);

@@ -14,7 +14,7 @@ import {
   TableCell,
 } from '@/components/ui/Table';
 import { ProductTableProps } from '../config/interface';
-import { DEFAULT_PAGE_SIZE } from '../config/constant';
+const DEFAULT_PAGE_SIZE = 10;
 import { checkProductStockStatus } from '../util';
 
 export const ProductTable: React.FC<ProductTableProps> = ({

@@ -1,4 +1,4 @@
 export * from './PaymentMethodForm';
 export * from './PlanCheckoutStatus';
 export * from './PlanPricingSelector';
-export * from './PlanPurchaseModal';
+export * from './modal';
