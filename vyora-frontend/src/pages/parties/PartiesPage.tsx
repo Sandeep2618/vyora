@@ -1,22 +1,24 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Filter, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Party, PartyType } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { Modal } from '../../components/ui/Modal';
 import { PageHeader } from '../../components/ui/PageHeader';
-import { SearchInput } from '../../components/ui/SearchInput';
-import { Select } from '../../components/ui/Select';
 import { useAuth } from '../../context/AuthContext';
 import { useParties, useDeleteParty } from '../../hooks/useParties';
-import { PartyTable } from './PartyTable';
-import { PartyFormModal } from './PartyFormModal';
+import { BalanceFilter } from './config';
+import { PartyFilterToolbar } from './components/PartyFilterToolbar';
+import { PartyTable } from './components/PartyTable';
+import { PartyFormModal } from './components/PartyFormModal';
+import { DeletePartyModal } from './components/DeletePartyModal';
 
 export const PartiesPage: React.FC = () => {
   const { isOwner } = useAuth();
+  const { t } = useTranslation(['parties', 'common']);
   const [activeTab, setActiveTab] = useState<PartyType>('CUSTOMER');
   const [search, setSearch] = useState('');
-  const [balanceFilter, setBalanceFilter] = useState<'ALL' | 'DUE' | 'SETTLED'>('ALL');
+  const [balanceFilter, setBalanceFilter] = useState<BalanceFilter>('ALL');
   const [stateFilter, setStateFilter] = useState<string>('ALL');
   const [showFilters, setShowFilters] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,8 +29,7 @@ export const PartiesPage: React.FC = () => {
   const deleteMutation = useDeleteParty();
 
   const isCustomer = activeTab === 'CUSTOMER';
-  const label = isCustomer ? 'Customer' : 'Supplier';
-  const pluralLabel = isCustomer ? 'Customers' : 'Suppliers';
+  const label = isCustomer ? t('tab.customers') : t('tab.suppliers');
 
   // Extract unique states for dropdown filter
   const availableStates = useMemo(() => {
@@ -45,7 +46,6 @@ export const PartiesPage: React.FC = () => {
     if (!data?.items) return [];
 
     return data.items.filter((party) => {
-      // Search
       const q = search.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -54,7 +54,6 @@ export const PartiesPage: React.FC = () => {
         (party.gstin && party.gstin.toLowerCase().includes(q)) ||
         (party.billingAddress?.city && party.billingAddress.city.toLowerCase().includes(q));
 
-      // Balance status
       let matchesBalance = true;
       if (balanceFilter === 'DUE') {
         matchesBalance = party.currentBalanceMinor > 0;
@@ -62,7 +61,6 @@ export const PartiesPage: React.FC = () => {
         matchesBalance = party.currentBalanceMinor <= 0;
       }
 
-      // State filter
       const matchesState = stateFilter === 'ALL' || party.billingAddress?.state === stateFilter;
 
       return matchesSearch && matchesBalance && matchesState;
@@ -80,8 +78,8 @@ export const PartiesPage: React.FC = () => {
   return (
     <div className="space-y-4 sm:space-y-5 max-w-7xl mx-auto">
       <PageHeader
-        title={pluralLabel}
-        description={`Manage your ${label.toLowerCase()} accounts, contact info, and balance ledgers`}
+        title={t('title')}
+        description={t('subtitle')}
       >
         {isOwner && (
           <Button
@@ -89,119 +87,30 @@ export const PartiesPage: React.FC = () => {
               setPartyToEdit(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center gap-1.5 w-full sm:w-auto justify-center"
+            className="flex items-center gap-1.5 w-full sm:w-auto justify-center shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Add {label}</span>
+            <span>{isCustomer ? t('actions.addCustomer', { ns: 'common' }) : t('actions.addSupplier', { ns: 'common' })}</span>
           </Button>
         )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
-        {/* Responsive Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 bg-[#F4F8F7] p-1 rounded-xl border border-[#D7E5E2]">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('CUSTOMER');
-                  clearAllFilters();
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  activeTab === 'CUSTOMER'
-                    ? 'bg-[#0F766E] text-white shadow-2xs'
-                    : 'text-[#566B69] hover:text-[#123B3A]'
-                }`}
-              >
-                Customers
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('SUPPLIER');
-                  clearAllFilters();
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  activeTab === 'SUPPLIER'
-                    ? 'bg-[#0F766E] text-white shadow-2xs'
-                    : 'text-[#566B69] hover:text-[#123B3A]'
-                }`}
-              >
-                Suppliers
-              </button>
-            </div>
-
-            {Boolean((data?.items && data.items.length > 0) || hasActiveFilters) && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
-                    showFilters || balanceFilter !== 'ALL' || stateFilter !== 'ALL'
-                      ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
-                      : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
-                  }`}
-                >
-                  <Filter className="w-3.5 h-3.5" />
-                  <span>Filters</span>
-                  {(balanceFilter !== 'ALL' || stateFilter !== 'ALL') && (
-                    <span className="w-2 h-2 rounded-full bg-[#0F766E]" />
-                  )}
-                </button>
-
-                {hasActiveFilters && (
-                  <button
-                    type="button"
-                    onClick={clearAllFilters}
-                    className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1"
-                  >
-                    <X className="w-3 h-3" />
-                    <span>Reset</span>
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-
-          {Boolean((data?.items && data.items.length > 0) || hasActiveFilters) && (
-            <div className="w-full lg:w-72 shrink-0">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder={`Search ${label.toLowerCase()} name, phone, GSTIN...`}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Filter Toolbar Drawer */}
-        {showFilters && (
-          <div className="p-3.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in">
-            {/* Balance Status */}
-            <Select
-              label="Ledger Balance Status"
-              value={balanceFilter}
-              onChange={(e) => setBalanceFilter(e.target.value as any)}
-              options={[
-                { label: 'All Accounts', value: 'ALL' },
-                { label: '⚠️ Has Outstanding Balance (Due > 0)', value: 'DUE' },
-                { label: '✅ Settled / Advance (₹0 or Credit)', value: 'SETTLED' },
-              ]}
-            />
-
-            {/* State Filter */}
-            <Select
-              label="State Location"
-              value={stateFilter}
-              onChange={(e) => setStateFilter(e.target.value)}
-              options={[
-                { label: 'All States', value: 'ALL' },
-                ...availableStates.map((st) => ({ label: st, value: st })),
-              ]}
-            />
-          </div>
-        )}
+        <PartyFilterToolbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          search={search}
+          setSearch={setSearch}
+          balanceFilter={balanceFilter}
+          setBalanceFilter={setBalanceFilter}
+          stateFilter={stateFilter}
+          setStateFilter={setStateFilter}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          availableStates={availableStates}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearAllFilters}
+        />
 
         <PartyTable
           parties={filteredParties}
@@ -214,9 +123,7 @@ export const PartiesPage: React.FC = () => {
             setPartyToEdit(party);
             setIsModalOpen(true);
           }}
-          onDelete={(party) => {
-            setPartyToDelete(party);
-          }}
+          onDelete={(party) => setPartyToDelete(party)}
           onAddFirst={() => {
             setPartyToEdit(null);
             setIsModalOpen(true);
@@ -224,6 +131,7 @@ export const PartiesPage: React.FC = () => {
         />
       </Card>
 
+      {/* Add / Edit Party Modal */}
       <PartyFormModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -234,46 +142,19 @@ export const PartiesPage: React.FC = () => {
         partyToEdit={partyToEdit}
       />
 
-      {/* Modal: Delete Party Confirmation */}
-      <Modal
-        isOpen={!!partyToDelete}
+      {/* Delete Confirmation Modal */}
+      <DeletePartyModal
+        party={partyToDelete}
         onClose={() => setPartyToDelete(null)}
-        title={`Delete ${label}`}
-        description={`Confirm removal of ${label.toLowerCase()} account`}
-        maxWidth="sm"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPartyToDelete(null)}
-              className="w-full sm:w-auto"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="danger"
-              size="sm"
-              isLoading={deleteMutation.isPending}
-              onClick={async () => {
-                if (partyToDelete) {
-                  await deleteMutation.mutateAsync(partyToDelete.id);
-                  setPartyToDelete(null);
-                }
-              }}
-              className="w-full sm:w-auto"
-            >
-              Delete {label}
-            </Button>
-          </>
-        }
-      >
-        <p className="text-xs sm:text-sm text-[#566B69] leading-relaxed">
-          Are you sure you want to delete <strong className="text-[#123B3A]">{partyToDelete?.name}</strong>? This will remove their contact details and balance ledger from active views.
-        </p>
-      </Modal>
+        onConfirm={() => {
+          if (partyToDelete) {
+            deleteMutation.mutate(partyToDelete.id, {
+              onSuccess: () => setPartyToDelete(null),
+            });
+          }
+        }}
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 };

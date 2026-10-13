@@ -1,0 +1,1 @@
+export const INVOICE_DEFAULT_CURRENCY = 'INR';

@@ -1,0 +1,22 @@
+{
+  "title": "Purchases (Supplier Bills)",
+  "subtitle": "Record inventory replenishments, supplier payables, and inbound bills",
+  "button": {
+    "recordBill": "Record Purchase Bill"
+  },
+  "columns": {
+    "billNo": "Bill No.",
+    "supplier": "Supplier",
+    "billDate": "Bill Date",
+    "items": "Items",
+    "subtotal": "Subtotal",
+    "tax": "Tax (GST)",
+    "total": "Total Amount",
+    "status": "Status"
+  },
+  "empty": {
+    "title": "No purchase bills recorded yet",
+    "description": "Record supplier invoices to track inventory additions and vendor payables.",
+    "action": "Record Purchase Bill"
+  }
+}

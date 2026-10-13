@@ -1,0 +1,46 @@
+{
+  "greetingMorning": "શુભ સવાર",
+  "greetingAfternoon": "શુભ બપોર",
+  "greetingEvening": "શુભ સાંજ",
+  "subGreeting": "આજે તમારા વ્યવસાયમાં શું થઈ રહ્યું છે તે અહીં જુઓ.",
+  "metrics": {
+    "totalSales": "કુલ વેચાણ",
+    "totalInvoices": "કુલ બિલ",
+    "outstandingAmount": "બાકી રકમ",
+    "totalStockValue": "કુલ સ્ટોક મૂલ્ય",
+    "vsLastWeek": "ગયા સપ્તાહની સરખામણીએ",
+    "noSalesYet": "હજી સુધી કોઈ વેચાણ નોંધાયું નથી",
+    "invoicesGenerated": "બિલ બનાવ્યા",
+    "duesSettled": "ગ્રાહકોની બધી બાકી રકમ ચૂકવાઈ ગઈ છે",
+    "stockHealthy": "સ્ટોકનું સ્તર સારું છે"
+  },
+  "salesOverview": {
+    "title": "વેચાણ વિહંગાવલોકન",
+    "subtitle": "નોંધાયેલ વેચાણમાંથી કુલ આવક",
+    "last7Days": "છેલ્લા 7 દિવસ",
+    "noSalesTitle": "હજી સુધી કોઈ વેચાણ નોંધાયું નથી",
+    "noSalesDesc": "સાપ્તાહિક પ્રવાહો અને દૈનિક આવક જોવા માટે વેચાણ બિલ બનાવો અને ફાઇનલ કરો."
+  },
+  "salesByCategory": {
+    "title": "કેટેગરી મુજબ વેચાણ",
+    "subtitle": "ઉત્પાદન કેટેગરી વિતરણ",
+    "generalMerchandise": "સામાન્ય મર્ચેન્ડાઇઝ અને કપડાં",
+    "wholesaleBulk": "જથ્થાબંધ અને મોટા ઓર્ડર્સ"
+  },
+  "recentInvoices": {
+    "title": "તાજેતરના બિલ",
+    "subtitle": "તાજેતરમાં જારી કરાયેલ વેચાણ બિલ",
+    "invoiceNo": "બિલ નંબર",
+    "customer": "ગ્રાહક",
+    "date": "તારીખ",
+    "amount": "રકમ",
+    "status": "સ્થિતિ"
+  },
+  "topProducts": {
+    "title": "ટોચના ઉત્પાદનો",
+    "subtitle": "જથ્થા અને આવક પ્રમાણે સૌથી વધુ વેચાતી વસ્તુઓ",
+    "product": "ઉત્પાદન",
+    "sold": "વેચાયા",
+    "revenue": "આવક"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "title": "પાર્ટીઓ",
+  "subtitle": "રીઅલ-ટાઇમ બેલેન્સ ખાતાવહી સાથે ગ્રાહકો અને સપ્લાયર્સ ડિરેક્ટરી",
+  "tab": {
+    "all": "બધી પાર્ટીઓ",
+    "customers": "ગ્રાહકો",
+    "suppliers": "સપ્લાયર્સ"
+  },
+  "button": {
+    "addParty": "પાર્ટી ઉમેરો",
+    "viewLedger": "ખાતાવહી જુઓ",
+    "receivePayment": "ચુકવણી મેળવો"
+  },
+  "columns": {
+    "name": "પાર્ટીનું નામ",
+    "type": "પ્રકાર",
+    "phone": "ફોન",
+    "location": "સ્થળ",
+    "gstin": "GSTIN",
+    "balance": "બાકી રકમ",
+    "status": "સ્થિતિ",
+    "actions": "ક્રિયાઓ"
+  },
+  "balance": {
+    "due": "બાકી",
+    "advance": "એડવાન્સ",
+    "settled": "ચુકતે"
+  },
+  "filter": {
+    "balanceStatus": "બાકી સ્થિતિ",
+    "stateProvince": "રાજ્ય / પ્રાંત",
+    "allBalances": "બધા બાકી",
+    "balanceDue": "બાકી રકમ",
+    "settledZero": "ચુકવેલ (શૂન્ય)",
+    "allStates": "બધા રાજ્યો"
+  },
+  "empty": {
+    "title": "કોઈ પાર્ટી મળી નથી",
+    "description": "ચુકવણીઓ, લેણાં અને સંપર્ક વિગતો ટ્રેક કરવા માટે ગ્રાહકો અથવા સપ્લાયર્સ ઉમેરો.",
+    "action": "તમારી પ્રથમ પાર્ટી ઉમેરો"
+  }
+}

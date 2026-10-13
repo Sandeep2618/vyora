@@ -1,0 +1,2 @@
+export const DEFAULT_LINE_ITEM_QTY = 1;
+export const DEFAULT_LINE_ITEM_DISCOUNT = 0;

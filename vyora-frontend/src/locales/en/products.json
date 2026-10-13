@@ -1,0 +1,33 @@
+{
+  "title": "Products & Services",
+  "subtitle": "Catalog of sellable inventory items, prices, and GST rates",
+  "button": {
+    "addProduct": "Add Item",
+    "adjustStock": "Adjust Stock",
+    "bulkImport": "Bulk Import"
+  },
+  "columns": {
+    "name": "Item Name",
+    "sku": "SKU / Code",
+    "price": "Sale Price",
+    "stock": "In Stock",
+    "gst": "GST Rate",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "badge": {
+    "out": "Out",
+    "low": "Low"
+  },
+  "filter": {
+    "stockStatus": "Stock Status",
+    "taxSlab": "Tax Slab (GST)",
+    "measurementUnit": "Measurement Unit",
+    "allUnits": "All Units"
+  },
+  "empty": {
+    "title": "No Products Added Yet",
+    "description": "Add products and inventory stock to quickly generate invoices.",
+    "action": "+ Add Your First Item"
+  }
+}

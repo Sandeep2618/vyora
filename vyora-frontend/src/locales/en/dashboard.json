@@ -1,0 +1,46 @@
+{
+  "greetingMorning": "Good Morning",
+  "greetingAfternoon": "Good Afternoon",
+  "greetingEvening": "Good Evening",
+  "subGreeting": "Here's what's happening with your business today.",
+  "metrics": {
+    "totalSales": "Total Sales",
+    "totalInvoices": "Total Invoices",
+    "outstandingAmount": "Outstanding Amount",
+    "totalStockValue": "Total Stock Value",
+    "vsLastWeek": "vs last week",
+    "noSalesYet": "No sales recorded yet",
+    "invoicesGenerated": "invoices generated",
+    "duesSettled": "All customer dues settled",
+    "stockHealthy": "Inventory levels healthy"
+  },
+  "salesOverview": {
+    "title": "Sales Overview",
+    "subtitle": "Authoritative revenue across recorded sales",
+    "last7Days": "Last 7 days",
+    "noSalesTitle": "No sales recorded yet",
+    "noSalesDesc": "Issue and finalize sales invoices to visualize your weekly sales trends and daily revenue."
+  },
+  "salesByCategory": {
+    "title": "Sales by Category",
+    "subtitle": "Product category distribution",
+    "generalMerchandise": "General Merchandise & Apparel",
+    "wholesaleBulk": "Wholesale & Bulk Orders"
+  },
+  "recentInvoices": {
+    "title": "Recent Invoices",
+    "subtitle": "Recently issued sales invoices",
+    "invoiceNo": "Invoice No.",
+    "customer": "Customer",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status"
+  },
+  "topProducts": {
+    "title": "Top Products",
+    "subtitle": "Best sellers by volume & revenue",
+    "product": "Product",
+    "sold": "Sold",
+    "revenue": "Revenue"
+  }
+}

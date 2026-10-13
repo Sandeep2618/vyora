@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { AppLayout } from './components/layout/AppLayout';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
@@ -55,44 +56,46 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 export const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <AuthProvider>
+            <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardPage />} />
-              <Route path="invoices" element={<InvoiceListPage />} />
-              <Route path="invoices/create" element={<CreateInvoicePage />} />
-              <Route path="invoices/:id" element={<InvoiceViewPage />} />
-              <Route path="parties" element={<PartiesPage />} />
-              <Route path="products" element={<ProductsPage />} />
-              <Route path="inventory" element={<InventoryPage />} />
-              <Route path="purchases" element={<PurchasesPage />} />
-              <Route path="payments" element={<PaymentsPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="account" element={<AccountHubPage />} />
-              <Route path="roles" element={<AccountHubPage />} />
-              <Route path="settings" element={<AccountHubPage />} />
-            </Route>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardPage />} />
+                <Route path="invoices" element={<InvoiceListPage />} />
+                <Route path="invoices/create" element={<CreateInvoicePage />} />
+                <Route path="invoices/:id" element={<InvoiceViewPage />} />
+                <Route path="parties" element={<PartiesPage />} />
+                <Route path="products" element={<ProductsPage />} />
+                <Route path="inventory" element={<InventoryPage />} />
+                <Route path="purchases" element={<PurchasesPage />} />
+                <Route path="payments" element={<PaymentsPage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route path="account" element={<AccountHubPage />} />
+                <Route path="roles" element={<AccountHubPage />} />
+                <Route path="settings" element={<AccountHubPage />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Analytics />
-        </BrowserRouter>
-      </AuthProvider>
-    </ToastProvider>
-  </QueryClientProvider>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Analytics />
+          </BrowserRouter>
+        </AuthProvider>
+      </ToastProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 };
 

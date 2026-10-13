@@ -1,20 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Filter, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { PageHeader } from '../../components/ui/PageHeader';
-import { SearchInput } from '../../components/ui/SearchInput';
 import { useAuth } from '../../context/AuthContext';
 import { useInventoryMovements } from '../../hooks/useInventory';
-import { StockMovementTable } from './StockMovementTable';
-import { StockAdjustmentModal } from './StockAdjustmentModal';
+import { MovementTypeFilter } from './config';
+import { InventoryFilterToolbar } from './components/InventoryFilterToolbar';
+import { StockMovementTable } from './components/StockMovementTable';
+import { StockAdjustmentModal } from './components/StockAdjustmentModal';
 
 export const InventoryPage: React.FC = () => {
   const { isOwner, hasFeature } = useAuth();
+  const { t } = useTranslation(['inventory', 'common']);
   const canAdjust = isOwner && hasFeature('STOCK_ADJUSTMENTS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const [movementTypeFilter, setMovementTypeFilter] = useState<string>('ALL');
+  const [movementTypeFilter, setMovementTypeFilter] = useState<MovementTypeFilter>('ALL');
   const [showFilters, setShowFilters] = useState(false);
 
   const { data, isLoading } = useInventoryMovements();
@@ -24,7 +27,6 @@ export const InventoryPage: React.FC = () => {
     if (!data?.items) return [];
 
     return data.items.filter((m) => {
-      // Search
       const q = search.toLowerCase().trim();
       const matchesSearch =
         !q ||
@@ -32,7 +34,6 @@ export const InventoryPage: React.FC = () => {
         m.sku.toLowerCase().includes(q) ||
         (m.reason && m.reason.toLowerCase().includes(q));
 
-      // Movement Type
       let matchesType = true;
       if (movementTypeFilter === 'SALE') {
         matchesType = m.movementType === 'SALE';
@@ -60,90 +61,28 @@ export const InventoryPage: React.FC = () => {
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <PageHeader
-        title="Inventory Movements"
-        description="Traceable stock movement history across sales, purchases, and audited manual adjustments"
+        title={t('title')}
+        description={t('subtitle')}
       >
         {canAdjust && (
-          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto">
+          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 w-full sm:w-auto shadow-sm">
             <Plus className="w-4 h-4" />
-            <span>Record Stock Adjustment</span>
+            <span>{t('button.recordAdjustment')}</span>
           </Button>
         )}
       </PageHeader>
 
       <Card className="p-3.5 sm:p-5 space-y-4">
-        {/* Controls Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 ${
-                showFilters || movementTypeFilter !== 'ALL'
-                  ? 'bg-[#E6F4F2] border-[#0F766E] text-[#0F766E]'
-                  : 'bg-[#F4F8F7] border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Movement Type</span>
-              {movementTypeFilter !== 'ALL' && <span className="w-2 h-2 rounded-full bg-[#0F766E]" />}
-            </button>
-
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearAllFilters}
-                className="px-2.5 py-1.5 text-xs font-medium text-[#B91C1C] hover:bg-[#FEF2F2] rounded-lg transition-colors flex items-center gap-1"
-              >
-                <X className="w-3 h-3" />
-                <span>Reset</span>
-              </button>
-            )}
-
-            <div className="text-xs text-[#566B69] font-medium hidden sm:block">
-              Showing <span className="font-bold text-[#123B3A]">{filteredMovements.length}</span> logs
-            </div>
-          </div>
-
-          <div className="w-full lg:w-72 shrink-0">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search product name, SKU..."
-              className="w-full"
-            />
-          </div>
-        </div>
-
-        {/* Filter Drawer */}
-        {showFilters && (
-          <div className="p-3.5 bg-[#F4F8F7] border border-[#D7E5E2] rounded-xl flex items-center gap-3 animate-in fade-in flex-wrap">
-            <span className="text-xs font-bold text-[#123B3A]">Filter By Type:</span>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {[
-                { label: 'All Movements', val: 'ALL' },
-                { label: 'Sales Outward', val: 'SALE' },
-                { label: 'Purchases Inward', val: 'PURCHASE' },
-                { label: 'Manual Adjustments', val: 'ADJUSTMENT' },
-                { label: 'Opening Stock', val: 'OPENING' },
-                { label: 'Cancellations', val: 'CANCEL' },
-              ].map((opt) => (
-                <button
-                  key={opt.val}
-                  type="button"
-                  onClick={() => setMovementTypeFilter(opt.val)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                    movementTypeFilter === opt.val
-                      ? 'bg-[#0F766E] text-white shadow-2xs font-semibold'
-                      : 'bg-white border border-[#D7E5E2] text-[#566B69] hover:text-[#123B3A]'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <InventoryFilterToolbar
+          search={search}
+          setSearch={setSearch}
+          movementTypeFilter={movementTypeFilter}
+          setMovementTypeFilter={setMovementTypeFilter}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={clearAllFilters}
+        />
 
         <StockMovementTable
           movements={filteredMovements}

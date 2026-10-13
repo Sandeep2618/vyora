@@ -1,0 +1,1 @@
+export const STOCK_ADJUSTMENT_DEFAULT_REASON = '';

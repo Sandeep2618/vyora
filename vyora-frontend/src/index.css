@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #0F766E;
   --color-primary-dark: #0D665F;
@@ -20,11 +22,36 @@
 }
 
 @layer base {
-  body {
-    background-color: var(--color-page-bg);
-    color: var(--color-deep-nav);
+  html, body {
+    color-scheme: light;
+    background-color: #F4F8F7;
+    color: #123B3A;
     font-family: var(--font-sans);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
+
+  html.dark,
+  html.dark body,
+  .dark body {
+    color-scheme: dark;
+    background-color: #0A1615;
+    color: #E6F4F1;
+  }
+}
+
+/* Calendar Date Input Styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+  transition: opacity 0.2s ease;
+  opacity: 0.7;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.85) hue-rotate(180deg) brightness(1.2);
 }
 
 /* Custom scrollbars and utility classes */
@@ -39,8 +66,14 @@
   background: #D7E5E2;
   border-radius: 3px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E3B38;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #A0BDB8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2E5A56;
 }
 
 @media print {

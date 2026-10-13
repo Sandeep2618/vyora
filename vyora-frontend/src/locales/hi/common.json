@@ -1,0 +1,106 @@
+{
+  "appName": "व्योरा",
+  "appTagline": "सरल व्यापार. बड़े सपने.",
+  "navigation": {
+    "dashboard": "डैशबोर्ड",
+    "invoices": "बिक्री बिल",
+    "customers": "ग्राहक",
+    "parties": "पार्टियां",
+    "products": "उत्पाद",
+    "inventory": "स्टॉक इन्वेंटरी",
+    "purchase": "खरीद बिल",
+    "purchases": "खरीद बिल",
+    "payments": "भुगतान व रसीदें",
+    "reports": "रिपोर्ट्स",
+    "account": "खाता व अनुमतियां",
+    "settings": "सेटिंग्स",
+    "menu": "मेनू"
+  },
+  "actions": {
+    "create": "बनाएं",
+    "save": "सहेजें",
+    "saveDraft": "ड्राफ्ट सहेजें",
+    "createAndFinalize": "बनाएं और अंतिम रूप दें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "search": "खोजें...",
+    "download": "डाउनलोड",
+    "print": "प्रिंट करें",
+    "share": "साझा करें",
+    "filter": "फिल्टर",
+    "reset": "रीसेट",
+    "refresh": "ताज़ा करें",
+    "confirm": "पुष्टि करें",
+    "viewAll": "सभी देखें",
+    "addItem": "आइटम जोड़ें",
+    "getMobileApp": "मोबाइल ऐप डाउनलोड करें",
+    "upgrade": "प्लान अपग्रेड करें",
+    "newInvoice": "नया बिल",
+    "recordVoucher": "वाउचर दर्ज करें",
+    "recordPayment": "भुगतान दर्ज करें",
+    "addCustomer": "नया ग्राहक",
+    "addProduct": "नया उत्पाद",
+    "addSupplier": "नया आपूर्तिकर्ता",
+    "signOut": "लॉग आउट करें",
+    "businessProfile": "व्यापार प्रोफ़ाइल",
+    "rolesAndPermissions": "भूमिकाएं और अनुमतियां",
+    "billingAndPlans": "बिलिंग और प्लान"
+  },
+  "status": {
+    "all": "सभी",
+    "loading": "लोड हो रहा है...",
+    "paid": "भुगतान संपन्न",
+    "unpaid": "बकाया",
+    "partial": "आंशिक",
+    "pending": "लंबित",
+    "draft": "ड्राफ्ट",
+    "overdue": "अतिदेय",
+    "cancelled": "रद्द",
+    "active": "सक्रिय",
+    "inactive": "निष्क्रिय",
+    "popular": "लोकप्रिय",
+    "power": "पावर"
+  },
+  "languages": {
+    "select": "भाषा चुनें",
+    "en": "English",
+    "hi": "हिन्दी (Hindi)",
+    "gu": "ગુજરાતી (Gujarati)"
+  },
+  "timeframe": {
+    "label": "दिनांक समय सीमा",
+    "allDates": "सभी दिनांक",
+    "today": "आज",
+    "thisMonth": "इस महीने",
+    "last30Days": "पिछले 30 दिन"
+  },
+  "theme": {
+    "light": "लाइट मोड",
+    "dark": "डार्क मोड",
+    "toggle": "थीम बदलें"
+  },
+  "empty": {
+    "noData": "कोई डेटा नहीं मिला",
+    "noResults": "सक्रिय फिल्टर से मेल खाने वाला कोई रिकॉर्ड नहीं मिला।"
+  },
+  "roles": {
+    "owner": "मालिक (पूर्ण व्यवस्थापक पहुंच)",
+    "staff": "स्टाफ (केवल देखने की अनुमति)",
+    "admin": "व्यवस्थापक",
+    "ownerShort": "मालिक (पूर्ण पहुंच)",
+    "staffShort": "स्टाफ (सीमित पहुंच)"
+  },
+  "plans": {
+    "enterprise": "बिजनेस प्रो",
+    "growth": "ग्रोथ प्लान",
+    "starter": "स्टार्टर फ्री",
+    "enterpriseDesc": "असीमित स्टाफ, ऑडिटेड स्टॉक",
+    "growthDesc": "3 स्टाफ तक, खरीद और रिपोर्ट",
+    "starterDesc": "साधारण बिल (50/माह), 1 मालिक",
+    "proBadge": "प्रो",
+    "activeBadge": "सक्रिय",
+    "freeBadge": "फ्री",
+    "renewUpi": "UPI से नवीनीकरण / अपग्रेड करें"
+  }
+}

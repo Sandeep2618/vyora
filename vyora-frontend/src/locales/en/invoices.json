@@ -1,0 +1,36 @@
+{
+  "title": "Sales Invoices",
+  "subtitle": "Manage, print, and track payments for all customer bills",
+  "button": {
+    "create": "Create Sales Bill",
+    "recordPayment": "Record Payment",
+    "cancel": "Cancel Bill",
+    "downloadPdf": "Download PDF"
+  },
+  "filter": {
+    "all": "All Invoices",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "overdue": "Overdue"
+  },
+  "columns": {
+    "invoiceNo": "Invoice #",
+    "customer": "Customer",
+    "date": "Date",
+    "dueDate": "Due Date",
+    "amount": "Total Amount",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "empty": {
+    "title": "No Invoices Recorded",
+    "description": "Start creating GST/Non-GST tax bills to track revenue and pending payments.",
+    "action": "+ Create Your First Invoice"
+  },
+  "createPage": {
+    "title": "Create Invoice",
+    "subtitle": "Fill in the details below to issue a new bill",
+    "saveDraft": "Save Draft",
+    "createFinalize": "Create & Finalize"
+  }
+}

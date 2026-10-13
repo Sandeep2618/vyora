@@ -1,0 +1,30 @@
+{
+  "title": "Inventory Movements",
+  "subtitle": "Traceable stock movement history across sales, purchases, and audited manual adjustments",
+  "button": {
+    "recordAdjustment": "Record Stock Adjustment",
+    "confirmAdjustment": "Confirm Adjustment"
+  },
+  "columns": {
+    "dateTime": "Date & Time",
+    "productName": "Product Name",
+    "sku": "SKU",
+    "movementType": "Movement Type",
+    "change": "Change",
+    "resultingStock": "Resulting Stock",
+    "reason": "Reason / Reference"
+  },
+  "movementTypes": {
+    "all": "All Movement Types",
+    "sale": "Sales Orders",
+    "purchase": "Purchase Inward",
+    "adjustment": "Manual Adjustments",
+    "cancel": "Cancelled Orders",
+    "opening": "Opening Stock"
+  },
+  "empty": {
+    "title": "No stock movements recorded",
+    "description": "All sales, purchases, and manual adjustments create an immutable audit trail here.",
+    "action": "Record Stock Adjustment"
+  }
+}

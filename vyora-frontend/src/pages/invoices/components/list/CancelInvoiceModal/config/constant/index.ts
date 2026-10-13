@@ -1,0 +1,1 @@
+export const CANCEL_INVOICE_DEFAULT_REASON = '';

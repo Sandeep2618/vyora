@@ -1,0 +1,17 @@
+export enum ProfileFormField {
+  NAME = 'name',
+  LEGAL_NAME = 'legalName',
+  PHONE = 'phone',
+  EMAIL = 'email',
+  GSTIN = 'gstin',
+  PAN = 'pan',
+  ADDRESS_LINE_1 = 'addressLine1',
+  ADDRESS_LINE_2 = 'addressLine2',
+  CITY = 'city',
+  STATE = 'state',
+  PINCODE = 'pincode',
+  INVOICE_PREFIX = 'invoicePrefix',
+  INVOICE_PADDING = 'invoicePadding',
+  PURCHASE_PREFIX = 'purchasePrefix',
+  TERMS = 'terms',
+}

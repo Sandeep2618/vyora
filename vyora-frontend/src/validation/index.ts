@@ -113,7 +113,7 @@ export const InvoiceItemSchema = z.object({
 });
 
 // Sales Invoice Creation / Update Validation
-export const CreateInvoiceSchema = z.object({
+export const CreateInvoiceBaseSchema = z.object({
   customerId: z.string().min(1, 'Customer is required'),
   issueDate: z.string().min(1, 'Issue date is required'),
   dueDate: z.string().min(1, 'Due date is required'),
@@ -123,7 +123,34 @@ export const CreateInvoiceSchema = z.object({
   terms: z.string().optional(),
   roundOff: z.boolean().optional().default(true),
 });
-export type CreateInvoiceInput = z.input<typeof CreateInvoiceSchema>;
+
+export const CreateInvoiceSchema = z.preprocess((val: any) => {
+  if (!val || typeof val !== 'object') return val;
+  const input = { ...val };
+  if (!input.items && Array.isArray(input.lines)) {
+    input.items = input.lines.map((l: any) => ({
+      productId: l.productId,
+      quantity: typeof l.quantity === 'number' ? l.quantity : Number(l.quantity) || 1,
+      unitPriceMinor:
+        l.unitPriceMinor !== undefined
+          ? (typeof l.unitPriceMinor === 'number' ? l.unitPriceMinor : Number(l.unitPriceMinor))
+          : (l.rateMajor ? Math.round(Number(l.rateMajor) * 100) : 0),
+      discountPercent: l.discountPercent ? Number(l.discountPercent) : 0,
+      taxRatePercent: l.taxRatePercent !== undefined ? Number(l.taxRatePercent) : 18,
+    }));
+  }
+  if (!input.issueDate && input.date) {
+    input.issueDate = input.date;
+  }
+  if (!input.issueDate) {
+    input.issueDate = new Date().toISOString().split('T')[0];
+  }
+  if (!input.dueDate) {
+    input.dueDate = input.issueDate;
+  }
+  return input;
+}, CreateInvoiceBaseSchema);
+export type CreateInvoiceInput = z.input<typeof CreateInvoiceBaseSchema>;
 
 export const CancelInvoiceSchema = z.object({
   reason: z.string().min(3, 'A cancellation reason is required for audit tracking'),
@@ -131,7 +158,7 @@ export const CancelInvoiceSchema = z.object({
 export type CancelInvoiceInput = z.infer<typeof CancelInvoiceSchema>;
 
 // Purchase Bill Validation
-export const CreatePurchaseSchema = z.object({
+export const CreatePurchaseBaseSchema = z.object({
   supplierId: z.string().min(1, 'Supplier is required'),
   billNumber: z.string().min(1, 'Supplier bill number is required'),
   billDate: z.string().min(1, 'Bill date is required'),
@@ -154,10 +181,18 @@ export const CreatePurchaseSchema = z.object({
     .min(1, 'At least one item is required'),
   notes: z.string().optional(),
 });
-export type CreatePurchaseInput = z.infer<typeof CreatePurchaseSchema>;
+
+export const CreatePurchaseSchema = z.preprocess((val: any) => {
+  if (!val || typeof val !== 'object') return val;
+  const input = { ...val };
+  if (!input.billDate && input.date) input.billDate = input.date;
+  if (!input.billDate) input.billDate = new Date().toISOString().split('T')[0];
+  return input;
+}, CreatePurchaseBaseSchema);
+export type CreatePurchaseInput = z.input<typeof CreatePurchaseBaseSchema>;
 
 // Payment / Receipt Validation
-export const CreatePaymentSchema = z.object({
+export const CreatePaymentBaseSchema = z.object({
   type: z.enum(['RECEIPT', 'PAYMENT']),
   partyId: z.string().min(1, 'Party is required'),
   invoiceId: z.string().optional(),
@@ -169,7 +204,38 @@ export const CreatePaymentSchema = z.object({
   notes: z.string().optional(),
   idempotencyKey: z.string().min(1, 'Idempotency key is required'),
 });
-export type CreatePaymentInput = z.infer<typeof CreatePaymentSchema>;
+
+export const CreatePaymentSchema = z.preprocess((val: any) => {
+  if (!val || typeof val !== 'object') return val;
+  const input = { ...val };
+  if (input.type === 'PAYMENT_IN') {
+    input.type = 'RECEIPT';
+  } else if (input.type === 'PAYMENT_OUT') {
+    input.type = 'PAYMENT';
+  }
+  if (!input.paymentMethod && input.paymentMode) {
+    input.paymentMethod = input.paymentMode;
+  }
+  if (!input.paymentMethod) {
+    input.paymentMethod = 'CASH';
+  }
+  if (!input.partyId) {
+    if (input.customerId) input.partyId = input.customerId;
+    else if (input.supplierId) input.partyId = input.supplierId;
+  }
+  if (!input.paymentDate) {
+    if (input.date) input.paymentDate = input.date;
+    else input.paymentDate = new Date().toISOString().split('T')[0];
+  }
+  if (!input.idempotencyKey) {
+    input.idempotencyKey = `auto-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  }
+  if (!input.referenceNumber && input.reference) {
+    input.referenceNumber = input.reference;
+  }
+  return input;
+}, CreatePaymentBaseSchema);
+export type CreatePaymentInput = z.input<typeof CreatePaymentBaseSchema>;
 
 // Stock Adjustment Validation
 export const StockAdjustmentSchema = z.object({

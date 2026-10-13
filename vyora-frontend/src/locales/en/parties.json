@@ -1,0 +1,42 @@
+{
+  "title": "Parties",
+  "subtitle": "Customers and suppliers directory with real-time balance ledgers",
+  "tab": {
+    "all": "All Parties",
+    "customers": "Customers",
+    "suppliers": "Suppliers"
+  },
+  "button": {
+    "addParty": "Add Party",
+    "viewLedger": "View Ledger",
+    "receivePayment": "Receive Payment"
+  },
+  "columns": {
+    "name": "Party Name",
+    "type": "Type",
+    "phone": "Phone",
+    "location": "Location",
+    "gstin": "GSTIN",
+    "balance": "Balance Due",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "balance": {
+    "due": "Due",
+    "advance": "Advance",
+    "settled": "Settled"
+  },
+  "filter": {
+    "balanceStatus": "Balance Status",
+    "stateProvince": "State / Province",
+    "allBalances": "All Balances",
+    "balanceDue": "Balance Due",
+    "settledZero": "Settled (Zero)",
+    "allStates": "All States"
+  },
+  "empty": {
+    "title": "No Parties Found",
+    "description": "Add customers or suppliers to track payables, receivables, and contact details.",
+    "action": "Add Your First Party"
+  }
+}

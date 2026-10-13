@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vyora - Backend Architecture & Complete API Directory</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 12mm 12mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #123B3A;
+      background: #FFFFFF;
+      margin: 0;
+      padding: 0;
+      font-size: 9pt;
+      line-height: 1.4;
+    }
+    .header-bar {
+      border-bottom: 3px solid #0F766E;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-box {
+      width: 38px;
+      height: 38px;
+      background: #0F766E;
+      color: #FFFFFF;
+      font-weight: 900;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .brand-title {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #123B3A;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 8.5pt;
+      color: #566B69;
+      margin: 3px 0 0 0;
+      font-weight: 600;
+    }
+    .meta-box {
+      text-align: right;
+      font-size: 8pt;
+      color: #566B69;
+      line-height: 1.35;
+    }
+    h2 {
+      font-size: 12pt;
+      color: #0F766E;
+      border-bottom: 1.5px solid #D7E5E2;
+      padding-bottom: 3px;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      break-after: avoid;
+    }
+    h3 {
+      font-size: 9.8pt;
+      color: #123B3A;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-weight: 700;
+      break-after: avoid;
+    }
+    p {
+      margin: 0 0 5px 0;
+      font-size: 8.8pt;
+      color: #334A48;
+    }
+    ul, ol {
+      margin: 0 0 6px 0;
+      padding-left: 18px;
+      font-size: 8.8pt;
+      color: #334A48;
+    }
+    li {
+      margin-bottom: 2.5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 8pt;
+    }
+    th, td {
+      border: 1px solid #D7E5E2;
+      padding: 4.5px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #F4F8F7;
+      color: #123B3A;
+      font-weight: 700;
+    }
+    tr:nth-child(even) td {
+      background-color: #FAFCFC;
+    }
+    .badge-method {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 7.2pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-family: monospace;
+    }
+    .method-get { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .method-post { background: #E0E7FF; color: #4338CA; border: 1px solid #C7D2FE; }
+    .method-put { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+    .method-patch { background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF; }
+    .method-delete { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .badge-role {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 6.8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: #E6F4F2;
+      color: #0F766E;
+      border: 1px solid #A0D2CA;
+    }
+    .card-box {
+      background: #F4F8F7;
+      border: 1px solid #D7E5E2;
+      border-left: 4px solid #0F766E;
+      padding: 6px 10px;
+      border-radius: 5px;
+      margin: 6px 0 10px 0;
+    }
+    .code-tree {
+      background: #0D1C1B;
+      color: #E6F4F1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 7.8pt;
+      line-height: 1.35;
+      margin: 6px 0 10px 0;
+      overflow-x: auto;
+    }
+    .code-tree span.folder { color: #14B8A6; font-weight: bold; }
+    .code-tree span.comment { color: #8FA8A4; font-style: italic; }
+    .page-break {
+      page-break-before: always;
+    }
+    .footer {
+      border-top: 1px solid #D7E5E2;
+      padding-top: 5px;
+      font-size: 7.5pt;
+      color: #566B69;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: TECH STACK & DIRECTORY ARCHITECTURE -->
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Backend Engineering Blueprint & Complete API Catalog</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Technical Architecture & API Reference</strong><br>
+      Framework: NestJS 11 Modular Monolith<br>
+      Total Implemented Endpoints: <strong>49 Endpoints</strong>
+    </div>
+  </div>
+
+  <h2>1. Technical Stack & Engineering Rationale</h2>
+  <p>The Vyora backend is engineered as a decoupled, multi-tenant modular monolith designed for horizontal scaling, absolute data integrity, and strict separation of business concerns:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 22%;">Technology / Layer</th>
+        <th style="width: 25%;">Selected Component</th>
+        <th style="width: 53%;">Engineering Rationale & Architectural Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Core Framework</strong></td>
+        <td><strong>NestJS 11</strong> (Express adapter)</td>
+        <td>Provides enterprise architectural conventions: dependency injection, declarative routing, guards, interceptors, and modular domain encapsulation without microservices overhead.</td>
+      </tr>
+      <tr>
+        <td><strong>Database & ORM</strong></td>
+        <td><strong>MongoDB Atlas + Mongoose 8</strong></td>
+        <td>Document-based persistence perfectly mirrors hierarchical financial documents (invoices with embedded line items). Multi-tenancy enforced through indexed <code>businessId</code> scoping.</td>
+      </tr>
+      <tr>
+        <td><strong>Runtime & Language</strong></td>
+        <td><strong>Node.js 20+ / TypeScript 5.8</strong></td>
+        <td>Strict typing across all services, DTOs, and schemas. Zero implicit <code>any</code>. Compiles cleanly with <code>tsc</code>.</td>
+      </tr>
+      <tr>
+        <td><strong>Authentication</strong></td>
+        <td><strong>JWT + Passport + bcrypt</strong></td>
+        <td>Stateless JSON Web Tokens with 7-day expiration. Passwords securely hashed using bcrypt (salt rounds = 10). User memberships auto-link to business tenants.</td>
+      </tr>
+      <tr>
+        <td><strong>Financial Mathematics</strong></td>
+        <td><strong>Integer Minor Units (Paisa)</strong></td>
+        <td><strong>Rule of Zero Float:</strong> Every financial value (prices, discounts, taxes, grand totals) is stored and computed in minor units (1 INR = 100 Paisa), eliminating floating-point rounding bugs.</td>
+      </tr>
+      <tr>
+        <td><strong>Validation Engine</strong></td>
+        <td><strong>Zod + <code>@vyora/validation</code></strong></td>
+        <td>Shared, strict runtime validation schemas. Guarantees that payloads rejected by the frontend are also rejected by the backend with deterministic 400 error envelopes.</td>
+      </tr>
+      <tr>
+        <td><strong>Security & Rate Limits</strong></td>
+        <td><strong>Sliding-Window Memory Throttler</strong></td>
+        <td>In-memory rate limiter with periodic cleanup: 25 req/min on <code>/auth/*</code> (brute-force protection) and 200 req/min general. Automatic security headers (no-sniff, frame-options).</td>
+      </tr>
+      <tr>
+        <td><strong>API Documentation</strong></td>
+        <td><strong>Swagger / OpenAPI 3.0</strong></td>
+        <td>Auto-generated interactive API documentation available at <code>/api/v1/docs</code> with Bearer auth support.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>2. Backend Repository & Folder Hierarchy</h2>
+  <p>The backend follows a domain-driven modular structure inside <code>C:\Users\sande\vyora\vyora-backend</code>:</p>
+
+  <div class="code-tree">
+<span class="folder">vyora-backend/</span>
+├── <span class="folder">src/</span>
+│   ├── <span class="folder">common/</span>                      <span class="comment"># Cross-cutting framework infrastructure</span>
+│   │   ├── <span class="folder">guards/</span>                 <span class="comment"># JwtAuthGuard, TenantGuard, RolesGuard, PlanGuard</span>
+│   │   ├── <span class="folder">decorators/</span>             <span class="comment"># @CurrentUser, @CurrentTenant, @Roles, @PlanRequired</span>
+│   │   ├── <span class="folder">filters/</span>                <span class="comment"># AllExceptionsFilter (standardized error envelopes)</span>
+│   │   └── <span class="folder">middleware/</span>             <span class="comment"># RateLimitMiddleware, TenantHeaderMiddleware</span>
+│   ├── <span class="folder">modules/</span>                     <span class="comment"># Domain-driven feature modules (13 core domains)</span>
+│   │   ├── <span class="folder">auth/</span>                   <span class="comment"># Registration, login, JWT strategy, session verification</span>
+│   │   ├── <span class="folder">business/</span>               <span class="comment"># Organization profile, GST settings, staff RBAC membership</span>
+│   │   ├── <span class="folder">products/</span>               <span class="comment"># Item catalog, SKU, tax slabs, units, pricing</span>
+│   │   ├── <span class="folder">parties/</span>                <span class="comment"># Customers and suppliers, credit tracking, party balances</span>
+│   │   ├── <span class="folder">invoices/</span>               <span class="comment"># Sales billing, server tax math, numbering, PDF data</span>
+│   │   ├── <span class="folder">purchases/</span>              <span class="comment"># Supplier bills, line items, accounts payable</span>
+│   │   ├── <span class="folder">payments/</span>               <span class="comment"># Payment vouchers (Receipt & Payment), invoice allocation</span>
+│   │   ├── <span class="folder">inventory/</span>              <span class="comment"># Stock movements ledger, manual adjustments with reasons</span>
+│   │   ├── <span class="folder">expenses/</span>               <span class="comment"># Operating expenses, expense categories, payment modes</span>
+│   │   ├── <span class="folder">dashboard/</span>              <span class="comment"># Real-time KPIs, sales volume, receivables, low-stock</span>
+│   │   ├── <span class="folder">reports/</span>                <span class="comment"># Sales/purchase registers, stock summary, customer dues</span>
+│   │   ├── <span class="folder">audit/</span>                  <span class="comment"># Financial and administrative audit trails</span>
+│   │   └── <span class="folder">health/</span>                 <span class="comment"># Health check endpoint for uptime and monitoring</span>
+│   ├── <span class="folder">seeder/</span>                      <span class="comment"># Automated bootstrap seeder (creates demo tenant & sample data)</span>
+│   ├── app.module.ts                <span class="comment"># Root application module coordinating database and routes</span>
+│   └── main.ts                      <span class="comment"># Application entry point (port 4000, global prefix /api/v1)</span>
+  </div>
+
+  <h2>3. Non-Negotiable Backend Architectural Invariants</h2>
+  <ul>
+    <li><strong>Multi-Tenancy Isolation (<code>x-business-id</code>):</strong> Every mutation and query is scoped to the tenant. <code>TenantGuard</code> extracts <code>x-business-id</code> from headers, verifies that the requesting JWT user is an active member of that business, and binds the verified ID. Requests with invalid or un-joined business IDs are rejected with <code>403 Forbidden</code>.</li>
+    <li><strong>Authoritative Calculation Engine:</strong> Frontend previews totals for user convenience, but the server calculates subtotals, CGST/SGST/IGST, rounding, and grand totals upon submission. Client-calculated totals are never trusted.</li>
+    <li><strong>Immutability of Finalized Documents:</strong> Finalized invoices and purchase bills cannot be directly updated or overwritten. Any correction requires a formal cancellation flow with recorded reason and stock reversal.</li>
+    <li><strong>Traceable Inventory Ledger:</strong> Direct stock overwrites are strictly forbidden. Stock level is altered only via verified movements: Sales deduction (<code>SALE</code>), Purchase addition (<code>PURCHASE</code>), or Manual Adjustment (<code>ADJUSTMENT</code>) with mandatory reason.</li>
+    <li><strong>Idempotency Guarantees:</strong> Invoices and payment vouchers validate uniqueness constraints to ensure network retries cannot double-record bills or payments.</li>
+  </ul>
+
+  <div class="footer">
+    <span>Vyora Backend Architecture &bull; Confidential & Proprietary</span>
+    <span>Page 1 of 4</span>
+  </div>
+
+  <!-- PAGE 2: COMPLETE API DIRECTORY (MODULES 1 TO 5) -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Complete API Directory &bull; Modules 1 through 5 (15 Endpoints)</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>API Reference: Section 1</strong><br>
+      Health, Auth, Business, Staff & Dashboard<br>
+      Global Prefix: <code>/api/v1</code>
+    </div>
+  </div>
+
+  <h2>4. Core API Directory (15 of 49 Endpoints)</h2>
+
+  <h3>Module 1: Health & Diagnostics (1 Endpoint)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/health</code></td>
+        <td>Public (None)</td>
+        <td>None</td>
+        <td>Returns server uptime, database connectivity status, and release version timestamp for health checks.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 2: Authentication & Sessions (4 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/auth/register</code></td>
+        <td>Public (None)</td>
+        <td><code>{ name, email, password, businessName, phone? }</code></td>
+        <td>Hashes password with bcrypt, creates User document, initializes default Business tenant, assigns user as <code>OWNER</code>, and issues JWT token.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/auth/login</code></td>
+        <td>Public (None)</td>
+        <td><code>{ email, password }</code></td>
+        <td>Validates credentials against bcrypt hash, fetches active business memberships, generates signed JWT access token.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/auth/me</code></td>
+        <td><span class="badge-role">JwtAuth</span></td>
+        <td>Bearer Token header</td>
+        <td>Returns authenticated user identity, assigned role, active business ID, and user profile data.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/auth/logout</code></td>
+        <td><span class="badge-role">JwtAuth</span></td>
+        <td>Bearer Token header</td>
+        <td>Logs logout audit event and clears server-side session references if applicable.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 3: Business Profile & Settings (4 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/business/current</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td><code>x-business-id</code> header</td>
+        <td>Fetches current business profile, GSTIN, legal address, invoice prefix, numbering sequence, and active subscription plan.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-put">PUT</span></td>
+        <td><code>/api/v1/business/current</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>BusinessProfileInput</code> (Zod parsed)</td>
+        <td>Updates business name, address, state code, GST profile, terms & conditions, and invoice numbering format.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-put">PUT</span></td>
+        <td><code>/api/v1/business/plan</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ plan: 'starter' | 'growth' | 'enterprise' }</code></td>
+        <td>Updates business subscription tier. Emits audit log event. Enforces plan feature gating immediately.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-put">PUT</span></td>
+        <td><code>/api/v1/business/permissions</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>Record&lt;string, boolean&gt;</code></td>
+        <td>Updates granular module access permissions for the staff role within this business tenant.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 4: Staff & RBAC Management (5 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/business/staff</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td><code>x-business-id</code> header</td>
+        <td>Lists all team members, assigned roles (<code>OWNER</code>, <code>ADMIN</code>, <code>STAFF</code>), active status, and join date.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/business/staff</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ name, email, role }</code></td>
+        <td>Invites or creates a staff member, links business membership, assigns initial permissions.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-patch">PATCH</span></td>
+        <td><code>/api/v1/business/staff/:id/role</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ role: UserRole }</code></td>
+        <td>Switches member role. <strong>Primary Owner Immutability:</strong> Blocks attempts to demote primary owner with 403 Forbidden.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-patch">PATCH</span></td>
+        <td><code>/api/v1/business/staff/:id/status</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ isActive: boolean }</code></td>
+        <td>Enables or disables member access. Deactivated staff tokens are rejected by <code>TenantGuard</code>.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-delete">DELETE</span></td>
+        <td><code>/api/v1/business/staff/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Removes staff membership from this business tenant. Prevents primary owner self-deletion.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 5: Dashboard & Analytics (1 Endpoint)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/dashboard/metrics</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>timeRange?</code> (30d, 7d, today)</td>
+        <td>Aggregates gross sales, total invoices, pending receivables, stock valuation, low-stock alerts, and 5 recent invoices.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>Vyora Backend Architecture &bull; Confidential & Proprietary</span>
+    <span>Page 2 of 4</span>
+  </div>
+
+  <!-- PAGE 3: COMPLETE API DIRECTORY (MODULES 6 TO 9) -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Complete API Directory &bull; Modules 6 through 9 (19 Endpoints)</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>API Reference: Section 2</strong><br>
+      Products, Parties, Invoices & Purchases<br>
+      Global Prefix: <code>/api/v1</code>
+    </div>
+  </div>
+
+  <h2>5. Core Domain APIs (19 of 49 Endpoints)</h2>
+
+  <h3>Module 6: Products & Catalog (5 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/products</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreateProductDto</code> (Zod parsed)</td>
+        <td>Creates product in catalog. Stores prices in paisa. Validates unique SKU per tenant. Records opening stock movement if &gt; 0.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/products</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>search, stockFilter, taxFilter, unit, page, limit</code></td>
+        <td>Returns paginated product list with current stock levels, low-stock flags, tax rates, and pricing in minor units.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/products/:id</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Fetches product details, complete stock movement history, and pricing specifications.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-put">PUT</span></td>
+        <td><code>/api/v1/products/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>UpdateProductDto</code></td>
+        <td>Updates name, SKU, tax category, selling/purchase prices, reorder point. Does not mutate stock directly (use adjustments).</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-delete">DELETE</span></td>
+        <td><code>/api/v1/products/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Deletes product if no active finalized invoices reference it. Otherwise marks deleted or returns validation barrier.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 7: Parties Master (Customers & Suppliers) (5 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/parties</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreatePartyDto</code> (Zod parsed)</td>
+        <td>Creates Customer or Supplier record. Saves contact, state code, GSTIN, and opening balance (stored in paisa).</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/parties</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>type, search, balanceFilter, state, page, limit</code></td>
+        <td>Returns paginated parties with live net balance (receivable or payable) and contact details.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/parties/:id</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Returns party profile, full transaction history (invoices, payments, purchases), and current balance.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-put">PUT</span></td>
+        <td><code>/api/v1/parties/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>UpdatePartyDto</code></td>
+        <td>Updates name, phone, email, address, state code, credit limit, and GSTIN.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-delete">DELETE</span></td>
+        <td><code>/api/v1/parties/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Deletes party if no active balance or invoice references exist. Enforces referential integrity.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 8: Sales Invoices & Billing (6 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/invoices/preview</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td><code>InvoiceDraftInput</code></td>
+        <td>Authoritative server preview: calculates item subtotal, itemized CGST/SGST/IGST in paisa, and grand total without persisting.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/invoices</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreateInvoiceDto</code></td>
+        <td>Creates invoice in <code>DRAFT</code> status. Server calculates totals in minor units. Assigns draft reference. Stock NOT deducted yet.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/invoices</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>status, search, timeFilter, page, limit</code></td>
+        <td>Returns paginated invoices with customer names, dates, grand totals, due amounts, and status badges.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/invoices/:id</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Returns full invoice document with snapshot line items, tax breakdown, customer address, payment history, and business info for PDF print.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/invoices/:id/finalize</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td><strong>Finalization Engine:</strong> Validates stock availability, assigns permanent sequential invoice number (e.g. <code>INV-2026-0001</code>), deducts inventory traceably, updates customer receivable balance, transitions state to <code>UNPAID</code>. Document becomes immutable.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/invoices/:id/cancel</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ reason: string }</code></td>
+        <td><strong>Cancellation Engine:</strong> Validates cancellation reason, restores deducted stock back to inventory via reversal movement, reverses customer balance, marks status <code>CANCELLED</code>, records audit event.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 9: Purchases & Supplier Bills (3 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/purchases</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreatePurchaseDto</code></td>
+        <td>Records supplier bill. Calculates tax in paisa, immediately increases physical inventory for each line item, updates supplier payable balance, generates purchase record.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/purchases</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>supplierId, search, timeFilter, page, limit</code></td>
+        <td>Returns paginated purchase bills with supplier name, bill number, bill date, total amount, and line count.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/purchases/:id</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Fetches complete purchase bill details with itemized received goods, tax rates, and supplier details.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>Vyora Backend Architecture &bull; Confidential & Proprietary</span>
+    <span>Page 3 of 4</span>
+  </div>
+
+  <!-- PAGE 4: COMPLETE API DIRECTORY (MODULES 10 TO 14) -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Complete API Directory &bull; Modules 10 through 14 (15 Endpoints)</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>API Reference: Section 3</strong><br>
+      Payments, Inventory, Expenses, Reports & Audit<br>
+      Total Endpoints Documented: <strong>49/49</strong>
+    </div>
+  </div>
+
+  <h2>6. Financial Ledger & Operational APIs (15 of 49 Endpoints)</h2>
+
+  <h3>Module 10: Payments & Vouchers (3 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/payments</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreatePaymentDto</code></td>
+        <td><strong>Payment Allocation Engine:</strong> Records voucher (<code>RECEIPT</code> from customer or <code>PAYMENT</code> to vendor). Reconciles against invoice <code>dueMinor</code>, updates invoice state (<code>PARTIAL</code> or <code>PAID</code>), adjusts party ledger balance. Enforces unique idempotency key to prevent double posting.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/payments</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>type, method, search, page, limit</code></td>
+        <td>Returns paginated voucher entries with voucher number, party name, method (Cash, Bank, UPI, Cheque), reference/UTR, and amount.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/payments/:id</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Fetches payment receipt voucher with allocated invoice numbers and payment verification timestamps.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 11: Inventory & Stock Adjustments (2 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/inventory/movements</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>productId, movementType, page, limit</code></td>
+        <td>Returns complete immutable inventory movement audit trail: previous stock, change amount, new stock, reference document ID, actor.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/inventory/adjustments</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>{ productId, quantityDelta, reason, notes? }</code></td>
+        <td>Adjusts physical stock. Validates reason enum (<code>DAMAGED</code>, <code>RECOUNT</code>, <code>RETURN</code>, <code>THEFT</code>). Updates current stock on product document and records movement audit entry.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 12: Expenses Management (4 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-post">POST</span></td>
+        <td><code>/api/v1/expenses</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td><code>CreateExpenseDto</code></td>
+        <td>Records operational expense (rent, electricity, salary, courier). Saves amount in minor units, payment mode, and optional receipt note.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/expenses</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>category, startDate, endDate, page, limit</code></td>
+        <td>Returns paginated expenses filtered by date range and category.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/expenses/categories</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>None</td>
+        <td>Returns list of active expense categories and aggregate expense sum per category for this tenant.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-delete">DELETE</span></td>
+        <td><code>/api/v1/expenses/:id</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Path parameter <code>:id</code></td>
+        <td>Deletes expense record. Emits audit trail event.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 13: Business Reports (5 Endpoints)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/reports/sales-register</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>startDate, endDate, status</code></td>
+        <td>Detailed sales register: itemized tax breakdown (CGST, SGST, IGST), customer names, invoices, taxable amounts, and gross totals.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/reports/purchase-register</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>startDate, endDate, supplierId</code></td>
+        <td>Purchase bill register with supplier tax numbers, invoice numbers, input tax credit totals, and bill sums.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/reports/stock-summary</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>None</td>
+        <td>Current stock inventory valuation: computes total stock value (quantity &times; purchase price in paisa) across catalog.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/reports/customer-dues</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>None</td>
+        <td>Outstanding receivables ledger: lists all customers with pending unpaid balance and days overdue.</td>
+      </tr>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/reports/expense-summary</code></td>
+        <td><span class="badge-role">Jwt + Tenant</span></td>
+        <td>Query: <code>startDate, endDate</code></td>
+        <td>Comprehensive expense summary grouped by category and payment method with total operating outlay.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Module 14: Audit Trail & Compliance (1 Endpoint)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">Method</th>
+        <th style="width: 25%;">Endpoint Route</th>
+        <th style="width: 15%;">Guards & Access</th>
+        <th style="width: 25%;">Payload / Parameters</th>
+        <th style="width: 25%;">Business Logic & Side Effects</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge-method method-get">GET</span></td>
+        <td><code>/api/v1/audit/logs</code></td>
+        <td><span class="badge-role">Owner/Admin</span></td>
+        <td>Query: <code>entityType, action, page, limit</code></td>
+        <td>Returns chronological audit history of important financial actions: invoice finalizations, cancellations, stock adjustments, and staff role edits.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card-box" style="margin-top: 10px;">
+    <strong>API Directory Summary:</strong> All 49 endpoints are strictly tenant-isolated, enforce integer minor unit calculations for currency, execute inside NestJS domain services, and are verified by unit/integration tests and OpenAPI contracts.
+  </div>
+
+  <div class="footer">
+    <span>Vyora Backend Architecture &bull; Confidential & Proprietary</span>
+    <span>Page 4 of 5</span>
+  </div>
+
+  <!-- PAGE 5: QUALITY CHECKS: THE FIVE LAYERS -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Backend Engineering & Quality Assurance Standards</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Section 4: Quality Architecture</strong><br>
+      The Five Layers of Quality Checks<br>
+      Continuous Delivery & Gatekeeping
+    </div>
+  </div>
+
+  <h2>7. Quality Checks: The Five Layers</h2>
+  <p>To eliminate regressions, guarantee strict typing, maintain uniform style, and prevent broken behavior from ever reaching production, Vyora enforces five defensive quality layers:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 15%;">Layer</th>
+        <th style="width: 25%;">Tool</th>
+        <th style="width: 38%;">What It Catches</th>
+        <th style="width: 22%;">Execution Command</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Formatting</strong></td>
+        <td><code>Prettier</code></td>
+        <td>Spacing, quotes, line width (printWidth: 100), trailing commas, so all code looks the same across files and team members.</td>
+        <td><code>npm run format:check</code><br><code>npm run format</code></td>
+      </tr>
+      <tr>
+        <td><strong>2. Linting</strong></td>
+        <td><code>ESLint + typescript-eslint</code></td>
+        <td>Bugs, implicit <code>any</code>, unused code/variables, bad import order, hook mistakes, and unhandled promises.</td>
+        <td><code>npm run lint</code></td>
+      </tr>
+      <tr>
+        <td><strong>3. Type check</strong></td>
+        <td><code>tsc --noEmit (strict mode)</code></td>
+        <td>Type errors, broken DTO contracts, undefined property accesses, missing function parameters, schema mismatches.</td>
+        <td><code>npm run typecheck</code></td>
+      </tr>
+      <tr>
+        <td><strong>4. Tests</strong></td>
+        <td><code>Vitest + Testing Library</code></td>
+        <td>Behaviour that breaks: tax calculation regressions, stock overselling, unauthorized tenant leaks, broken endpoint status codes.</td>
+        <td><code>npm run test</code></td>
+      </tr>
+      <tr>
+        <td><strong>5. Gate</strong></td>
+        <td><code>Husky + lint-staged + CI</code></td>
+        <td>Blocks bad code before commit and before merge. Automated pre-commit hook runs Layers 1–4 on staged files. Continuous Integration verifies full test matrix on PR.</td>
+        <td>Pre-commit hook<br>&amp; GitHub Actions CI</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>8. Quality Layer Execution & Verification Matrix</h2>
+  <div class="card-box">
+    <strong>Mandatory Pre-Release Verification Protocol:</strong>
+    <ol style="margin-top: 4px; padding-left: 16px;">
+      <li><strong>Formatting Gate:</strong> Run <code>npm run format:check</code> across <code>vyora-backend</code> and <code>vyora-frontend</code>. All source files must comply with shared Prettier rules.</li>
+      <li><strong>Linting Gate:</strong> Run <code>npm run lint</code>. Zero ESLint warnings or errors permitted on production branches.</li>
+      <li><strong>Typecheck Gate:</strong> Run <code>npm run typecheck</code> (which runs <code>tsc --noEmit</code>). Both projects must compile with 0 errors.</li>
+      <li><strong>Behavioral Test Suite:</strong> Run <code>npm run test</code>. All NestJS controller, service, guard, and Vitest component tests must report 100% pass rate.</li>
+      <li><strong>Gatekeeper Certification:</strong> Run <code>node scripts/ship-check.js</code>. Validates secret leakage prevention, UI audit compliance, and build artifacts before release.</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    <span>Vyora Backend Architecture &bull; Confidential & Proprietary</span>
+    <span>Page 5 of 5</span>
+  </div>
+
+</body>
+</html>

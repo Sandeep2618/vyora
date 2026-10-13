@@ -1,0 +1,46 @@
+{
+  "greetingMorning": "सुप्रभात",
+  "greetingAfternoon": "शुभ दोपहर",
+  "greetingEvening": "शुभ संध्या",
+  "subGreeting": "यहाँ देखें कि आज आपके व्यवसाय में क्या चल रहा है।",
+  "metrics": {
+    "totalSales": "कुल बिक्री",
+    "totalInvoices": "कुल बिल",
+    "outstandingAmount": "बकाया राशि",
+    "totalStockValue": "कुल स्टॉक मूल्य",
+    "vsLastWeek": "पिछले सप्ताह की तुलना में",
+    "noSalesYet": "अभी तक कोई बिक्री दर्ज नहीं",
+    "invoicesGenerated": "बिल बनाए गए",
+    "duesSettled": "सभी ग्राहक बकाया चुकता",
+    "stockHealthy": "स्टॉक स्तर स्वस्थ है"
+  },
+  "salesOverview": {
+    "title": "बिक्री अवलोकन",
+    "subtitle": "दर्ज की गई बिक्री से प्राप्त कुल राजस्व",
+    "last7Days": "पिछले 7 दिन",
+    "noSalesTitle": "अभी तक कोई बिक्री दर्ज नहीं",
+    "noSalesDesc": "साप्ताहिक रुझान और दैनिक राजस्व देखने के लिए बिक्री बिल बनाएं और अंतिम रूप दें।"
+  },
+  "salesByCategory": {
+    "title": "श्रेणी अनुसार बिक्री",
+    "subtitle": "उत्पाद श्रेणी वितरण",
+    "generalMerchandise": "सामान्य सामान और वस्त्र",
+    "wholesaleBulk": "थोक और बड़े ऑर्डर"
+  },
+  "recentInvoices": {
+    "title": "हाल के बिल",
+    "subtitle": "हाल ही में जारी किए गए बिक्री बिल",
+    "invoiceNo": "बिल संख्या",
+    "customer": "ग्राहक",
+    "date": "दिनांक",
+    "amount": "राशि",
+    "status": "स्थिति"
+  },
+  "topProducts": {
+    "title": "शीर्ष उत्पाद",
+    "subtitle": "मात्रा और राजस्व के अनुसार सर्वाधिक बिकने वाले उत्पाद",
+    "product": "उत्पाद",
+    "sold": "बिके",
+    "revenue": "राजस्व"
+  }
+}

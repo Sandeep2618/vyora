@@ -1,0 +1,155 @@
+{
+  "title": "Account & Organization Hub",
+  "signedInAs": "Signed in as",
+  "roleOwner": "Owner (Full Admin Access)",
+  "roleStaff": "Staff Member",
+  "renewUpi": "Renew / Upgrade via UPI",
+  "upgradeSuccess": "Subscription upgraded successfully!",
+  "tabs": {
+    "profile": "Business & User Profile",
+    "roles": "Roles & Module Rights",
+    "billing": "Billing & Plans",
+    "audit": "Audit Activity Log"
+  },
+  "profile": {
+    "title": "Business Profile & Billing Settings",
+    "subtitle": "Manage your legal tax identity, counter prefix, and default invoice terms.",
+    "saveBtn": "Save Profile Changes",
+    "saving": "Saving...",
+    "businessName": "Business Name",
+    "legalName": "Legal Registered Name",
+    "phone": "Business Phone Number",
+    "email": "Contact Email Address",
+    "gstin": "GSTIN (15 Digits)",
+    "pan": "Permanent Account Number (PAN)",
+    "sequenceSection": "Counter Document & Sequence Defaults",
+    "invoicePrefix": "Sales Invoice Prefix",
+    "invoicePadding": "Invoice Number Digits (Padding)",
+    "purchasePrefix": "Purchase Bill Prefix",
+    "addressSection": "Official Registered Address",
+    "addressLine1": "Address Line 1",
+    "addressLine2": "Address Line 2 (Optional)",
+    "city": "City",
+    "state": "State / Union Territory",
+    "pincode": "PIN Code",
+    "termsSection": "Default Invoice Terms & Conditions",
+    "termsPlaceholder": "Enter terms printed on invoice footer...",
+    "savedSuccess": "Business and user profile saved successfully!",
+    "savedError": "Failed to update business profile"
+  },
+  "rolesTab": {
+    "title": "Staff Module Access Rights",
+    "subtitle": "Configure which ERP modules are visible and accessible to Staff members. Owners always retain 100% full administrative access.",
+    "ownerManaged": "Owner Managed",
+    "enabledForStaff": "Enabled for Staff",
+    "hiddenForStaff": "Hidden for Staff",
+    "teamDirectoryTitle": "Team Staff & Ownership Directory",
+    "teamDirectorySubtitle": "Primary Owner is immutable and protected. Secondary owners can be promoted or demoted by the Primary Owner.",
+    "addMember": "Add Team Member",
+    "loadingTeam": "Loading business team members...",
+    "noTeamMembers": "No team members registered yet.",
+    "colNameEmail": "Name & Email",
+    "colRoleTier": "Role Tier",
+    "colRightsScope": "Rights Scope",
+    "colActions": "Actions",
+    "primaryOwnerBadge": "Primary Owner",
+    "ownerFullAccess": "100% Administrative & Financial Access",
+    "staffRestrictedAccess": "Restricted according to Staff Module Rights",
+    "demoteToStaff": "Demote to Staff",
+    "promoteToOwner": "Promote to Owner",
+    "protected": "Protected",
+    "rightsSaved": "Staff module rights updated! Staff accounts will see changes immediately.",
+    "modules": {
+      "invoices": {
+        "title": "Sales Invoices & Billing",
+        "desc": "Create counter bills, manage GST invoices, and track customer receivables."
+      },
+      "parties": {
+        "title": "Customers & Suppliers",
+        "desc": "Access party directory, phone contacts, and outstanding ledger balances."
+      },
+      "products": {
+        "title": "Products & Services Catalog",
+        "desc": "Browse inventory catalog, prices, and stock quantities."
+      },
+      "inventory": {
+        "title": "Inventory Movements & Audit",
+        "desc": "Track live stock movement history, adjustments, and reorder alerts."
+      },
+      "purchases": {
+        "title": "Purchase Bills & Vendors",
+        "desc": "Record supplier purchase bills and receive incoming inventory."
+      },
+      "payments": {
+        "title": "Cash & Bank Payments",
+        "desc": "Record customer receipts, vendor payments, and expense vouchers."
+      },
+      "reports": {
+        "title": "Financial & Tax Reports",
+        "desc": "Generate GSTR-1, GSTR-3B summaries, profit & loss, and ledger statements."
+      }
+    },
+    "inviteModal": {
+      "title": "Invite New Business Member",
+      "description": "Add a staff user or secondary business owner to collaborate.",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "e.g. Rahul Sharma",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "e.g. rahul@company.com",
+      "roleLabel": "Role Assignment",
+      "staffRole": "Staff Member",
+      "staffRoleDesc": "Operates counter based on enabled module rights",
+      "ownerRole": "Secondary Owner",
+      "ownerRoleDesc": "Full admin access, billing & user management",
+      "cancel": "Cancel",
+      "submit": "Add Member"
+    }
+  },
+  "billingTab": {
+    "activePlan": "Active Plan",
+    "live": "LIVE",
+    "multiUserNotice": "Multi-user business subscription with real-time cloud database synchronization. All invoices, stock deductions, and customer balances are instantly available across web and mobile apps.",
+    "instantRenewUpi": "Instant Bharat UPI Renewal",
+    "starterTitle": "Starter Plan",
+    "starterFree": "Free",
+    "starterDesc": "Forever free for small shops and solo counters.",
+    "growthTitle": "Growth Plan",
+    "growthPrice": "₹999",
+    "perYear": "/ year",
+    "growthDesc": "Ideal for retail shops & growing trading businesses.",
+    "proTitle": "Business Pro",
+    "proPrice": "₹1,999",
+    "proDesc": "Complete enterprise power for multi-counter operations.",
+    "currentBadge": "Current",
+    "recommendedBadge": "RECOMMENDED",
+    "downgradeFree": "Downgrade to Free",
+    "switchToGrowth": "Switch to Growth (₹999/yr)",
+    "upgradeToPro": "Upgrade to Pro (₹1,999/yr)",
+    "features": {
+      "starterInvoices": "Up to 50 GST Sales Invoices / mo",
+      "starterCatalog": "Product Catalog & Customers",
+      "starterOwner": "1 Business Owner Account",
+      "starterNoModules": "No Purchase or Report Modules",
+      "growthInvoices": "Unlimited GST Sales Invoices",
+      "growthModules": "Purchases, Expenses & Reports",
+      "growthStaff": "Up to 3 Team Staff Members",
+      "growthUpi": "Bharat UPI QR Counter Payments",
+      "proStaff": "Unlimited Staff & Multi-Counter Sync",
+      "proRights": "Granular Staff Module-Rights Control",
+      "proAudit": "Full Audit Trail & Stock Adjustments",
+      "proSupport": "Priority Support & Mobile Sync"
+    }
+  },
+  "auditTab": {
+    "title": "System Activity Audit Trail",
+    "subtitle": "Comprehensive chronological log of user actions, role changes, invoices created, and stock alterations.",
+    "loading": "Loading system audit records...",
+    "noRecords": "No activity logged yet.",
+    "columns": {
+      "dateTime": "Date & Time",
+      "actor": "Actor / User",
+      "action": "Action Event",
+      "entity": "Entity Type"
+    }
+  }
+}

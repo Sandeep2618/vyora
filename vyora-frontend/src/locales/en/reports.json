@@ -1,0 +1,67 @@
+{
+  "title": "Core Business Reports",
+  "subtitle": "Authoritative registers, GST tax breakdowns, inventory valuation, and debtor aging",
+  "tabs": {
+    "sales": "Sales Register",
+    "purchases": "Purchase Register",
+    "stock": "Stock Summary & Valuation",
+    "dues": "Customer Dues (Receivables)"
+  },
+  "button": {
+    "printReport": "Print Report",
+    "export": "Export Report",
+    "downloadCsv": "Download CSV"
+  },
+  "filter": {
+    "dates": "Dates:",
+    "to": "to"
+  },
+  "summary": {
+    "totalInvoices": "Total Invoices",
+    "totalTaxable": "Total Taxable",
+    "totalTax": "Total Tax (GST)",
+    "netSales": "Net Sales",
+    "totalStockUnits": "Total Stock Units",
+    "totalValuation": "Total Stock Valuation",
+    "totalOutstanding": "Total Outstanding Receivables"
+  },
+  "columns": {
+    "date": "Date",
+    "invoiceNo": "Invoice No.",
+    "billNo": "Bill No.",
+    "customer": "Customer",
+    "supplier": "Supplier",
+    "customerName": "Customer Name",
+    "productName": "Product Name",
+    "sku": "SKU",
+    "unit": "Unit",
+    "currentStock": "Current Stock",
+    "costPrice": "Cost Price",
+    "valuation": "Valuation",
+    "taxable": "Taxable",
+    "cgst": "CGST",
+    "sgst": "SGST",
+    "igst": "IGST",
+    "totalAmount": "Total Amount",
+    "due": "Due",
+    "subtotal": "Subtotal",
+    "taxes": "Taxes",
+    "phone": "Phone",
+    "outstandingDue": "Outstanding Due"
+  },
+  "empty": {
+    "salesTitle": "No sales invoices in this period",
+    "salesDesc": "Invoices finalized within the selected date range will appear in this tax register.",
+    "purchasesTitle": "No purchase bills recorded in this period",
+    "purchasesDesc": "Vendor purchases recorded for the selected date range will appear in this purchase ledger.",
+    "stockTitle": "No products in catalog",
+    "stockDesc": "Add items to your product inventory to see unit counts and financial valuation.",
+    "duesTitle": "Zero outstanding customer dues!",
+    "duesDesc": "All customer invoices are settled or fully reconciled. No pending receivables."
+  },
+  "upgrade": {
+    "title": "Business Reports require Growth Plan",
+    "description": "Sales Register, Purchase Register, Stock Inventory Valuation, and Debtor Aging are available on Growth (₹499/mo) and Business Pro (₹999/mo) plans.",
+    "button": "Upgrade to Growth Plan (₹499/mo)"
+  }
+}

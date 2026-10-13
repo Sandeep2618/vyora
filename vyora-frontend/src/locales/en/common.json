@@ -1,0 +1,106 @@
+{
+  "appName": "Vyora",
+  "appTagline": "Simple Business. Bigger Dreams.",
+  "navigation": {
+    "dashboard": "Dashboard",
+    "invoices": "Invoices",
+    "customers": "Customers",
+    "parties": "Parties",
+    "products": "Products",
+    "inventory": "Inventory",
+    "purchase": "Purchase",
+    "purchases": "Purchases",
+    "payments": "Payments",
+    "reports": "Reports",
+    "account": "Account & Roles",
+    "settings": "Settings",
+    "menu": "Menu"
+  },
+  "actions": {
+    "create": "Create",
+    "save": "Save",
+    "saveDraft": "Save Draft",
+    "createAndFinalize": "Create & Finalize",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search...",
+    "download": "Download",
+    "print": "Print",
+    "share": "Share",
+    "filter": "Filters",
+    "reset": "Reset",
+    "refresh": "Refresh",
+    "confirm": "Confirm",
+    "viewAll": "View all",
+    "addItem": "Add Item",
+    "getMobileApp": "Get Mobile App",
+    "upgrade": "Upgrade Plan",
+    "newInvoice": "New Invoice",
+    "recordVoucher": "Record Voucher",
+    "recordPayment": "Record Payment",
+    "addCustomer": "New Customer",
+    "addProduct": "New Product",
+    "addSupplier": "New Supplier",
+    "signOut": "Sign Out",
+    "businessProfile": "Business Profile",
+    "rolesAndPermissions": "Roles & Permissions",
+    "billingAndPlans": "Billing & Plans"
+  },
+  "status": {
+    "all": "All",
+    "loading": "Loading...",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "partial": "Partial",
+    "pending": "Pending",
+    "draft": "Draft",
+    "overdue": "Overdue",
+    "cancelled": "Cancelled",
+    "active": "Active",
+    "inactive": "Inactive",
+    "popular": "Popular",
+    "power": "Power"
+  },
+  "languages": {
+    "select": "Select Language",
+    "en": "English",
+    "hi": "हिन्दी (Hindi)",
+    "gu": "ગુજરાતી (Gujarati)"
+  },
+  "timeframe": {
+    "label": "Issue Date Timeframe",
+    "allDates": "All Dates",
+    "today": "Today",
+    "thisMonth": "This Month",
+    "last30Days": "Last 30 Days"
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "toggle": "Toggle Theme"
+  },
+  "empty": {
+    "noData": "No data found",
+    "noResults": "No records match active filters."
+  },
+  "roles": {
+    "owner": "Owner (Full Admin Access)",
+    "staff": "Staff (View Only)",
+    "admin": "Admin",
+    "ownerShort": "OWNER (Full Access)",
+    "staffShort": "STAFF (View Only)"
+  },
+  "plans": {
+    "enterprise": "Business Pro",
+    "growth": "Growth Plan",
+    "starter": "Starter Free",
+    "enterpriseDesc": "Unlimited staff, audited stock",
+    "growthDesc": "Up to 3 staff, purchases & reports",
+    "starterDesc": "Basic invoices (50/mo), 1 owner",
+    "proBadge": "PRO",
+    "activeBadge": "ACTIVE",
+    "freeBadge": "FREE",
+    "renewUpi": "Renew / Upgrade via UPI"
+  }
+}

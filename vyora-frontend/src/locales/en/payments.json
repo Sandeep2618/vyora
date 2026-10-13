@@ -1,0 +1,35 @@
+{
+  "title": "Payments & Receipts",
+  "subtitle": "Record customer receipts, supplier settlements, and reconcile outstanding dues",
+  "button": {
+    "recordVoucher": "Record Voucher",
+    "receipt": "Receipt",
+    "payment": "Payment"
+  },
+  "columns": {
+    "voucherNo": "Voucher No.",
+    "type": "Type",
+    "partyName": "Party Name",
+    "date": "Date",
+    "method": "Payment Method",
+    "reference": "Reference / UTR",
+    "amount": "Amount"
+  },
+  "filter": {
+    "voucherType": "Voucher Type",
+    "paymentMethod": "Payment Method",
+    "all": "All Vouchers",
+    "receipt": "Receipt (Inflow)",
+    "payment": "Payment (Outflow)",
+    "allMethods": "All Methods",
+    "cash": "Cash",
+    "bankTransfer": "Bank Transfer",
+    "upi": "UPI / QR",
+    "cheque": "Cheque"
+  },
+  "empty": {
+    "title": "No payment vouchers recorded",
+    "description": "Record receipts from customers or payments to vendors to manage cash flow traceably.",
+    "action": "Record Voucher"
+  }
+}

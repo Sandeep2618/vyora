@@ -1,0 +1,3 @@
+export const DEFAULT_INVOICE_PREFIX = 'INV-';
+export const DEFAULT_PURCHASE_PREFIX = 'BILL-';
+export const DEFAULT_INVOICE_PADDING = 4;

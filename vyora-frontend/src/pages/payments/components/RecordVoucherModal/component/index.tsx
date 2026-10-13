@@ -1,0 +1,137 @@
+import React from 'react';
+import { PaymentMethod } from '@vyora/shared-types';
+import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { RecordVoucherModalProps } from '../config/interface';
+
+export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
+  isOpen,
+  onClose,
+  type,
+  onTypeChange,
+  partyId,
+  onPartyIdChange,
+  partyOptions,
+  amountMajor,
+  onAmountChange,
+  paymentMethod,
+  onPaymentMethodChange,
+  paymentDate,
+  onPaymentDateChange,
+  referenceNumber,
+  onReferenceNumberChange,
+  notes,
+  onNotesChange,
+  onSubmit,
+  isSubmitting,
+}) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Record Payment / Receipt Voucher"
+      description="Idempotent ledger voucher with customer/supplier balance adjustment"
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
+            Cancel
+          </Button>
+          <Button
+            isLoading={isSubmitting}
+            disabled={!partyId || !amountMajor || Number(amountMajor) <= 0}
+            onClick={onSubmit}
+            className="w-full sm:w-auto"
+          >
+            Confirm Voucher
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 bg-[#F4F8F7] dark:bg-[#0D1C1B] p-1 rounded-lg border border-[#D7E5E2] dark:border-[#1E3B38]">
+          <button
+            type="button"
+            onClick={() => onTypeChange('RECEIPT')}
+            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-colors ${
+              type === 'RECEIPT'
+                ? 'bg-[#0F766E] text-white shadow-2xs'
+                : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
+            }`}
+          >
+            Receipt (From Customer)
+          </button>
+          <button
+            type="button"
+            onClick={() => onTypeChange('PAYMENT')}
+            className={`flex-1 py-1.5 rounded-md text-xs font-bold transition-colors ${
+              type === 'PAYMENT'
+                ? 'bg-[#0F766E] text-white shadow-2xs'
+                : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
+            }`}
+          >
+            Payment (To Supplier)
+          </button>
+        </div>
+
+        <Select
+          label={`Select ${type === 'RECEIPT' ? 'Customer' : 'Supplier'}`}
+          value={partyId}
+          onValueChange={onPartyIdChange}
+          options={partyOptions}
+          required
+        />
+
+        <Input
+          label="Payment Amount (₹)"
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          value={amountMajor}
+          onChange={(e) => onAmountChange(e.target.value)}
+          required
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Select
+            label="Payment Method"
+            value={paymentMethod}
+            onValueChange={(val) => onPaymentMethodChange(val as PaymentMethod)}
+            required
+            options={[
+              { label: 'Bank Transfer (NEFT/RTGS/IMPS)', value: 'BANK_TRANSFER' },
+              { label: 'UPI', value: 'UPI' },
+              { label: 'Cash', value: 'CASH' },
+              { label: 'Cheque', value: 'CHEQUE' },
+              { label: 'Debit / Credit Card', value: 'CARD' },
+              { label: 'Other', value: 'OTHER' },
+            ]}
+          />
+
+          <DatePicker
+            label="Payment Date"
+            value={paymentDate}
+            onChange={onPaymentDateChange}
+            required
+          />
+        </div>
+
+        <Input
+          label="Reference / UTR / Cheque No."
+          value={referenceNumber}
+          onChange={(e) => onReferenceNumberChange(e.target.value)}
+          placeholder="e.g. UTR-98214812"
+        />
+
+        <Input
+          label="Notes (Optional)"
+          value={notes}
+          onChange={(e) => onNotesChange(e.target.value)}
+          placeholder="e.g. Advance payment against order"
+        />
+      </div>
+    </Modal>
+  );
+};

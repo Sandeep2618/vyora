@@ -1,0 +1,106 @@
+{
+  "appName": "વ્યોરા",
+  "appTagline": "સરળ વ્યાપાર. મોટા સપના.",
+  "navigation": {
+    "dashboard": "ડેશબોર્ડ",
+    "invoices": "વેચાણ બિલ",
+    "customers": "ગ્રાહકો",
+    "parties": "પાર્ટીઓ",
+    "products": "ઉત્પાદનો",
+    "inventory": "સ્ટોક ઇન્વેન્ટરી",
+    "purchase": "ખરીદી બિલ",
+    "purchases": "ખરીદી બિલ",
+    "payments": "ચુકવણી અને રસીદો",
+    "reports": "રિપોર્ટ્સ",
+    "account": "ખાતું અને ભૂમિકાઓ",
+    "settings": "સેટિંગ્સ",
+    "menu": "મેનૂ"
+  },
+  "actions": {
+    "create": "બનાવો",
+    "save": "સાચવો",
+    "saveDraft": "ડ્રાફ્ટ સાચવો",
+    "createAndFinalize": "બનાવો અને ફાઇનલ કરો",
+    "cancel": "રદ કરો",
+    "delete": "કાઢી નાખો",
+    "edit": "સંપાદિત કરો",
+    "search": "શોધો...",
+    "download": "ડાઉનલોડ",
+    "print": "પ્રિન્ટ કરો",
+    "share": "શેર કરો",
+    "filter": "ફિલ્ટર્સ",
+    "reset": "રીસેટ",
+    "refresh": "તાજું કરો",
+    "confirm": "પુષ્ટિ કરો",
+    "viewAll": "બધા જુઓ",
+    "addItem": "આઇટમ ઉમેરો",
+    "getMobileApp": "મોબાઇલ એપ મેળવો",
+    "upgrade": "પ્લાન અપગ્રેડ કરો",
+    "newInvoice": "નવું બિલ",
+    "recordVoucher": "વાઉચર નોંધો",
+    "recordPayment": "ચુકવણી નોંધો",
+    "addCustomer": "નવો ગ્રાહક",
+    "addProduct": "નવું ઉત્પાદન",
+    "addSupplier": "નવો સપ્લાયર",
+    "signOut": "સાઇન આઉટ",
+    "businessProfile": "વ્યવસાય પ્રોફાઇલ",
+    "rolesAndPermissions": "ભૂમિકાઓ અને પરવાનગીઓ",
+    "billingAndPlans": "બિલિંગ અને પ્લાન્સ"
+  },
+  "status": {
+    "all": "બધા",
+    "loading": "લોડ થઈ રહ્યું છે...",
+    "paid": "ચુકવેલ",
+    "unpaid": "બાકી",
+    "partial": "આંશિક",
+    "pending": "બાકી / પ્રક્રિયામાં",
+    "draft": "ડ્રાફ્ટ",
+    "overdue": "મુદતવીતી",
+    "cancelled": "રદ કરેલ",
+    "active": "સક્રિય",
+    "inactive": "નિષ્ક્રિય",
+    "popular": "લોકપ્રિય",
+    "power": "પાવર"
+  },
+  "languages": {
+    "select": "ભાષા પસંદ કરો",
+    "en": "English",
+    "hi": "हिन्दी (Hindi)",
+    "gu": "ગુજરાતી (Gujarati)"
+  },
+  "timeframe": {
+    "label": "તારીખ સમયમર્યાદા",
+    "allDates": "બધી તારીખો",
+    "today": "આજે",
+    "thisMonth": "આ મહિને",
+    "last30Days": "છેલ્લા 30 દિવસ"
+  },
+  "theme": {
+    "light": "લાઇટ મોડ",
+    "dark": "ડાર્ક મોડ",
+    "toggle": "થીમ બદલો"
+  },
+  "empty": {
+    "noData": "કોઈ ડેટા મળ્યો નથી",
+    "noResults": "કોઈ રેકોર્ડ ફિલ્ટર સાથે મેળ ખાતો નથી."
+  },
+  "roles": {
+    "owner": "માલિક (સંપૂર્ણ વહીવટી પ્રવેશ)",
+    "staff": "સ્ટાફ (માત્ર જોવા માટે)",
+    "admin": "એડમિન",
+    "ownerShort": "માલિક (સંપૂર્ણ પ્રવેશ)",
+    "staffShort": "સ્ટાફ (મર્યાદિત પ્રવેશ)"
+  },
+  "plans": {
+    "enterprise": "બિઝનેસ પ્રો",
+    "growth": "ગ્રોથ પ્લાન",
+    "starter": "સ્ટાર્ટર ફ્રી",
+    "enterpriseDesc": "અમર્યાદિત સ્ટાફ, ઓડિટેડ સ્ટોક",
+    "growthDesc": "3 સ્ટાફ સુધી, ખરીદી અને રિપોર્ટ",
+    "starterDesc": "બેઝિક બિલ (50/મહિને), 1 માલિક",
+    "proBadge": "પ્રો",
+    "activeBadge": "સક્રિય",
+    "freeBadge": "ફ્રી",
+    "renewUpi": "UPI દ્વારા રિન્યૂ / અપગ્રેડ કરો"
+  }
+}

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@nestjs/cli':
+        specifier: ^11.0.5
+        version: 11.0.24(@swc/core@1.16.13)(@types/node@22.20.5)(esbuild@0.28.2)(postcss@8.5.29)
       '@nestjs/common':
         specifier: ^11.0.11
         version: 11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
@@ -29,9 +32,15 @@ importers:
       '@nestjs/platform-express':
         specifier: ^11.0.11
         version: 11.2.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(supports-color@8.1.1)
+      '@nestjs/schematics':
+        specifier: ^11.0.2
+        version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
       '@nestjs/swagger':
         specifier: ^11.0.6
         version: 11.4.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)
+      '@nestjs/throttler':
+        specifier: ^6.7.1
+        version: 6.7.1(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(reflect-metadata@0.2.2)
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.3
@@ -56,16 +65,13 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
       zod:
         specifier: ^3.24.2
         version: 3.25.76
     devDependencies:
-      '@nestjs/cli':
-        specifier: ^11.0.5
-        version: 11.0.24(@swc/core@1.16.13)(@types/node@22.20.5)(esbuild@0.28.2)(postcss@8.5.29)
-      '@nestjs/schematics':
-        specifier: ^11.0.2
-        version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
       '@nestjs/testing':
         specifier: ^11.0.11
         version: 11.2.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(@nestjs/platform-express@11.2.7)
@@ -90,9 +96,6 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.16.13)(@types/node@22.20.5)(typescript@5.9.3)
-      typescript:
-        specifier: ^5.8.2
-        version: 5.9.3
       unplugin-swc:
         specifier: ^2.0.0
         version: 2.0.0(@swc/core@1.16.13)(esbuild@0.28.2)(rollup@4.64.3)(vite@7.3.7(@types/node@22.20.5)(terser@5.51.2))(webpack@5.106.2(@swc/core@1.16.13)(esbuild@0.28.2)(postcss@8.5.29))
@@ -616,6 +619,14 @@ packages:
         optional: true
       '@nestjs/platform-express':
         optional: true
+
+  '@nestjs/throttler@6.7.1':
+    resolution: {integrity: sha512-gAyY1AkU+cSK5DCjFOB43xax9oakameH4xZa9kAgqBqSBQZgmv3DZylLV8KyZNzOGhceL3kDVtby+CF8VAdmEA==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0
+      reflect-metadata: ^0.1.13 || ^0.2.0
 
   '@rollup/pluginutils@5.4.0':
     resolution: {integrity: sha512-MfPp06CjRLfXQ3wY0R8vJDYBy/MvVcc9OulEfR0B8Iv9ko+GCNaRZ+EpJYFl27LhKsZK0o420sYCRHCjfCgeUg==}
@@ -3100,6 +3111,12 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@nestjs/platform-express': 11.2.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(supports-color@8.1.1)
+
+  '@nestjs/throttler@6.7.1(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.2.7)(reflect-metadata@0.2.2)':
+    dependencies:
+      '@nestjs/common': 11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
+      '@nestjs/core': 11.2.7(@nestjs/common@11.2.7(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/platform-express@11.2.7)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      reflect-metadata: 0.2.2
 
   '@rollup/pluginutils@5.4.0(rollup@4.64.3)':
     dependencies:

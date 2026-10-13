@@ -51,7 +51,7 @@ for (const file of tsxFiles) {
   const rel = path.relative(ROOT_DIR, file).replace(/\\/g, '/');
 
   // Rule 1: Modal edge-to-edge footer
-  if (content.includes('<Modal') && !rel.endsWith('components/ui/Modal.tsx')) {
+  if (content.includes('<Modal') && !rel.includes('components/ui/Modal')) {
     const hasFooter = content.includes('footer={');
     recordFinding(file, 'Modal Footer Architecture', hasFooter, {
       description: 'Modal must use dedicated footer={<Button ... />} prop',

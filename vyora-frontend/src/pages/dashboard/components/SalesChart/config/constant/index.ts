@@ -1,0 +1,2 @@
+export const DEFAULT_MAX_CHART_SALES = 100000;
+export const MIN_BAR_HEIGHT_PERCENT = 12;

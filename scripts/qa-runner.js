@@ -141,7 +141,7 @@ function auditFrontendCode(moduleName) {
     const relative = path.relative(ROOT_DIR, file);
     const normalizedRelative = relative.replace(/\\/g, '/');
 
-    if (content.includes('<Modal') && !normalizedRelative.endsWith('components/ui/Modal.tsx') && (moduleName === 'all' || file.toLowerCase().includes(moduleName))) {
+    if (content.includes('<Modal') && !normalizedRelative.includes('components/ui/Modal') && (moduleName === 'all' || file.toLowerCase().includes(moduleName))) {
       const hasFooterProp = content.includes('footer={');
       const modalBlocks = content.match(/<Modal[\s\S]*?<\/Modal>/g) || [];
       const hasOldFloatingDivider = modalBlocks.some(block =>

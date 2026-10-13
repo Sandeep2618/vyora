@@ -1,0 +1,1 @@
+export const TOP_PRODUCTS_MAX_NAME_WIDTH = 130;

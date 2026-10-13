@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vyora - Version 1 Release Plan & Vyapar Parity Roadmap (PM & AI Handoff Brief)</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 12mm 12mm 12mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #123B3A;
+      background: #FFFFFF;
+      margin: 0;
+      padding: 0;
+      font-size: 9.3pt;
+      line-height: 1.4;
+    }
+    .header-bar {
+      border-bottom: 3px solid #0F766E;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-box {
+      width: 38px;
+      height: 38px;
+      background: #0F766E;
+      color: #FFFFFF;
+      font-weight: 900;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .brand-title {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #123B3A;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+      font-size: 8.5pt;
+      color: #566B69;
+      margin: 3px 0 0 0;
+      font-weight: 600;
+    }
+    .meta-box {
+      text-align: right;
+      font-size: 8pt;
+      color: #566B69;
+      line-height: 1.35;
+    }
+    h2 {
+      font-size: 12pt;
+      color: #0F766E;
+      border-bottom: 1.5px solid #D7E5E2;
+      padding-bottom: 3px;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      break-after: avoid;
+    }
+    h3 {
+      font-size: 9.8pt;
+      color: #123B3A;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-weight: 700;
+      break-after: avoid;
+    }
+    p {
+      margin: 0 0 5px 0;
+      font-size: 8.8pt;
+      color: #334A48;
+    }
+    ul, ol {
+      margin: 0 0 6px 0;
+      padding-left: 18px;
+      font-size: 8.8pt;
+      color: #334A48;
+    }
+    li {
+      margin-bottom: 2.5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 8pt;
+    }
+    th, td {
+      border: 1px solid #D7E5E2;
+      padding: 4.5px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background-color: #F4F8F7;
+      color: #123B3A;
+      font-weight: 700;
+    }
+    tr:nth-child(even) td {
+      background-color: #FAFCFC;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1.5px 6px;
+      border-radius: 4px;
+      font-size: 7.2pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .badge-success { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .badge-warning { background: #FEF9C3; color: #A16207; border: 1px solid #FEF08A; }
+    .badge-teal { background: #E6F4F2; color: #0F766E; border: 1px solid #A0D2CA; }
+    .badge-purple { background: #F3E8FF; color: #7E22CE; border: 1px solid #E9D5FF; }
+    .badge-danger { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .card-box {
+      background: #F4F8F7;
+      border: 1px solid #D7E5E2;
+      border-left: 4px solid #0F766E;
+      padding: 7px 11px;
+      border-radius: 6px;
+      margin: 6px 0 10px 0;
+    }
+    .card-box-danger {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-left: 4px solid #B91C1C;
+      padding: 7px 11px;
+      border-radius: 6px;
+      margin: 6px 0 10px 0;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    .footer {
+      border-top: 1px solid #D7E5E2;
+      padding-top: 5px;
+      font-size: 7.5pt;
+      color: #566B69;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1: EXECUTIVE BRIEF & ACHIEVEMENTS -->
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Small-Business Billing & Inventory Platform</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>V1 Release Gate & Roadmap Brief</strong><br>
+      Document Version: 2.2 (October 2026)<br>
+      Target Audience: Senior Developer & QA Agents
+    </div>
+  </div>
+
+  <div class="card-box">
+    <strong>Project Manager Mission Statement:</strong>
+    Vyora is designed to provide Indian MSMEs with a rock-solid, production-grade business billing, inventory, and ledger application inspired by market leaders such as Vyapar, but built with clean web architecture, multi-tenant cloud persistence, and strict accounting invariants. This document serves as the authoritative release plan, feature matrix, and handoff protocol for Senior Developer and QA engineering agents.
+  </div>
+
+  <h2>1. Version 1 Release Goals: Planned vs. Achieved vs. Extra Scope</h2>
+  <p>The core objective of Version 1 is delivering a dependable, connected daily-use commercial workflow rather than an isolated UI prototype. All calculations, stock adjustments, and ledger postings are authoritative on the backend.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 14%;">Module / Req</th>
+        <th style="width: 28%;">Original V1 Specification</th>
+        <th style="width: 32%;">Implementation Status & Invariants</th>
+        <th style="width: 26%;">Extra Capabilities Accomplished</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Auth & Tenant<br>(V1-01, V1-02)</strong></td>
+        <td>JWT login/register, business onboarding, GST profile, secure token expiration.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Auto-tenant discovery, multi-tenant isolation via <code>x-business-id</code>, bcrypt hashing.</td>
+        <td>Session persistence recovery, sanitization against <code>undefined</code> header injection.</td>
+      </tr>
+      <tr>
+        <td><strong>Access Control<br>(V1-03, V1-18, V1-19)</strong></td>
+        <td>Owner vs Staff role enforcement on backend API and UI menus.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br><code>RolesGuard</code> blocks staff mutations with 403; primary owner is immutable.</td>
+        <td><strong>Live Roles Switchboard:</strong> Dedicated <code>/account?tab=ROLES</code> with granular module permission matrix.</td>
+      </tr>
+      <tr>
+        <td><strong>Catalog Master<br>(V1-04)</strong></td>
+        <td>Products & services, SKU, unit of measure, GST tax categories, opening stock.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Calculations in integer minor units (paisa); duplicate SKU prevention.</td>
+        <td>Unit filter, tax slab filter, low-stock threshold badges, search debounce (300ms).</td>
+      </tr>
+      <tr>
+        <td><strong>Parties Master<br>(V1-05)</strong></td>
+        <td>Customers and suppliers, contact info, state code, GSTIN, opening balance ledger.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Strict tenant scoping; balance tracking with real-time receivables/payables.</td>
+        <td>State filter, balance due filter, integrated party ledger modal with direct payment links.</td>
+      </tr>
+      <tr>
+        <td><strong>Sales Invoicing<br>(V1-06, V1-07, V1-14)</strong></td>
+        <td>Draft/finalize invoice lifecycle, server-side tax math, unique number, A4 PDF/print.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Draft to finalized state engine; stock deducted upon finalization; immutable documents.</td>
+        <td>Authoritative live calculation preview, print-optimized stylesheet, cancellation reason audit.</td>
+      </tr>
+      <tr>
+        <td><strong>Inventory Ledger<br>(V1-08)</strong></td>
+        <td>Traceable movements log, sales reduce stock, purchases increase stock, audit logs.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Idempotent stock mutations; adjustment reasons (Damaged, Recount, Return, Expiry).</td>
+        <td>Negative stock validation guard, inventory movements filter by date and movement type.</td>
+      </tr>
+      <tr>
+        <td><strong>Payments & Vouchers<br>(V1-09)</strong></td>
+        <td>Full and partial payments, method (Cash, Bank, UPI, Cheque), reference/UTR.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Invoice balance reconciliation, unique idempotency keys to prevent double-recording.</td>
+        <td>Payment-in (Receipt) & Payment-out (Payment) voucher types, reference number validation.</td>
+      </tr>
+      <tr>
+        <td><strong>Purchases<br>(V1-10)</strong></td>
+        <td>Supplier purchase bill entry, line items, taxes, stock increment, accounts payable.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Purchases immediately increment physical stock and record supplier liability.</td>
+        <td>Custom <code>DatePicker</code> calendar, dynamic purchase bill tax calculation, zero-product catalog card.</td>
+      </tr>
+      <tr>
+        <td><strong>Expenses<br>(V1-11)</strong></td>
+        <td>Direct & indirect expense tracking, categories, payment methods, notes.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Tenant-scoped expense entries; date range filtering and category breakdowns.</td>
+        <td>Instant category summary aggregation, method breakdown (UPI, Cash, Bank).</td>
+      </tr>
+      <tr>
+        <td><strong>Reports & Dashboard<br>(V1-12, V1-13)</strong></td>
+        <td>Sales/Purchase registers, stock valuation summary, customer dues, sales charts.</td>
+        <td><span class="badge badge-success">Delivered & Verified</span><br>Real-time API aggregation; gross revenue, pending dues, top items.</td>
+        <td>Customer aging dues breakdown, date range presets (Today, This Month, Last 30 Days).</td>
+      </tr>
+      <tr>
+        <td><strong>Localization & UI<br>(Extra Milestone)</strong></td>
+        <td>Basic English web layout (original spec had no multi-language requirement).</td>
+        <td><span class="badge badge-teal">Extra Scope Delivered</span><br>Tri-lingual engine with English, Hindi (हिन्दी), and Gujarati (ગુજરાતી) support.</td>
+        <td><strong>Full i18n Suite:</strong> Radix Select language switcher, translated table tabs, filters, and modals.</td>
+      </tr>
+      <tr>
+        <td><strong>Theming & Design<br>(Extra Milestone)</strong></td>
+        <td>Standard light Theme B (Teal Ledger) web UI.</td>
+        <td><span class="badge badge-teal">Extra Scope Delivered</span><br>Full Dark Mode & Light Mode support with custom Teal Ledger dark surfaces.</td>
+        <td>Persistent theme storage, uniform 36px (<code>h-9</code>) header controls, accessible Radix Selects.</td>
+      </tr>
+      <tr>
+        <td><strong>SaaS Monetization<br>(Extra Milestone)</strong></td>
+        <td>Static tier badges (Starter, Growth, Pro).</td>
+        <td><span class="badge badge-teal">Extra Scope Delivered</span><br>End-to-end interactive checkout modal with billing cycle toggle and 18% GST calculation.</td>
+        <td>Simulated UPI/Card gateway authorization, instant plan activation, printable receipts.</td>
+      </tr>
+      <tr>
+        <td><strong>Mobile Companion<br>(Extra Milestone)</strong></td>
+        <td>Responsive browser layout only.</td>
+        <td><span class="badge badge-teal">Extra Scope Delivered</span><br>Mobile App Companion Sync modal with QR code connection, APK download, and Expo app.</td>
+        <td>Sticky mobile bottom navigation, auto-collapsing desktop sidebar, card layout adapters.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>Vyora Project Management Brief • Confidential & Proprietary</span>
+    <span>Page 1 of 5</span>
+  </div>
+
+  <!-- PAGE 2: ROOT CAUSE ANALYSIS & ARCHITECTURAL PROTOCOL -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Architectural Discipline & Core Engineering Standard</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Section 2: Systemic Protocol</strong><br>
+      Eliminating Piecemeal Regressions<br>
+      One-Shot Whole-App Execution Standard
+    </div>
+  </div>
+
+  <h2>2. Root Cause Analysis: Why Were Changes Done Piecemeal?</h2>
+  <div class="card-box-danger">
+    <strong>The Core Problem Identified by Leadership:</strong>
+    <em>"Currently we update things in one place only; if the same thing is used in another module we need to update that as well. For example, adding i18n languages took 3 to 4 prompts. Why wasn't that achieved in one shot?"</em>
+  </div>
+
+  <p>An honest architectural retrospective reveals three specific technical causes for this friction:</p>
+  <ol>
+    <li><strong>Component Dispersion (Lack of a Shared Abstraction):</strong> Filter toolbars, search bars, and table headers were implemented individually inside module folders (e.g. <code>InvoiceFilterToolbar</code>, <code>PartyFilterToolbar</code>, <code>ProductFilterToolbar</code>) rather than consuming a unified polymorphic <code>&lt;TableToolbar&gt;</code> component. Local strings were hardcoded in local configs instead of binding to a global schema.</li>
+    <li><strong>Namespace Fragmentation in i18n Dictionaries:</strong> Status keys were scattered across multiple JSON files without clear naming conventions (e.g. <code>invoices.json</code> had <code>filter.paid</code>, <code>common.json</code> had <code>status.paid</code>, while <code>ALL</code> was unmapped). When one view was translated, the others retained unmapped keys.</li>
+    <li><strong>Absence of a Mandatory Whole-App Audit Step:</strong> AI agents previously operated with narrow "prompt-level myopia"—fixing only the screen mentioned in the user's prompt rather than grepping the codebase for all identical occurrences across Products, Invoices, Parties, Payments, Purchases, and Inventory.</li>
+  </ol>
+
+  <h2>3. The "One-Shot Whole-App" Engineering Standard (For Senior Dev & QA Agents)</h2>
+  <p>To eliminate piecemeal edits permanently, every engineer and AI subagent must follow this non-negotiable architectural protocol:</p>
+
+  <div class="card-box">
+    <strong>Mandatory Invariant Rule: The Rule of Universal Application</strong><br>
+    Whenever a component pattern, UX rule, schema constraint, or translation key is modified, the developer agent MUST audit and apply the change across <u>ALL 6 CORE DOMAINS</u> before submitting code for QA sign-off:
+    <br><code>1. Products &bull; 2. Parties (Customers/Suppliers) &bull; 3. Invoices &bull; 4. Purchases &bull; 5. Payments &bull; 6. Inventory</code>
+  </div>
+
+  <h3>Standard Architectural Rules</h3>
+  <ul>
+    <li><strong>Shared Component Enforcement:</strong> All tables MUST use <code>src/components/ui/Table.tsx</code> and <code>Pagination.tsx</code>. All filter inputs MUST use <code>SearchInput.tsx</code> (with 300ms built-in debounce) and <code>Select.tsx</code> (Radix UI). Never write custom inline dropdowns or un-debounced inputs.</li>
+    <li><strong>Universal i18n Contract:</strong>
+      <ul>
+        <li>All shared statuses (<code>ALL</code>, <code>PAID</code>, <code>PENDING</code>, <code>OVERDUE</code>, <code>CANCELLED</code>, <code>ACTIVE</code>, <code>INACTIVE</code>) MUST reside in <code>common.json</code> under <code>status.*</code>.</li>
+        <li>All standard actions (<code>Create</code>, <code>Edit</code>, <code>Delete</code>, <code>Search</code>, <code>Filter</code>, <code>Reset</code>, <code>Cancel</code>, <code>Save</code>) MUST reside in <code>common.json</code> under <code>actions.*</code>.</li>
+        <li>Whenever a new string is added, the agent MUST update <code>en</code>, <code>hi</code>, and <code>gu</code> simultaneously in the same file change. Zero hardcoded strings permitted.</li>
+      </ul>
+    </li>
+    <li><strong>Radix UI Safety Standard:</strong> Any dropdown or select component MUST use defensive, non-crashing components. <code>SelectLabel</code> is standardized as an accessible styled <code>&lt;div&gt;</code> to prevent Radix <code>SelectGroup</code> context errors.</li>
+    <li><strong>Zero-Data Clean Slate Standard:</strong> When a table has 0 records and no active search/filters, all filter bars, search inputs, and pagination controls MUST be hidden, rendering only a focused <code>&lt;EmptyState&gt;</code> card with a primary creation CTA.</li>
+    <li><strong>Sticky Modal Architecture:</strong> Every modal must use <code>&lt;Modal footer={...}&gt;</code> with full-bleed responsive buttons (full width on mobile, right-aligned on desktop). No floating dividers or nested scrollbars.</li>
+  </ul>
+
+  <div class="footer">
+    <span>Vyora Project Management Brief • Confidential & Proprietary</span>
+    <span>Page 2 of 5</span>
+  </div>
+
+  <!-- PAGE 3: VYAPAR APP EXPLORATION & MULTI-VERSION ROADMAP -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Competitive Analysis & Multi-Version Roadmap</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Section 3: Product Strategy</strong><br>
+      Deep Vyapar App Decomposition<br>
+      Version 1.0 &rarr; 2.0 &rarr; 3.0 Milestone Path
+    </div>
+  </div>
+
+  <h2>4. Comprehensive Vyapar App Decomposition</h2>
+  <p>Vyapar is the market benchmark for Indian business accounting. To achieve true commercial parity, we systematically map Vyapar's complete feature architecture and phase it across disciplined release boundaries:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 18%;">Vyapar Functional Pillar</th>
+        <th style="width: 32%;">Detailed Feature Capabilities</th>
+        <th style="width: 25%;">Vyora Target Version</th>
+        <th style="width: 25%;">Implementation Strategy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Sales Pipeline</strong></td>
+        <td>Estimates / Quotations, Sale Orders, Delivery Challan, Sale Invoices, Credit Notes (Sale Return), POS counter billing.</td>
+        <td><strong>V1:</strong> Sales Invoices<br><strong>V2:</strong> Estimates, Challans, Credit Notes<br><strong>V3:</strong> POS Shift Billing</td>
+        <td>V1 establishes authoritative invoice numbering and stock depletion. V2 introduces document conversion pipelines (Estimate &rarr; Invoice).</td>
+      </tr>
+      <tr>
+        <td><strong>Purchase Pipeline</strong></td>
+        <td>Purchase Orders, Purchase Bills, Debit Notes (Purchase Return), Supplier Price Lists.</td>
+        <td><strong>V1:</strong> Purchase Bills<br><strong>V2:</strong> Purchase Orders, Debit Notes<br><strong>V3:</strong> Automated Reorder Requests</td>
+        <td>V1 increases physical inventory and records accounts payable. V2 adds PO tracking and return stock reversal.</td>
+      </tr>
+      <tr>
+        <td><strong>Party Management & Ledger</strong></td>
+        <td>Customer/Supplier directory, GSTIN verification, Credit Limits, Statement of Accounts, Aging Reports, WhatsApp Reminders.</td>
+        <td><strong>V1:</strong> Party Master, Receivables/Payables<br><strong>V2:</strong> Credit Limits, WhatsApp Sharing<br><strong>V3:</strong> Live GSTIN Lookup API</td>
+        <td>V1 tracks net dues per party. V2 introduces PDF statement generation and direct WhatsApp notification integration.</td>
+      </tr>
+      <tr>
+        <td><strong>Banking & Cash Management</strong></td>
+        <td>Cash-in-hand, Multiple Bank Accounts, Cheque tracking, Contra transfers (Bank to Cash / Cash to Bank), Dynamic UPI QR.</td>
+        <td><strong>V1:</strong> Basic Payment Methods<br><strong>V2:</strong> Bank Accounts Ledger, Contra<br><strong>V3:</strong> Auto Bank Statement Sync</td>
+        <td>V1 records payment transactions against invoices. V2 adds a true double-sided Cash/Bank ledger with dynamic invoice QR codes.</td>
+      </tr>
+      <tr>
+        <td><strong>Inventory & Warehousing</strong></td>
+        <td>Item Master, Stock Movements, Low Stock Alerts, Batch Tracking, Expiry Dates, Serial Numbers, Barcode Scanning/Printing, Multi-MRP.</td>
+        <td><strong>V1:</strong> SKU, Stock Ledger, Adjustments<br><strong>V2:</strong> Batch/Expiry, Barcode Scan<br><strong>V3:</strong> Multi-Warehouse Transfers</td>
+        <td>V1 enforces FIFO atomic stock updates and low-stock indicators. V2 introduces batch-level traceability for pharma/retail.</td>
+      </tr>
+      <tr>
+        <td><strong>Taxation & Compliance</strong></td>
+        <td>GST Invoicing (CGST, SGST, IGST), HSN/SAC codes, GSTR-1, GSTR-2, GSTR-3B summaries, E-Way Bill generation, E-Invoicing (IRN).</td>
+        <td><strong>V1:</strong> GST Tax Calculation, HSN<br><strong>V2:</strong> GSTR-1 & 3B JSON Exports<br><strong>V3:</strong> Live E-Way & E-Invoice API</td>
+        <td>V1 computes tax in minor units. V2 generates government-compatible JSON offline files. V3 connects to NIC/GSP sandbox APIs.</td>
+      </tr>
+      <tr>
+        <td><strong>Financial Reporting</strong></td>
+        <td>Sales/Purchase Registers, Daybook, Stock Summary, Bill-wise Profit, Profit & Loss Statement, Balance Sheet.</td>
+        <td><strong>V1:</strong> Core 5 Registers<br><strong>V2:</strong> Bill-Wise Profit, Daybook<br><strong>V3:</strong> Full P&L & Balance Sheet</td>
+        <td>V1 provides operational transaction registers. V2/V3 deliver formal double-entry accounting reports.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>5. Phased Product Roadmap</h2>
+
+  <h3>Version 1.0 — Core Foundation & Release Gate (Current Scope Wrap-Up)</h3>
+  <ul>
+    <li><strong>Scope:</strong> Complete daily-use billing for retail/wholesale trade. Auth, Tenant Isolation, Product Catalog, Party Directory, Sales Invoices (Draft & Finalize), Purchase Bills, Payment Vouchers (Receipt & Payment), Inventory Adjustments, Expenses, Dashboard, Core Reports.</li>
+    <li><strong>Signature Polish:</strong> Tri-lingual i18n (EN/HI/GU), Theme B Light/Dark mode, accessible Radix Selects & DatePickers, debounced search, mobile companion sync, and SaaS checkout.</li>
+  </ul>
+
+  <h3>Version 2.0 — Operational Parity (Vyapar Equivalent Operations)</h3>
+  <ul>
+    <li><strong>Document Flow Pipeline:</strong> Quotations / Estimates &rarr; 1-click conversion to Sales Invoices. Delivery Challans &rarr; 1-click billing.</li>
+    <li><strong>Returns & Adjustments:</strong> Credit Notes (Sales Return) and Debit Notes (Purchase Return) with automated stock replenishment.</li>
+    <li><strong>Banking Ledger:</strong> Bank Accounts & Cash In Hand ledgers; Contra vouchers; Dynamic UPI QR code printed directly on invoice PDFs.</li>
+    <li><strong>Batch & Barcode:</strong> Batch numbers, expiry date tracking, and USB/camera barcode scanner input for lightning-fast billing.</li>
+  </ul>
+
+  <h3>Version 3.0 — Extended Compliance, Scale & Automation</h3>
+  <ul>
+    <li><strong>Tax Portal Automation:</strong> GSTR-1 & GSTR-3B offline JSON exports; Direct E-Way Bill and E-Invoice (IRN) generation via GSP APIs.</li>
+    <li><strong>Offline-First & Mobile Sync:</strong> SQLite / WatermelonDB client database with delta-sync architecture for unreliable internet.</li>
+    <li><strong>Full Accounting:</strong> Journal vouchers, Trial Balance, Profit & Loss, and Balance Sheet verified by certified accountants.</li>
+  </ul>
+
+  <div class="footer">
+    <span>Vyora Project Management Brief • Confidential & Proprietary</span>
+    <span>Page 3 of 5</span>
+  </div>
+
+  <!-- PAGE 4: V1 WRAP-UP PUNCH LIST & THE FIVE LAYERS OF QUALITY CHECKS -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">V1 Wrap-Up Punch List & Quality Assurance Architecture</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Section 4: Quality & Wrap-Up</strong><br>
+      The Five Layers of Quality Checks<br>
+      Pre-Flight Verification Punch List
+    </div>
+  </div>
+
+  <h2>6. Version 1 Wrap-Up Punch List (Pending UI, Schema & Fallback Gaps)</h2>
+  <p>Before issuing the final V1 certification, the Senior Developer and QA agents must address and verify these specific remaining gaps:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 18%;">Gap Category</th>
+        <th style="width: 38%;">Specific Issue & Target Screens</th>
+        <th style="width: 26%;">Required Resolution</th>
+        <th style="width: 18%;">Acceptance Gate</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>UI Action Uniformity</strong></td>
+        <td>Some table action buttons previously rendered mixed icon/text buttons or inconsistent paddings across Payments and Purchases.</td>
+        <td>Enforce pure icon-only buttons (<code>&lt;Edit2&gt;</code>, <code>&lt;Trash2&gt;</code>, <code>&lt;Eye&gt;</code>) with subtle rounded backgrounds and localized tooltips.</td>
+        <td>Verified across all 6 tables in Light and Dark mode.</td>
+      </tr>
+      <tr>
+        <td><strong>Clean Slate Hierarchy</strong></td>
+        <td>When product catalog has 0 items, search bar was previously visible in certain modal views without any items to search.</td>
+        <td>Suppress search and filter controls when table has zero items in database; display prominent <code>&lt;EmptyState&gt;</code> card.</td>
+        <td>0-item database renders clean card with primary CTA.</td>
+      </tr>
+      <tr>
+        <td><strong>Schema & Null Fallbacks</strong></td>
+        <td>Optional notes, GSTIN, and customer addresses could display literal <code>"-"</code> or cause minor layout shifts if undefined.</td>
+        <td>Apply standardized optional chaining (<code>party?.gstin || t('common.na')</code>) and clamp text overflow with <code>truncate</code>.</td>
+        <td>No layout displacement on missing optional fields.</td>
+      </tr>
+      <tr>
+        <td><strong>Inventory Adjustment DTO</strong></td>
+        <td>Manual stock adjustment modal reason field requires strict client/server enum alignment (<code>DAMAGED</code>, <code>RECOUNT</code>, <code>RETURN</code>, <code>THEFT</code>).</td>
+        <td>Ensure frontend select options exactly match Zod schema in <code>@vyora/validation</code> and NestJS backend DTO.</td>
+        <td>Stock adjustment succeeds without validation mismatch.</td>
+      </tr>
+      <tr>
+        <td><strong>100% i18n Verification</strong></td>
+        <td>Modal titles, confirmation prompts, and toast notifications must have zero hardcoded English strings.</td>
+        <td>Audit all modal titles, buttons, toasts, and validation error messages across <code>en</code>, <code>hi</code>, and <code>gu</code>.</td>
+        <td>Switching to Hindi/Gujarati leaves 0 untranslated strings.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>7. Quality Checks: The Five Layers</h2>
+  <p>To enforce zero-defect releases and guarantee continuous, regression-free development across human engineers and autonomous AI agents, every change must strictly satisfy these five layers of defense:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 15%;">Layer</th>
+        <th style="width: 25%;">Tool</th>
+        <th style="width: 38%;">What It Catches</th>
+        <th style="width: 22%;">Execution Command</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>1. Formatting</strong></td>
+        <td><code>Prettier</code></td>
+        <td>Spacing, single/double quotes, line width (printWidth: 100), trailing commas, and indentation so all code looks identical regardless of editor or author.</td>
+        <td><code>npm run format:check</code><br><code>npm run format</code></td>
+      </tr>
+      <tr>
+        <td><strong>2. Linting</strong></td>
+        <td><code>ESLint + typescript-eslint</code></td>
+        <td>Potential logic bugs, accidental <code>any</code> types, unused variables/imports, bad import ordering, and React hook violations (e.g. missing dependencies in <code>useEffect</code>).</td>
+        <td><code>npm run lint</code></td>
+      </tr>
+      <tr>
+        <td><strong>3. Type Check</strong></td>
+        <td><code>tsc --noEmit (strict mode)</code></td>
+        <td>Static type errors, broken interface contracts, undefined property lookups, missing return types, and schema drift between frontend and backend.</td>
+        <td><code>npm run typecheck</code></td>
+      </tr>
+      <tr>
+        <td><strong>4. Tests</strong></td>
+        <td><code>Vitest + Testing Library</code></td>
+        <td>Behavior that breaks: calculation regressions (paisa/tax math), unauthorized mutations, broken invoice finalization, and component rendering crashes.</td>
+        <td><code>npm run test</code></td>
+      </tr>
+      <tr>
+        <td><strong>5. Gate</strong></td>
+        <td><code>Husky + lint-staged + CI</code></td>
+        <td>Blocks bad code before commit and before merge. Automated pre-commit hook runs Layers 1–4 on staged files. Continuous Integration runs full suite on pull requests.</td>
+        <td>Pre-commit hook<br>&amp; GitHub Actions CI</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>Vyora Project Management Brief • Confidential & Proprietary</span>
+    <span>Page 4 of 5</span>
+  </div>
+
+  <!-- PAGE 5: AGENT HANDOFF CONTRACT & FINAL SIGN-OFF -->
+  <div class="page-break"></div>
+
+  <div class="header-bar">
+    <div class="brand">
+      <div class="logo-box">V</div>
+      <div>
+        <h1 class="brand-title">VYORA</h1>
+        <p class="brand-subtitle">Senior Dev & QA Agent Handoff Protocol</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <strong>Section 5: Handoff & Sign-Off</strong><br>
+      Senior Dev & QA Execution Gate<br>
+      Final Acceptance Criteria
+    </div>
+  </div>
+
+  <h2>8. Senior Developer Agent & QA Agent Handoff Protocol</h2>
+  <p>To ensure flawless execution between autonomous AI coding agents, this strict operational workflow must be followed:</p>
+
+  <div class="card-box">
+    <strong>Senior Developer Agent Protocol:</strong>
+    <ol style="margin-top: 4px; padding-left: 16px;">
+      <li><strong>Atomic Vertical Slices:</strong> Implement fixes one domain at a time (UI + validation + API + tests). Do not make sweeping unverified refactors.</li>
+      <li><strong>Whole-App Rule:</strong> If fixing a UI pattern (e.g. icon button, modal footer, select dropdown), update all 6 modules in the same session.</li>
+      <li><strong>Satisfy Layers 1 to 4:</strong> Format (Prettier), Lint (ESLint), Typecheck (<code>tsc --noEmit</code>), and Tests (Vitest) must all pass before handoff.</li>
+      <li><strong>Build Verification:</strong> Always run <code>npm run build</code> in <code>vyora-frontend</code> and <code>npm run build</code> in <code>vyora-backend</code> before reporting completion. Zero TypeScript errors allowed.</li>
+      <li><strong>Strict Git Rule:</strong> NEVER execute <code>git push</code>. Only commit locally if requested.</li>
+    </ol>
+  </div>
+
+  <div class="card-box">
+    <strong>QA Verification Agent Protocol:</strong>
+    <ol style="margin-top: 4px; padding-left: 16px;">
+      <li><strong>Tri-Lingual Language Sweep:</strong> Verify every page under English, Hindi, and Gujarati. Ensure table headers, filter buttons, badges, and modal titles change dynamically.</li>
+      <li><strong>Dark/Light Theme Contrast Check:</strong> Toggle Theme B dark and light mode; verify that text contrast on table rows, card surfaces, and inputs meets WCAG AA standards.</li>
+      <li><strong>Zero-Data & Error Boundary Audit:</strong> Verify clean empty states on empty tenants; ensure no Radix or React unhandled runtime exceptions occur.</li>
+      <li><strong>Automated Test Suite:</strong> Execute backend integration tests (<code>npm run test</code>) and verify 100% pass rate.</li>
+      <li><strong>Gatekeeper Certification:</strong> Validate Layer 5 pre-commit compliance before certifying release readiness.</li>
+    </ol>
+  </div>
+
+  <h2>9. Final Sign-Off & Acceptance Criteria</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Verification Domain</th>
+        <th style="width: 50%;">Acceptance Criteria</th>
+        <th style="width: 25%;">Owner Sign-Off</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Functional Scope</strong></td>
+        <td>All 16 core V1 modules fully operational with real MongoDB persistence and zero mock fallbacks.</td>
+        <td>Project Manager / Lead</td>
+      </tr>
+      <tr>
+        <td><strong>Quality Checks (5 Layers)</strong></td>
+        <td>Prettier, ESLint, TypeScript (strict), Vitest test suite, and Husky pre-commit hooks passing 100%.</td>
+        <td>QA / Tech Lead</td>
+      </tr>
+      <tr>
+        <td><strong>Visual & UI Consistency</strong></td>
+        <td>Theme B (Teal Ledger) 100% consistent; h-9 header buttons; clean slate empty states; icon-only action columns.</td>
+        <td>UI/UX Designer</td>
+      </tr>
+      <tr>
+        <td><strong>Localization (i18n)</strong></td>
+        <td>Complete tri-lingual coverage (EN, HI, GU) across all pages, toolbars, tables, modals, and toasts.</td>
+        <td>QA / Localization Lead</td>
+      </tr>
+      <tr>
+        <td><strong>Backend & Security</strong></td>
+        <td>Tenant isolation on all 49 endpoints; rate limiting enabled; money in minor units; zero secrets in code.</td>
+        <td>Senior Backend Engineer</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <span>Vyora Project Management Brief • Confidential & Proprietary</span>
+    <span>Page 5 of 5</span>
+  </div>
+
+</body>
+</html>

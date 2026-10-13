@@ -321,10 +321,96 @@ We have built a complete suite of autonomous slash commands, skills, and runner 
 
 ---
 
-## 13. Next Tasks
+## 14. Version 1 Release Plan, Vyapar Parity Roadmap & Backend 49-API Directory (October 2026)
 
-1. **Vyora Mobile (React Native) Scaffolding**: Create `vyora/vyora-mobile` reusing the modular API contracts.
-2. **Thermal Receipt Mode**: Add 80mm / 58mm compact thermal receipt view in `vyora-frontend`.
-3. **GSTR-1 Export Automation**: Add CSV / Excel export endpoint for monthly GST GSTR-1 and GSTR-3B filings.
+### 1. Authoritative Project Management Documents Compiled
+Two comprehensive, print-ready PDF executive briefs have been compiled and published in `docs/`:
+1. **[`Vyora_Version_1_Release_Plan_PM_Brief.pdf`](file:///C:/Users/sande/vyora/docs/Vyora_Version_1_Release_Plan_PM_Brief.pdf)** (292 KB)
+   - *Source HTML*: [`docs/vyora_v1_release_plan.html`](file:///C:/Users/sande/vyora/docs/vyora_v1_release_plan.html)
+   - **Contents**: Full V1 achievements matrix (V1-01 through V1-24), extra capabilities delivered (tri-lingual i18n, Theme B Dark/Light mode, shadcn Radix primitives, mobile QR companion sync, SaaS tier checkout), root-cause analysis of piecemeal updates, the "One-Shot Whole-App" protocol, complete Vyapar app feature decomposition & V1/V2/V3 roadmap, and the V1 wrap-up punch list.
+2. **[`Vyora_Backend_Architecture_API_Directory.pdf`](file:///C:/Users/sande/vyora/docs/Vyora_Backend_Architecture_API_Directory.pdf)** (394 KB)
+   - *Source HTML*: [`docs/vyora_backend_architecture_api_directory.html`](file:///C:/Users/sande/vyora/docs/vyora_backend_architecture_api_directory.html)
+   - **Contents**: Full technology stack rationale (NestJS 11, MongoDB Atlas, Mongoose 8, JWT, bcrypt, Zod, minor paisa units, sliding-window rate limiter), folder structure blueprint, architectural invariants, and **the complete directory of all 49 backend endpoints currently implemented** across all 14 controllers.
+
+---
+
+### 2. The "One-Shot Whole-App" Engineering Standard
+**Root Cause Addressed**: Previously, changes (such as i18n, table styling, or select inputs) were executed piecemeal over 3-4 prompts because of component dispersion and lack of whole-app auditing.
+**The New Standard for Senior Dev & QA Agents**:
+Whenever a UI pattern, translation key, schema rule, or input component is modified, the developer agent MUST audit and apply the change across **ALL 6 CORE DOMAINS** simultaneously:
+`1. Products • 2. Parties (Customers/Suppliers) • 3. Invoices • 4. Purchases • 5. Payments • 6. Inventory`
+- **Single Component Layer**: All views MUST consume `src/components/ui/*` (`Table`, `Pagination`, `SearchInput`, `Select`, `DatePicker`, `Modal`).
+- **Universal i18n Contract**: All statuses, buttons, and timeframes are standardized in `common.json`. Any new key MUST be added to `en`, `hi`, and `gu` in the same commit.
+- **Radix UI Defensive Standard**: Dropdowns and Selects use safe wrappers (such as `SelectLabel` as a styled `div`) to prevent Radix `SelectGroup` context crashes.
+
+---
+
+### 3. Complete Backend API Directory Summary (49 Endpoints)
+The backend implements exactly **49 REST endpoints** across 14 controllers:
+- **Health** (1): `GET /api/v1/health`
+- **Auth** (4): `POST /api/v1/auth/register`, `POST /login`, `GET /me`, `POST /logout`
+- **Business** (4): `GET /api/v1/business/current`, `PUT /current`, `PUT /plan`, `PUT /permissions`
+- **Staff & RBAC** (5): `GET /api/v1/business/staff`, `POST /staff`, `PATCH /staff/:id/role`, `PATCH /staff/:id/status`, `DELETE /staff/:id`
+- **Dashboard** (1): `GET /api/v1/dashboard/metrics`
+- **Products** (5): `POST /api/v1/products`, `GET /products`, `GET /products/:id`, `PUT /products/:id`, `DELETE /products/:id`
+- **Parties** (5): `POST /api/v1/parties`, `GET /parties`, `GET /parties/:id`, `PUT /parties/:id`, `DELETE /parties/:id`
+- **Invoices** (6): `POST /api/v1/invoices/preview`, `POST /invoices`, `GET /invoices`, `GET /invoices/:id`, `POST /invoices/:id/finalize`, `POST /invoices/:id/cancel`
+- **Purchases** (3): `POST /api/v1/purchases`, `GET /purchases`, `GET /purchases/:id`
+- **Payments** (3): `POST /api/v1/payments`, `GET /payments`, `GET /payments/:id`
+- **Inventory** (2): `GET /api/v1/inventory/movements`, `POST /inventory/adjustments`
+- **Expenses** (4): `POST /api/v1/expenses`, `GET /expenses`, `GET /expenses/categories`, `DELETE /expenses/:id`
+- **Reports** (5): `GET /api/v1/reports/sales-register`, `GET /purchase-register`, `GET /stock-summary`, `GET /customer-dues`, `GET /expense-summary`
+- **Audit** (1): `GET /api/v1/audit/logs`
+
+---
+
+### 4. Senior Developer & QA Agent Handoff Protocols
+1. **Developer Agent**: Work in vertical slices; enforce whole-app audits across all 6 domains; verify `npm run build` in both frontend and backend before handoff; **NEVER execute `git push`**.
+2. **QA Agent**: Run tri-lingual check (EN/HI/GU); verify Theme B Dark/Light mode contrast; test zero-data clean slate; execute automated QA suite (`npm run test`); certify against the V1 Punch List.
+
+---
+
+### 5. Quality Checks: The Five Layers
+
+| Layer | Tool | What it catches | Execution Command |
+| :--- | :--- | :--- | :--- |
+| **1. Formatting** | `Prettier` | Spacing, quotes, line width, so all code looks the same | `npm run format:check` |
+| **2. Linting** | `ESLint + typescript-eslint` | Bugs, any, unused code, bad import order, hook mistakes | `npm run lint` |
+| **3. Type check** | `tsc --noEmit (strict mode)` | Type errors | `npm run typecheck` |
+| **4. Tests** | `Vitest + Testing Library` | Behaviour that breaks | `npm run test` |
+| **5. Gate** | `Husky + lint-staged + CI` | Blocks bad code before commit and before merge | Pre-commit hook & CI |
+
+---
+
+## 15. Mandatory Component Folder Architecture Standard
+
+Every UI component, table, modal, drawer, or complex widget strictly follows this modular directory structure:
+
+```
+ComponentName/
+├── component/
+│   └── index.tsx          # Component presentation only (pure JSX + logic/hook calls)
+├── config/
+│   ├── constant/index.ts  # Constants, default values, lookup maps, styling tokens
+│   ├── interface/index.ts # Component props and data shapes
+│   └── enum/index.ts      # Enums, action types, size / placement keys
+├── hook/index.ts          # State orchestration hook (pagination, dismiss, keyboard, filter)
+├── util/index.ts          # Pure helpers (style resolvers, badge mapping, formatters)
+└── index.ts               # Public barrel exports of this folder
+```
+
+### Reference Implementations:
+1. **Domain Tables (`InvoiceTable/`)**:
+   - Location: `src/pages/invoices/components/list/InvoiceTable/`
+   - Orchestrates pagination in `hook/index.ts`, status badge resolution in `util/index.ts`, constants in `config/constant/index.ts`, and interfaces in `config/interface/index.ts`.
+2. **Global Modals (`Modal/`)**:
+   - Location: `src/components/ui/Modal/`
+   - Encapsulates keyboard dismiss & scroll lock in `hook/index.ts`, width styles in `config/constant/index.ts`, sizing enums in `config/enum/index.ts`, and edge-to-edge footer JSX in `component/index.tsx`.
+3. **Global Drawers (`Drawer/`)**:
+   - Location: `src/components/ui/Drawer/`
+   - Encapsulates multi-directional sliding (right/left/bottom/top) in `util/index.ts`, sizing in `config/constant/index.ts`, keyboard dismiss in `hook/index.ts`, and edge-to-edge footer in `component/index.tsx`.
+4. **Global Reusability Principle**:
+   - Modals and Drawers are maintained as shared primitives in `src/components/ui/`. Any enhancement or bugfix made to `Modal/` or `Drawer/` applies globally across all modals, drawers, and views in the entire application.
+
 
 

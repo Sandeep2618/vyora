@@ -1,0 +1,1 @@
+export const DEFAULT_PAYMENT_METHOD = 'UPI';

@@ -19,6 +19,11 @@ import {
   formatDocumentNumber,
 } from '@vyora/utils';
 import { InvoiceStatus } from '@vyora/shared-types';
+import {
+  buildBusinessSnapshot,
+  buildCustomerSnapshot,
+  mapInvoiceDocument,
+} from './invoices.helper';
 
 @Injectable()
 export class InvoicesService {
@@ -105,26 +110,8 @@ export class InvoicesService {
       await this.calculateAndBuildInvoiceData(businessId, dto);
 
     return {
-      businessSnapshot: {
-        name: business.name,
-        legalName: business.legalName,
-        phone: business.phone,
-        email: business.email,
-        gstin: business.gstin,
-        address: `${business.addressLine1}${business.addressLine2 ? ', ' + business.addressLine2 : ''}`,
-        city: business.city,
-        state: business.state,
-        pincode: business.pincode,
-      },
-      customerSnapshot: {
-        name: customer.name,
-        phone: customer.phone,
-        email: customer.email,
-        gstin: customer.gstin,
-        address: `${customer.billingAddress.line1}, ${customer.billingAddress.city}`,
-        state: customer.billingAddress.state,
-        stateCode: customer.billingAddress.stateCode,
-      },
+      businessSnapshot: buildBusinessSnapshot(business),
+      customerSnapshot: buildCustomerSnapshot(customer),
       isInterState,
       items: calculatedLines,
       ...totals,
@@ -172,26 +159,8 @@ export class InvoicesService {
       invoiceNumber,
       status,
       customerId: customer._id.toString(),
-      customerSnapshot: {
-        name: customer.name,
-        phone: customer.phone,
-        email: customer.email,
-        gstin: customer.gstin,
-        address: `${customer.billingAddress.line1}, ${customer.billingAddress.city}`,
-        state: customer.billingAddress.state,
-        stateCode: customer.billingAddress.stateCode,
-      },
-      businessSnapshot: {
-        name: business.name,
-        legalName: business.legalName,
-        phone: business.phone,
-        email: business.email,
-        gstin: business.gstin,
-        address: `${business.addressLine1}${business.addressLine2 ? ', ' + business.addressLine2 : ''}`,
-        city: business.city,
-        state: business.state,
-        pincode: business.pincode,
-      },
+      customerSnapshot: buildCustomerSnapshot(customer),
+      businessSnapshot: buildBusinessSnapshot(business),
       issueDate: dto.issueDate,
       dueDate: dto.dueDate,
       isInterState,
@@ -251,7 +220,7 @@ export class InvoicesService {
       });
     }
 
-    return this.mapInvoice(invoice);
+    return mapInvoiceDocument(invoice);
   }
 
   /**
@@ -329,7 +298,7 @@ export class InvoicesService {
       },
     });
 
-    return this.mapInvoice(invoice);
+    return mapInvoiceDocument(invoice);
   }
 
   /**
@@ -401,7 +370,7 @@ export class InvoicesService {
       },
     });
 
-    return this.mapInvoice(invoice);
+    return mapInvoiceDocument(invoice);
   }
 
   async findOne(businessId: string, id: string) {
@@ -409,7 +378,7 @@ export class InvoicesService {
     if (!invoice) {
       throw new NotFoundException('Invoice not found');
     }
-    return this.mapInvoice(invoice);
+    return mapInvoiceDocument(invoice);
   }
 
   async findAll(
@@ -448,43 +417,10 @@ export class InvoicesService {
     ]);
 
     return {
-      items: items.map((inv) => this.mapInvoice(inv)),
+      items: items.map((inv) => mapInvoiceDocument(inv)),
       total,
       limit,
       skip,
-    };
-  }
-
-  private mapInvoice(doc: InvoiceDocument) {
-    return {
-      id: doc._id.toString(),
-      businessId: doc.businessId,
-      invoiceNumber: doc.invoiceNumber,
-      status: doc.status,
-      customerId: doc.customerId,
-      customerSnapshot: doc.customerSnapshot,
-      businessSnapshot: doc.businessSnapshot,
-      issueDate: doc.issueDate,
-      dueDate: doc.dueDate,
-      isInterState: doc.isInterState,
-      items: doc.items,
-      subtotalMinor: doc.subtotalMinor,
-      totalDiscountMinor: doc.totalDiscountMinor,
-      totalTaxableAmountMinor: doc.totalTaxableAmountMinor,
-      cgstMinor: doc.cgstMinor,
-      sgstMinor: doc.sgstMinor,
-      igstMinor: doc.igstMinor,
-      totalTaxMinor: doc.totalTaxMinor,
-      roundOffMinor: doc.roundOffMinor,
-      grandTotalMinor: doc.grandTotalMinor,
-      paidAmountMinor: doc.paidAmountMinor,
-      dueAmountMinor: doc.dueAmountMinor,
-      notes: doc.notes,
-      terms: doc.terms,
-      cancelReason: doc.cancelReason,
-      cancelledAt: doc.cancelledAt,
-      createdAt: (doc as any).createdAt,
-      updatedAt: (doc as any).updatedAt,
     };
   }
 }
