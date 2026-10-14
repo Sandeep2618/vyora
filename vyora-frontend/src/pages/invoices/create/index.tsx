@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { api } from '@/lib/api';
 import { majorToMinor, minorToMajor } from '@vyora/utils';
@@ -11,10 +11,12 @@ import { InvoiceCustomerHeader } from '../components/create/InvoiceCustomerHeade
 import { InvoiceLineItemsTable, LineFormItem } from '../components/create/InvoiceLineItemsTable';
 import { InvoiceTotalsSummary, InvoicePreviewTotals } from '../components/create/InvoiceTotalsSummary';
 import { NewCustomerModal } from '../components/create/modal';
+import { ProductFormModal } from '@/pages/products/modal/ProductFormModal';
 
 export const CreateInvoicePage: React.FC = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation('invoices');
+  const queryClient = useQueryClient();
+  const { t } = useTranslation(['invoices', 'common']);
 
   // Queries
   const { data: customers } = useQuery<{ items: Party[] }>({
@@ -43,6 +45,7 @@ export const CreateInvoicePage: React.FC = () => {
   });
   const [notes, setNotes] = useState('');
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
+  const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
 
   // Line items state
   const [lines, setLines] = useState<LineFormItem[]>([
@@ -177,16 +180,18 @@ export const CreateInvoicePage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#D7E5E2] dark:border-slate-800">
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => navigate('/invoices')}
-            className="p-1.5 rounded-lg text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-100 hover:bg-white dark:hover:bg-slate-800 border border-[#D7E5E2] dark:border-slate-700 transition-colors"
+            className="p-2 rounded-xl text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-100 hover:bg-white dark:hover:bg-slate-800 border border-[#D7E5E2] dark:border-slate-700 transition-colors cursor-pointer"
+            title="Back to invoices"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#123B3A] dark:text-slate-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#123B3A] dark:text-[#E6F4F1]">
               {t('createPage.title', { defaultValue: 'Create Invoice' })}
             </h2>
-            <p className="text-xs text-[#566B69] dark:text-slate-400">
+            <p className="text-xs text-[#566B69] dark:text-[#8FA8A4]">
               {t('createPage.subtitle', { defaultValue: 'Fill in the details below to issue a new bill' })}
             </p>
           </div>
@@ -242,6 +247,7 @@ export const CreateInvoicePage: React.FC = () => {
             onUpdateLine={handleUpdateLine}
             onAddLine={addLine}
             onRemoveLine={removeLine}
+            onAddNewProduct={() => setIsNewProductModalOpen(true)}
           />
         </div>
 
@@ -259,6 +265,15 @@ export const CreateInvoicePage: React.FC = () => {
         isOpen={isNewCustomerModalOpen}
         onClose={() => setIsNewCustomerModalOpen(false)}
         onCustomerCreated={(newId) => setCustomerId(newId)}
+      />
+
+      {/* Add New Product Modal (Inline Creation Flow) */}
+      <ProductFormModal
+        isOpen={isNewProductModalOpen}
+        onClose={() => {
+          setIsNewProductModalOpen(false);
+          queryClient.invalidateQueries({ queryKey: ['products'] });
+        }}
       />
     </div>
   );

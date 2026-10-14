@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
@@ -18,6 +19,7 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
   targetPlan = DEFAULT_TARGET_PLAN,
   onSuccess,
 }) => {
+  const { t } = useTranslation('common');
   const { business, updateSubscriptionPlan } = useAuth();
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>(
@@ -54,11 +56,11 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
     setErrorMsg(null);
 
     if (paymentMethod === 'UPI' && !upiId.includes('@')) {
-      setErrorMsg('Please enter a valid UPI Virtual Payment Address (e.g., yourname@okhdfcbank)');
+      setErrorMsg(t('planPurchaseModal.errUpi', { defaultValue: 'Please enter a valid UPI Virtual Payment Address (e.g., yourname@okhdfcbank)' }));
       return;
     }
     if (paymentMethod === 'CARD' && cardNumber.replace(/\s+/g, '').length < 16) {
-      setErrorMsg('Please provide a valid 16-digit debit or credit card number');
+      setErrorMsg(t('planPurchaseModal.errCard', { defaultValue: 'Please provide a valid 16-digit debit or credit card number' }));
       return;
     }
 
@@ -72,7 +74,7 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
       setTransactionId(txn);
       setStep('SUCCESS');
     } catch (err: any) {
-      setErrorMsg(err.message || 'Payment authorization failed. Please try again.');
+      setErrorMsg(err.message || t('planPurchaseModal.errFail', { defaultValue: 'Payment authorization failed. Please try again.' }));
       setStep('CHECKOUT');
     }
   };
@@ -88,23 +90,26 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
       onClose={step === 'PROCESSING' ? () => {} : onClose}
       title={
         step === 'SUCCESS'
-          ? 'Subscription Activated!'
-          : 'Upgrade Vyora Business Plan'
+          ? t('planPurchaseModal.titleSuccess', { defaultValue: 'Subscription Activated!' })
+          : t('planPurchaseModal.titleUpgrade', { defaultValue: 'Upgrade Vyora Business Plan' })
       }
       description={
         step === 'SUCCESS'
-          ? 'Your payment was authorized and tier features are now active.'
-          : 'Select your subscription tier, billing period, and authorized payment method.'
+          ? t('planPurchaseModal.descSuccess', { defaultValue: 'Your payment was authorized and tier features are now active.' })
+          : t('planPurchaseModal.descUpgrade', { defaultValue: 'Select your subscription tier, billing period, and authorized payment method.' })
       }
       maxWidth="lg"
       footer={
         step === 'CHECKOUT' ? (
           <>
             <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
-              Cancel
+              {t('actions.cancel', { defaultValue: 'Cancel' })}
             </Button>
             <Button type="submit" form="plan-purchase-form" className="w-full sm:w-auto px-6">
-              Pay {formatCurrency(pricing.total)} & Activate
+              {t('planPurchaseModal.payAndActivate', {
+                amount: formatCurrency(pricing.total),
+                defaultValue: `Pay ${formatCurrency(pricing.total)} & Activate`,
+              })}
             </Button>
           </>
         ) : undefined

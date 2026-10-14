@@ -81,17 +81,22 @@ export const InvoiceFilterToolbar: React.FC<InvoiceFilterToolbarProps> = ({
 
       {/* Expandable Filter Drawer */}
       {showFilters && (
-        <div className="p-3 bg-[#F4F8F7] dark:bg-[#162E2D] rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38] flex flex-wrap items-center gap-4 animate-in fade-in">
-          <div className="w-52">
-            <Select
-              label={t('timeframe.label', { ns: 'common', defaultValue: 'Issue Date Timeframe' })}
-              value={timeFilter}
-              onValueChange={(val) => setTimeFilter(val as InvoiceTimeFilter)}
-              options={INVOICE_TIME_OPTIONS.map((opt) => ({
-                value: opt.value,
-                label: t(opt.labelKey, { ns: 'common', defaultValue: opt.defaultLabel }),
-              }))}
-            />
+        <div className="flex items-center flex-wrap gap-3 p-2.5 bg-[#F4F8F7] dark:bg-[#162E2D] rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38] animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[#123B3A] dark:text-[#F0FDFA] whitespace-nowrap">
+              {t('timeframe.label', { ns: 'common', defaultValue: 'Date Range:' })}
+            </span>
+            <div className="w-44">
+              <Select
+                size="sm"
+                value={timeFilter}
+                onValueChange={(val) => setTimeFilter(val as InvoiceTimeFilter)}
+                options={INVOICE_TIME_OPTIONS.map((opt) => ({
+                  value: opt.value,
+                  label: t(opt.labelKey, { ns: 'common', defaultValue: opt.defaultLabel }),
+                }))}
+              />
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Party } from '@/types';
@@ -15,6 +16,7 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
   onClose,
   onCustomerCreated,
 }) => {
+  const { t } = useTranslation(['invoices', 'common']);
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -43,10 +45,10 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
       setEmail('');
       setAddress('');
       setCity('');
-      toast.success(`Customer ${newParty.name} created!`);
+      toast.success(t('newCustomerModal.successToast', { name: newParty.name, defaultValue: `Customer ${newParty.name} created!` }));
     },
     onError: (err: any) => {
-      toast.error(err?.message || 'Failed to save customer');
+      toast.error(err?.message || t('newCustomerModal.errorToast', { defaultValue: 'Failed to save customer' }));
     },
   });
 
@@ -54,64 +56,65 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Add New Customer"
-      description="Quickly save customer contact and billing address"
+      title={t('newCustomerModal.title', { defaultValue: 'Add New Customer' })}
+      description={t('newCustomerModal.description', { defaultValue: 'Quickly save customer contact and billing address' })}
       footer={
         <>
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
+            {t('actions.cancel', { ns: 'common' })}
           </Button>
           <Button
             isLoading={addCustomerMutation.isPending}
-            disabled={!name.trim() || !phone.trim()}
+            disabled={!name.trim() || !phone.trim() || !state.trim()}
             onClick={() => addCustomerMutation.mutate()}
             className="w-full sm:w-auto"
           >
-            Save Customer
+            {t('newCustomerModal.save', { defaultValue: 'Save Customer' })}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <Input
-          label="Customer Name"
+          label={t('newCustomerModal.name', { defaultValue: 'Customer Name' })}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Acme Enterprises"
+          placeholder={t('newCustomerModal.namePlaceholder', { defaultValue: 'e.g. Acme Enterprises' })}
           required
         />
         <Input
-          label="Phone Number"
+          label={t('newCustomerModal.phone', { defaultValue: 'Phone Number' })}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder="e.g. 9876543210"
+          placeholder={t('newCustomerModal.phonePlaceholder', { defaultValue: 'e.g. 9876543210' })}
           required
         />
         <Input
-          label="Email Address"
+          label={t('newCustomerModal.email', { defaultValue: 'Email Address' })}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="e.g. acme@company.com"
+          placeholder={t('newCustomerModal.emailPlaceholder', { defaultValue: 'e.g. acme@company.com' })}
         />
         <Input
-          label="Billing Address"
+          label={t('newCustomerModal.address', { defaultValue: 'Billing Address' })}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="e.g. 104, Trade Center"
+          placeholder={t('newCustomerModal.addressPlaceholder', { defaultValue: 'e.g. 104, Trade Center' })}
         />
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="City"
+            label={t('newCustomerModal.city', { defaultValue: 'City' })}
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="e.g. Mumbai"
+            placeholder={t('newCustomerModal.cityPlaceholder', { defaultValue: 'e.g. Mumbai' })}
           />
           <Select
-            label="State / Union Territory"
+            label={t('newCustomerModal.state', { defaultValue: 'State / Union Territory' })}
             value={state}
             onValueChange={setState}
             options={INDIAN_STATE_OPTIONS}
+            required
           />
         </div>
       </div>

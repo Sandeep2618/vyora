@@ -8,6 +8,7 @@ import { Invoice, PaymentMethod } from '@vyora/shared-types';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { toast } from '@/components/ui/Toast';
 import { InvoicePrintTemplate } from '../components/view/InvoicePrintTemplate';
 import { RecordPaymentModal } from '../components/view/modal';
 
@@ -43,17 +44,29 @@ export const InvoiceViewPage: React.FC = () => {
         idempotencyKey: `rcpt-${invoice?.id}-${Date.now()}`,
       }),
     onSuccess: () => {
+      toast.success('Payment Recorded', 'Receipt voucher created and ledger updated.');
       setIsPaymentModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['invoice', id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    },
+    onError: (err: any) => {
+      queryClient.invalidateQueries({ queryKey: ['invoice', id] });
+      const msg = err.response?.data?.message || err.message || 'Failed to record payment';
+      toast.error('Payment Failed', msg);
     },
   });
 
   const finalizeMutation = useMutation({
     mutationFn: () => api.post(`/invoices/${id}/finalize`),
     onSuccess: () => {
+      toast.success('Invoice Finalized', 'Tax invoice number assigned and ledger updated.');
       queryClient.invalidateQueries({ queryKey: ['invoice', id] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+    },
+    onError: (err: any) => {
+      queryClient.invalidateQueries({ queryKey: ['invoice', id] });
+      const msg = err.response?.data?.message || err.message || 'Failed to finalize invoice';
+      toast.error('Finalize Failed', msg);
     },
   });
 
@@ -148,6 +161,8 @@ export const InvoiceViewPage: React.FC = () => {
         invoice={invoice}
         isOwner={isOwner}
         onRecordPaymentClick={handleOpenPayment}
+        onFinalizeClick={() => finalizeMutation.mutate()}
+        isFinalizing={finalizeMutation.isPending}
       />
 
       {/* Record Payment Voucher Modal */}

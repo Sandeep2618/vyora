@@ -110,8 +110,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? `${t('actions.edit', { ns: 'common' })} Product` : `${t('actions.addProduct', { ns: 'common' })}`}
-      description="Enter product details, pricing, and initial inventory stock"
+      title={isEditing ? t('form.titleEdit', { defaultValue: 'Edit Product' }) : t('form.titleAdd', { defaultValue: 'New Product' })}
+      description={t('form.subtitle', { defaultValue: 'Enter product details, pricing, and initial inventory stock' })}
       footer={
         <>
           <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
@@ -124,41 +124,41 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             disabled={!isFormValid}
             className="w-full sm:w-auto"
           >
-            {isEditing ? t('actions.save', { ns: 'common' }) : t('actions.save', { ns: 'common' })}
+            {t('actions.save', { ns: 'common' })}
           </Button>
         </>
       }
     >
       <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Product / Service Name"
+          label={t('form.name', { defaultValue: 'Product / Service Name' })}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          placeholder="e.g. Premium Cotton Shirt"
+          placeholder={t('form.namePlaceholder', { defaultValue: 'e.g. Premium Cotton Shirt' })}
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label="SKU / Item Code"
+            label={t('form.sku', { defaultValue: 'SKU / Item Code' })}
             value={sku}
             onChange={(e) => setSku(e.target.value.toUpperCase())}
             required
-            placeholder="e.g. SHIRT-COT-01"
+            placeholder={t('form.skuPlaceholder', { defaultValue: 'e.g. SHIRT-COT-01' })}
           />
 
           <Input
-            label="HSN / SAC Code"
+            label={t('form.hsn', { defaultValue: 'HSN / SAC Code' })}
             value={hsnCode}
             onChange={(e) => setHsnCode(e.target.value)}
-            placeholder="e.g. 6205"
-            helperText="4 or 6 digit GST tariff code"
+            placeholder={t('form.hsnPlaceholder', { defaultValue: 'e.g. 6205' })}
+            helperText={t('form.hsnHelper', { defaultValue: '4 or 6 digit GST tariff code' })}
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Input
-            label="Selling Price (₹)"
+            label={t('form.sellingPrice', { defaultValue: 'Selling Price (₹)' })}
             type="number"
             min="0.01"
             step="0.01"
@@ -169,7 +169,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           />
 
           <Input
-            label="Purchase Cost (₹)"
+            label={t('form.purchaseCost', { defaultValue: 'Purchase Cost (₹)' })}
             type="number"
             min="0"
             step="0.01"
@@ -179,7 +179,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           />
 
           <Select
-            label="GST Tax Slab"
+            label={t('form.taxSlab', { defaultValue: 'GST Tax Slab' })}
             value={taxRate}
             onValueChange={(val) => setTaxRate(Number(val) as TaxRatePercent)}
             options={TAX_RATE_OPTIONS}
@@ -188,14 +188,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-[#D7E5E2] dark:border-[#1E3B38] pt-3">
           <Select
-            label="Measurement Unit"
+            label={t('form.unit', { defaultValue: 'Measurement Unit' })}
             value={unit}
             onValueChange={(val) => setUnit(val as ItemUnit)}
             options={UNIT_OPTIONS}
           />
 
           <Input
-            label="Opening Stock"
+            label={t('form.openingStock', { defaultValue: 'Opening Stock' })}
             type="number"
             min="0"
             value={openingStock}
@@ -205,13 +205,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           />
 
           <Input
-            label="Reorder Alert Level"
+            label={t('form.reorderLevel', { defaultValue: 'Reorder Alert Level' })}
             type="number"
             min="0"
             value={reorderLevel}
             onChange={(e) => setReorderLevel(e.target.value)}
             placeholder="5"
-            helperText="Alert when stock falls below"
+            helperText={t('form.reorderHelper', { defaultValue: 'Alert when stock falls below' })}
           />
         </div>
       </form>

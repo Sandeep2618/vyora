@@ -18,5 +18,26 @@
     "title": "No purchase bills recorded yet",
     "description": "Record supplier invoices to track inventory additions and vendor payables.",
     "action": "Record Purchase Bill"
+  },
+  "recordModal": {
+    "title": "Record Supplier Purchase Bill",
+    "description": "Increases stock inventory traceably and logs supplier payable",
+    "confirm": "Commit Purchase & Stock",
+    "selectSupplier": "Select Supplier",
+    "chooseSupplier": "Choose a supplier...",
+    "noSuppliers": "No suppliers registered in Parties",
+    "addSupplierFirst": "Add a supplier under Customers & Parties first",
+    "billNo": "Supplier Invoice / Bill No.",
+    "billNoPlaceholder": "e.g. SUP-2025-081",
+    "billDate": "Bill Date",
+    "notes": "Notes (Optional)",
+    "notesPlaceholder": "e.g. Received via BlueDart courier",
+    "receivedProducts": "Received Products",
+    "addItem": "+ Add Item",
+    "emptyCatalogTitle": "No products found in inventory",
+    "emptyCatalogDesc": "Please add products in the Products section before recording a supplier purchase bill.",
+    "selectProduct": "Select product...",
+    "qtyPlaceholder": "Qty",
+    "removeRow": "Remove row"
   }
 }

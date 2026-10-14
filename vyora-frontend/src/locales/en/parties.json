@@ -38,5 +38,32 @@
     "title": "No Parties Found",
     "description": "Add customers or suppliers to track payables, receivables, and contact details.",
     "action": "Add Your First Party"
+  },
+  "form": {
+    "titleAdd": "Add New Party",
+    "titleEdit": "Edit Party",
+    "subtitle": "Enter contact details and billing address",
+    "legalName": "Legal / Trade Name",
+    "namePlaceholder": "e.g. Acme Enterprises",
+    "phone": "Phone Number",
+    "phonePlaceholder": "9876543210",
+    "phoneHelper": "Must be 10 digits starting with 6-9",
+    "email": "Email Address",
+    "emailPlaceholder": "accounts@acme.in",
+    "gstin": "GSTIN (15 Digits)",
+    "gstinPlaceholder": "27ABCDE1234F1Z5",
+    "billingAddress": "Billing Address",
+    "addressLine1": "Address Line 1",
+    "addressPlaceholder": "Shop/Office No., Street, Area",
+    "city": "City",
+    "cityPlaceholder": "Mumbai",
+    "state": "State / UT",
+    "pincode": "PIN Code",
+    "pincodePlaceholder": "400001"
+  },
+  "deleteModal": {
+    "title": "Delete Account",
+    "confirm": "Are you sure you want to delete {{name}}?",
+    "warning": "This action cannot be undone. All linked contact information and historical records for {{name}} will be permanently removed."
   }
 }

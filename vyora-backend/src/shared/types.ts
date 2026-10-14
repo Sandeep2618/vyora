@@ -1,9 +1,10 @@
 // User and Authorization
-export type UserRole = 'OWNER' | 'STAFF' | 'ADMIN';
+export type UserRole = 'OWNER' | 'STAFF' | 'ADMIN' | 'CUSTOMER';
 
 export interface UserProfile {
   id: string;
   email: string;
+  phone?: string;
   name: string;
   role: UserRole;
   businessId?: string;
@@ -14,6 +15,20 @@ export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
   user: UserProfile;
+}
+
+export type SubscriptionPlan = 'free' | 'growth' | 'enterprise';
+
+export interface UserPersonas {
+  userId: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  activeRole: UserRole;
+  activeBusinessId?: string;
+  ownedBusinesses: Array<{ id: string; name: string; role: 'OWNER' }>;
+  staffBusinesses: Array<{ id: string; name: string; role: 'STAFF'; permissions: string[] }>;
+  customerShops: Array<{ businessId: string; shopName: string; shopPhone?: string; balanceMinor: number }>;
 }
 
 // Business Entity

@@ -46,7 +46,7 @@ export const DashboardPage: React.FC = () => {
             className="flex items-center gap-1.5 shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>{t('actions.createInvoice', { ns: 'common' })}</span>
+            <span>{t('actions.createInvoice', { ns: 'common', defaultValue: 'New Invoice' })}</span>
           </Button>
         )}
       </PageHeader>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PaymentMethod } from '@vyora/shared-types';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -28,16 +29,27 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation(['payments', 'common']);
+
+  const paymentMethodOptions = [
+    { label: t('recordModal.methods.bankTransfer', { defaultValue: 'Bank Transfer (NEFT/RTGS/IMPS)' }), value: 'BANK_TRANSFER' },
+    { label: t('recordModal.methods.upi', { defaultValue: 'UPI' }), value: 'UPI' },
+    { label: t('recordModal.methods.cash', { defaultValue: 'Cash' }), value: 'CASH' },
+    { label: t('recordModal.methods.cheque', { defaultValue: 'Cheque' }), value: 'CHEQUE' },
+    { label: t('recordModal.methods.card', { defaultValue: 'Debit / Credit Card' }), value: 'CARD' },
+    { label: t('recordModal.methods.other', { defaultValue: 'Other' }), value: 'OTHER' },
+  ];
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Record Payment / Receipt Voucher"
-      description="Idempotent ledger voucher with customer/supplier balance adjustment"
+      title={t('recordModal.title', { defaultValue: 'Record Payment / Receipt Voucher' })}
+      description={t('recordModal.description', { defaultValue: 'Idempotent ledger voucher with customer/supplier balance adjustment' })}
       footer={
         <>
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
+            {t('actions.cancel', { ns: 'common' })}
           </Button>
           <Button
             isLoading={isSubmitting}
@@ -45,7 +57,7 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
             onClick={onSubmit}
             className="w-full sm:w-auto"
           >
-            Confirm Voucher
+            {t('recordModal.confirm', { defaultValue: 'Confirm Voucher' })}
           </Button>
         </>
       }
@@ -61,7 +73,7 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
                 : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
             }`}
           >
-            Receipt (From Customer)
+            {t('recordModal.tabReceipt', { defaultValue: 'Receipt (From Customer)' })}
           </button>
           <button
             type="button"
@@ -72,12 +84,12 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
                 : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
             }`}
           >
-            Payment (To Supplier)
+            {t('recordModal.tabPayment', { defaultValue: 'Payment (To Supplier)' })}
           </button>
         </div>
 
         <Select
-          label={`Select ${type === 'RECEIPT' ? 'Customer' : 'Supplier'}`}
+          label={type === 'RECEIPT' ? t('recordModal.selectCustomer', { defaultValue: 'Select Customer' }) : t('recordModal.selectSupplier', { defaultValue: 'Select Supplier' })}
           value={partyId}
           onValueChange={onPartyIdChange}
           options={partyOptions}
@@ -85,7 +97,7 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
         />
 
         <Input
-          label="Payment Amount (₹)"
+          label={t('recordModal.amount', { defaultValue: 'Payment Amount (₹)' })}
           type="number"
           step="0.01"
           placeholder="0.00"
@@ -96,22 +108,15 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Select
-            label="Payment Method"
+            label={t('recordModal.method', { defaultValue: 'Payment Method' })}
             value={paymentMethod}
             onValueChange={(val) => onPaymentMethodChange(val as PaymentMethod)}
             required
-            options={[
-              { label: 'Bank Transfer (NEFT/RTGS/IMPS)', value: 'BANK_TRANSFER' },
-              { label: 'UPI', value: 'UPI' },
-              { label: 'Cash', value: 'CASH' },
-              { label: 'Cheque', value: 'CHEQUE' },
-              { label: 'Debit / Credit Card', value: 'CARD' },
-              { label: 'Other', value: 'OTHER' },
-            ]}
+            options={paymentMethodOptions}
           />
 
           <DatePicker
-            label="Payment Date"
+            label={t('recordModal.date', { defaultValue: 'Payment Date' })}
             value={paymentDate}
             onChange={onPaymentDateChange}
             required
@@ -119,17 +124,17 @@ export const RecordVoucherModal: React.FC<RecordVoucherModalProps> = ({
         </div>
 
         <Input
-          label="Reference / UTR / Cheque No."
+          label={t('recordModal.reference', { defaultValue: 'Reference / UTR / Cheque No.' })}
           value={referenceNumber}
           onChange={(e) => onReferenceNumberChange(e.target.value)}
-          placeholder="e.g. UTR-98214812"
+          placeholder={t('recordModal.referencePlaceholder', { defaultValue: 'e.g. UTR-98214812' })}
         />
 
         <Input
-          label="Notes (Optional)"
+          label={t('recordModal.notes', { defaultValue: 'Notes (Optional)' })}
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
-          placeholder="e.g. Advance payment against order"
+          placeholder={t('recordModal.notesPlaceholder', { defaultValue: 'e.g. Advance payment against order' })}
         />
       </div>
     </Modal>

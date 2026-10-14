@@ -26,5 +26,16 @@
     "title": "No stock movements recorded",
     "description": "All sales, purchases, and manual adjustments create an immutable audit trail here.",
     "action": "Record Stock Adjustment"
+  },
+  "adjustmentModal": {
+    "title": "Manual Stock Adjustment",
+    "description": "Audited adjustment for physical stock reconciliation, breakage, or damage",
+    "selectProduct": "Select Product",
+    "choosePlaceholder": "-- Choose product catalog item --",
+    "deltaQty": "Quantity Delta (+ for Inward, - for Outward/Loss)",
+    "deltaPlaceholder": "e.g. +10 or -2",
+    "reason": "Mandatory Reason for Adjustment",
+    "reasonPlaceholder": "e.g. Physical inventory discrepancy or carton damaged in transit",
+    "available": "Available"
   }
 }

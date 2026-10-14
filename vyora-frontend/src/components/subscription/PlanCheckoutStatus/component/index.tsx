@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { formatCurrency } from '@vyora/utils';
 import { Button } from '@/components/ui/Button';
@@ -13,6 +14,8 @@ export const PlanCheckoutStatus: React.FC<PlanCheckoutStatusProps> = ({
   transactionId,
   onFinish,
 }) => {
+  const { t } = useTranslation('common');
+
   if (step === 'PROCESSING') {
     return (
       <div className="py-14 text-center space-y-4">
@@ -24,15 +27,28 @@ export const PlanCheckoutStatus: React.FC<PlanCheckoutStatusProps> = ({
         </div>
         <div className="space-y-1">
           <h3 className="text-base font-bold text-[#123B3A] dark:text-[#E6F4F1]">
-            Connecting to Indian Banking Gateway...
+            {t('planPurchaseModal.connectingGateway', { defaultValue: 'Connecting to Indian Banking Gateway...' })}
           </h3>
           <p className="text-xs text-[#566B69] dark:text-slate-400">
-            Authorizing {formatCurrency(totalMinor)} via 256-bit encrypted checkout. Please do not refresh.
+            {t('planPurchaseModal.authorizingGateway', {
+              amount: formatCurrency(totalMinor),
+              defaultValue: `Authorizing ${formatCurrency(totalMinor)} via 256-bit encrypted checkout. Please do not refresh.`,
+            })}
           </p>
         </div>
       </div>
     );
   }
+
+  const planLabel =
+    selectedPlan === 'enterprise'
+      ? t('planPurchaseModal.businessPro', { defaultValue: 'Business Pro' })
+      : t('planPurchaseModal.growthPlan', { defaultValue: 'Growth Plan' });
+
+  const cycleLabel =
+    billingCycle === 'ANNUAL'
+      ? t('planPurchaseModal.annual', { defaultValue: 'Annual' })
+      : t('planPurchaseModal.monthly', { defaultValue: 'Monthly' });
 
   return (
     <div className="py-6 space-y-6 text-center">
@@ -42,42 +58,41 @@ export const PlanCheckoutStatus: React.FC<PlanCheckoutStatusProps> = ({
 
       <div className="space-y-2">
         <h3 className="text-xl font-black text-[#123B3A] dark:text-[#E6F4F1]">
-          Payment Successful & Plan Activated!
+          {t('planPurchaseModal.paymentSuccess', { defaultValue: 'Payment Successful & Plan Activated!' })}
         </h3>
         <p className="text-xs sm:text-sm text-[#566B69] dark:text-slate-400 max-w-md mx-auto">
-          Your business is now upgraded to the{' '}
-          <strong className="text-[#0F766E] dark:text-[#14B8A6]">
-            {selectedPlan === 'enterprise' ? 'Business Pro' : 'Growth Plan'}
-          </strong>
-          . All features, team role assignments, and reports are now unlocked.
+          {t('planPurchaseModal.paymentSuccessDesc', {
+            plan: planLabel,
+            defaultValue: `Your business is now upgraded to the ${planLabel}. All features, team role assignments, and reports are now unlocked.`,
+          })}
         </p>
       </div>
 
       {/* Receipt Card */}
       <div className="bg-[#F4F8F7] dark:bg-[#0D1C1B] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-4 text-left max-w-md mx-auto space-y-2 text-xs">
         <div className="flex justify-between border-b border-[#D7E5E2] dark:border-[#1E3B38] pb-2 font-mono text-[#566B69] dark:text-slate-400">
-          <span>Transaction Ref</span>
+          <span>{t('planPurchaseModal.txnRef', { defaultValue: 'Transaction Ref' })}</span>
           <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1]">{transactionId}</span>
         </div>
         <div className="flex justify-between border-b border-[#D7E5E2] dark:border-[#1E3B38] pb-2">
-          <span className="text-[#566B69] dark:text-slate-400">Billed To</span>
+          <span className="text-[#566B69] dark:text-slate-400">{t('planPurchaseModal.billedTo', { defaultValue: 'Billed To' })}</span>
           <span className="font-semibold text-[#123B3A] dark:text-[#E6F4F1]">{businessName || 'My Business'}</span>
         </div>
         <div className="flex justify-between border-b border-[#D7E5E2] dark:border-[#1E3B38] pb-2">
-          <span className="text-[#566B69] dark:text-slate-400">Plan & Billing</span>
+          <span className="text-[#566B69] dark:text-slate-400">{t('planPurchaseModal.planAndBilling', { defaultValue: 'Plan & Billing' })}</span>
           <span className="font-semibold text-[#123B3A] dark:text-[#E6F4F1]">
-            {selectedPlan === 'enterprise' ? 'Business Pro' : 'Growth'} ({billingCycle === 'ANNUAL' ? 'Yearly' : 'Monthly'})
+            {planLabel} ({cycleLabel})
           </span>
         </div>
         <div className="flex justify-between pt-1 font-bold text-sm text-[#123B3A] dark:text-[#E6F4F1]">
-          <span>Amount Paid (incl. 18% GST)</span>
+          <span>{t('planPurchaseModal.amountPaid', { defaultValue: 'Amount Paid (incl. 18% GST)' })}</span>
           <span className="text-[#0F766E] dark:text-[#14B8A6]">{formatCurrency(totalMinor)}</span>
         </div>
       </div>
 
       <div className="flex justify-center pt-2">
         <Button onClick={onFinish} className="px-8">
-          Continue to Workspace
+          {t('planPurchaseModal.continueToWorkspace', { defaultValue: 'Continue to Workspace' })}
           <ArrowRight className="w-4 h-4 ml-2" />
         </Button>
       </div>

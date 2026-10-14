@@ -16,16 +16,17 @@ function getApiBase(): string {
 
 const API_BASE = getApiBase();
 
-
 export class ApiError extends Error {
   statusCode: number;
   data: any;
+  requestId?: string;
 
-  constructor(message: string, statusCode: number, data?: any) {
+  constructor(message: string, statusCode: number, data?: any, requestId?: string) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.data = data;
+    this.requestId = requestId || data?.requestId;
   }
 }
 
@@ -51,34 +52,79 @@ export async function apiRequest<T = any>(
     localStorage.removeItem('vyora_business_id');
   }
 
+  const method = (options.method || 'GET').toUpperCase();
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const startTime = performance.now();
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (response.status === 401) {
-    // If token expired, clear and trigger redirect to login
-    localStorage.removeItem('vyora_token');
-    localStorage.removeItem('vyora_user');
-    if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-      window.location.href = '/login';
+    const durationMs = Math.round(performance.now() - startTime);
+    const traceId = response.headers.get('x-request-id') || undefined;
+
+    if (response.status === 401) {
+      // If token expired, clear and trigger redirect to login
+      localStorage.removeItem('vyora_token');
+      localStorage.removeItem('vyora_user');
+      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        window.location.href = '/login';
+      }
     }
+
+    const data = await response.json().catch(() => null);
+    const requestId = traceId || data?.requestId;
+
+    if (!response.ok) {
+      const errorMsg = data?.message || data?.error || `HTTP error ${response.status}`;
+
+      if (import.meta.env.DEV) {
+        console.error(
+          `%c[API ${response.status}] %c${method} ${endpoint} %c(${durationMs}ms) [Trace: ${requestId || 'N/A'}]`,
+          'color: #DC2626; font-weight: bold;',
+          'color: #1F2937; font-weight: 600;',
+          'color: #6B7280;',
+          { error: errorMsg, details: data?.details, data },
+        );
+      }
+
+      throw new ApiError(
+        Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg,
+        response.status,
+        data,
+        requestId,
+      );
+    }
+
+    if (import.meta.env.DEV) {
+      console.debug(
+        `%c[API ${response.status}] %c${method} ${endpoint} %c(${durationMs}ms) [Trace: ${requestId || 'N/A'}]`,
+        'color: #0F766E; font-weight: bold;',
+        'color: #1F2937; font-weight: 600;',
+        'color: #6B7280;',
+      );
+    }
+
+    return data as T;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    // Network or connection failure
+    const durationMs = Math.round(performance.now() - startTime);
+    if (import.meta.env.DEV) {
+      console.error(
+        `%c[API NETWORK ERROR] %c${method} ${endpoint} %c(${durationMs}ms)`,
+        'color: #DC2626; font-weight: bold;',
+        'color: #1F2937;',
+        'color: #6B7280;',
+        error,
+      );
+    }
+    throw new ApiError('Unable to connect to server. Please check your network or server status.', 0, error);
   }
-
-  const data = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const errorMsg = data?.message || data?.error || `HTTP error ${response.status}`;
-    throw new ApiError(
-      Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg,
-      response.status,
-      data,
-    );
-  }
-
-  return data as T;
 }
 
 export const api = {

@@ -11,27 +11,41 @@ export const SelectRoot = SelectPrimitive.Root;
 export const SelectGroup = SelectPrimitive.Group;
 export const SelectValue = SelectPrimitive.Value;
 
+export interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  size?: 'sm' | 'md' | 'lg';
+}
+
 export const SelectTrigger = forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'flex h-10 w-full items-center justify-between rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38] bg-white dark:bg-[#0D1C1B] px-3.5 py-2 text-xs font-semibold text-[#123B3A] dark:text-[#F0FDFA] shadow-2xs transition-all',
-      'hover:border-[#A0BDB8] dark:hover:border-[#2E5A56] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 dark:focus:ring-[#14B8A6]/20 focus:border-[#0F766E] dark:focus:border-[#14B8A6]',
-      'disabled:cursor-not-allowed disabled:bg-[#F4F8F7] dark:disabled:bg-[#112322] disabled:text-[#566B69]/60 dark:disabled:text-[#8FA8A4]/50',
-      '[&>span]:line-clamp-1 text-left',
-      className,
-    )}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 text-[#566B69] dark:text-[#8FA8A4] opacity-70 shrink-0 ml-2 transition-transform duration-200" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-));
+  SelectTriggerProps
+>(({ className, children, size = 'md', ...props }, ref) => {
+  const sizeClasses = {
+    sm: 'h-8 px-2.5 py-1 text-xs rounded-lg',
+    md: 'h-9.5 px-3 py-1.5 text-xs rounded-xl',
+    lg: 'h-11 px-3.5 py-2 text-sm rounded-xl',
+  }[size];
+
+  return (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        'flex w-full items-center justify-between border border-[#D7E5E2] dark:border-[#1E3B38] bg-white dark:bg-[#0D1C1B] font-semibold text-[#123B3A] dark:text-[#F0FDFA] shadow-2xs transition-all',
+        'hover:border-[#A0BDB8] dark:hover:border-[#2E5A56] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 dark:focus:ring-[#14B8A6]/20 focus:border-[#0F766E] dark:focus:border-[#14B8A6]',
+        'disabled:cursor-not-allowed disabled:bg-[#F4F8F7] dark:disabled:bg-[#112322] disabled:text-[#566B69]/60 dark:disabled:text-[#8FA8A4]/50',
+        '[&>span]:line-clamp-1 text-left',
+        sizeClasses,
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDown className="h-3.5 w-3.5 text-[#566B69] dark:text-[#8FA8A4] opacity-70 shrink-0 ml-1.5 transition-transform duration-200" />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 export const SelectScrollUpButton = forwardRef<
@@ -121,7 +135,7 @@ export const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-3 text-xs font-semibold text-[#123B3A] dark:text-[#F0FDFA] outline-none transition-colors',
+      'relative flex w-full cursor-pointer select-none items-center rounded-lg py-1.5 pl-7 pr-2.5 text-xs font-medium text-[#123B3A] dark:text-[#F0FDFA] outline-none transition-colors',
       'hover:bg-[#E6F4F2] dark:hover:bg-[#142B2A] hover:text-[#0F766E] dark:hover:text-[#14B8A6] focus:bg-[#E6F4F2] dark:focus:bg-[#142B2A] focus:text-[#0F766E] dark:focus:text-[#14B8A6]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
@@ -130,7 +144,7 @@ export const SelectItem = forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-[#0F766E] dark:text-[#14B8A6]" />
+        <Check className="h-3.5 w-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -165,6 +179,7 @@ export const Select: React.FC<SelectProps> = ({
   id,
   name,
   className,
+  size = 'md',
   onChange,
   onValueChange,
 }) => {
@@ -184,8 +199,14 @@ export const Select: React.FC<SelectProps> = ({
     }
   };
 
+  const placeholderFromEmptyOption = options.find((opt) => String(opt.value) === '')?.label;
+  const effectivePlaceholder =
+    placeholder !== DEFAULT_SELECT_PLACEHOLDER
+      ? placeholder
+      : (placeholderFromEmptyOption || placeholder);
+
   return (
-    <div className="w-full space-y-1.5 text-left">
+    <div className="w-full space-y-1 text-left">
       {label && (
         <label
           htmlFor={selectId}
@@ -204,27 +225,30 @@ export const Select: React.FC<SelectProps> = ({
       )}
 
       <SelectRoot
-        value={stringValue}
-        defaultValue={stringDefault}
+        value={stringValue && stringValue !== '' ? stringValue : undefined}
+        defaultValue={stringDefault && stringDefault !== '' ? stringDefault : undefined}
         onValueChange={handleValueChange}
         disabled={disabled}
       >
         <SelectTrigger
           id={selectId}
+          size={size}
           className={cn(
             error &&
               'border-[#B91C1C] dark:border-rose-500 bg-[#FEF2F2]/30 dark:bg-rose-950/30 focus:border-[#B91C1C]',
             className,
           )}
         >
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={effectivePlaceholder} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((opt) => (
-            <SelectItem key={String(opt.value)} value={String(opt.value)}>
-              {opt.label}
-            </SelectItem>
-          ))}
+          {options
+            .filter((opt) => String(opt.value) !== '')
+            .map((opt) => (
+              <SelectItem key={String(opt.value)} value={String(opt.value)}>
+                {opt.label}
+              </SelectItem>
+            ))}
         </SelectContent>
       </SelectRoot>
 

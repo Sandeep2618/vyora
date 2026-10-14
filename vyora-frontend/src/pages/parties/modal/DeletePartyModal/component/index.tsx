@@ -18,8 +18,8 @@ export const DeletePartyModal: React.FC<DeletePartyModalProps> = ({
     <Modal
       isOpen={Boolean(party)}
       onClose={onClose}
-      title="Delete Account"
-      description={`Are you sure you want to delete ${party.name}?`}
+      title={t('deleteModal.title', { defaultValue: 'Delete Account' })}
+      description={t('deleteModal.confirm', { name: party.name, defaultValue: `Are you sure you want to delete ${party.name}?` })}
       footer={
         <>
           <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
@@ -37,8 +37,10 @@ export const DeletePartyModal: React.FC<DeletePartyModalProps> = ({
       }
     >
       <p className="text-xs text-[#566B69] dark:text-[#8FA8A4] leading-relaxed">
-        This action cannot be undone. All linked contact information and historical records for{' '}
-        <strong className="text-[#123B3A] dark:text-[#E6F4F1]">{party.name}</strong> will be permanently removed.
+        {t('deleteModal.warning', {
+          name: party.name,
+          defaultValue: `This action cannot be undone. All linked contact information and historical records for ${party.name} will be permanently removed.`,
+        })}
       </p>
     </Modal>
   );

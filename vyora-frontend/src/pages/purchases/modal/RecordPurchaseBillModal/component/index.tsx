@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Trash2, ChevronDown, PackageOpen } from 'lucide-react';
 import { minorToMajor } from '@vyora/utils';
 import { Button } from '@/components/ui/Button';
@@ -27,6 +28,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation(['purchases', 'common']);
   const hasProducts = products.length > 0;
   const isSubmitDisabled =
     !supplierId || !billNumber.trim() || !hasProducts || lines.every((l) => !l.productId);
@@ -35,13 +37,13 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Record Supplier Purchase Bill"
-      description="Increases stock inventory traceably and logs supplier payable"
+      title={t('recordModal.title', { defaultValue: 'Record Supplier Purchase Bill' })}
+      description={t('recordModal.description', { defaultValue: 'Increases stock inventory traceably and logs supplier payable' })}
       maxWidth="2xl"
       footer={
         <>
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Cancel
+            {t('actions.cancel', { ns: 'common' })}
           </Button>
           <Button
             isLoading={isSubmitting}
@@ -49,7 +51,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
             onClick={onSubmit}
             className="w-full sm:w-auto"
           >
-            Commit Purchase & Stock
+            {t('recordModal.confirm', { defaultValue: 'Commit Purchase & Stock' })}
           </Button>
         </>
       }
@@ -57,12 +59,12 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
       <div className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Select
-            label="Select Supplier"
+            label={t('recordModal.selectSupplier', { defaultValue: 'Select Supplier' })}
             value={supplierId}
             onValueChange={onSupplierIdChange}
-            placeholder={suppliers.length === 0 ? 'No suppliers registered in Parties' : 'Choose a supplier...'}
+            placeholder={suppliers.length === 0 ? t('recordModal.noSuppliers', { defaultValue: 'No suppliers registered in Parties' }) : t('recordModal.chooseSupplier', { defaultValue: 'Choose a supplier...' })}
             required
-            helperText={suppliers.length === 0 ? 'Add a supplier under Customers & Parties first' : undefined}
+            helperText={suppliers.length === 0 ? t('recordModal.addSupplierFirst', { defaultValue: 'Add a supplier under Customers & Parties first' }) : undefined}
             options={suppliers.map((s) => ({
               label: `${s.name}${s.phone ? ` (${s.phone})` : ''}`,
               value: s.id,
@@ -70,33 +72,33 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
           />
 
           <Input
-            label="Supplier Invoice / Bill No."
+            label={t('recordModal.billNo', { defaultValue: 'Supplier Invoice / Bill No.' })}
             value={billNumber}
             onChange={(e) => onBillNumberChange(e.target.value)}
-            placeholder="e.g. SUP-2025-081"
+            placeholder={t('recordModal.billNoPlaceholder', { defaultValue: 'e.g. SUP-2025-081' })}
             required
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <DatePicker
-            label="Bill Date"
+            label={t('recordModal.billDate', { defaultValue: 'Bill Date' })}
             value={billDate}
             onChange={onBillDateChange}
             required
           />
           <Input
-            label="Notes (Optional)"
+            label={t('recordModal.notes', { defaultValue: 'Notes (Optional)' })}
             value={notes}
             onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="e.g. Received via BlueDart courier"
+            placeholder={t('recordModal.notesPlaceholder', { defaultValue: 'e.g. Received via BlueDart courier' })}
           />
         </div>
 
         {/* Lines */}
         <div className="border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-3.5 space-y-2.5 bg-[#F4F8F7]/50 dark:bg-[#0D1C1B]">
           <div className="flex justify-between items-center pb-2 border-b border-[#D7E5E2] dark:border-[#1E3B38]">
-            <span className="text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1]">Received Products</span>
+            <span className="text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1]">{t('recordModal.receivedProducts', { defaultValue: 'Received Products' })}</span>
             {hasProducts && (
               <button
                 type="button"
@@ -108,7 +110,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
                 }
                 className="text-xs font-bold text-[#0F766E] dark:text-[#14B8A6] hover:underline cursor-pointer"
               >
-                + Add Item
+                {t('recordModal.addItem', { defaultValue: '+ Add Item' })}
               </button>
             )}
           </div>
@@ -117,10 +119,10 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
             <div className="py-6 px-4 bg-white dark:bg-[#112322] border border-amber-200 dark:border-amber-900/50 rounded-xl text-center space-y-2">
               <PackageOpen className="w-8 h-8 text-amber-600 dark:text-amber-400 mx-auto opacity-80" />
               <p className="text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1]">
-                No products found in inventory
+                {t('recordModal.emptyCatalogTitle', { defaultValue: 'No products found in inventory' })}
               </p>
               <p className="text-[11px] text-[#566B69] dark:text-slate-400 max-w-sm mx-auto">
-                Please add products in the Products section before recording a supplier purchase bill.
+                {t('recordModal.emptyCatalogDesc', { defaultValue: 'Please add products in the Products section before recording a supplier purchase bill.' })}
               </p>
             </div>
           ) : (
@@ -145,7 +147,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
                       }}
                       className="w-full h-10 appearance-none pl-3 pr-8 bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs font-semibold text-[#123B3A] dark:text-[#E6F4F1] shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E] dark:focus:border-[#14B8A6] transition-all cursor-pointer"
                     >
-                      <option value="">Select product...</option>
+                      <option value="">{t('recordModal.selectProduct', { defaultValue: 'Select product...' })}</option>
                       {products.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name} {p.sku ? `(${p.sku})` : ''}
@@ -161,7 +163,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
                       type="number"
                       min="1"
                       step="1"
-                      placeholder="Qty"
+                      placeholder={t('recordModal.qtyPlaceholder', { defaultValue: 'Qty' })}
                       value={line.quantity}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) => {
@@ -231,7 +233,7 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
                           ? 'text-[#B91C1C] dark:text-rose-400 hover:bg-red-50 dark:hover:bg-rose-950/40 cursor-pointer'
                           : 'text-[#8CA19F]/40 dark:text-slate-600 cursor-not-allowed',
                       )}
-                      title="Remove row"
+                      title={t('recordModal.removeRow', { defaultValue: 'Remove row' })}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

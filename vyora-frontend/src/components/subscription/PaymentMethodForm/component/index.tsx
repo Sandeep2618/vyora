@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { QrCode, CreditCard, Building2, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '@vyora/utils';
 import { Select } from '@/components/ui/Select';
@@ -20,10 +21,12 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
   selectedBank,
   onSelectedBankChange,
 }) => {
+  const { t } = useTranslation('common');
+
   return (
     <div className="space-y-3">
       <label className="block text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1] uppercase tracking-wider">
-        2. Payment Method
+        {t('planPurchaseModal.step2Method', { defaultValue: '2. Payment Method' })}
       </label>
 
       {/* Tabs */}
@@ -38,7 +41,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span className="text-xs">UPI / QR</span>
+          <span className="text-xs">{t('planPurchaseModal.tabUpi', { defaultValue: 'UPI / QR' })}</span>
         </button>
         <button
           type="button"
@@ -50,7 +53,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span className="text-xs">Card</span>
+          <span className="text-xs">{t('planPurchaseModal.tabCard', { defaultValue: 'Card' })}</span>
         </button>
         <button
           type="button"
@@ -62,7 +65,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
           }`}
         >
           <Building2 className="w-4 h-4" />
-          <span className="text-xs">Net Banking</span>
+          <span className="text-xs">{t('planPurchaseModal.tabNetBanking', { defaultValue: 'Net Banking' })}</span>
         </button>
       </div>
 
@@ -72,7 +75,10 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
           <div className="space-y-3">
             <div className="bg-white dark:bg-[#112322] p-3.5 rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38] flex flex-col items-center justify-center text-center">
               <p className="text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1] mb-2">
-                Scan with any UPI App to Pay {formatCurrency(totalMinor)}
+                {t('planPurchaseModal.scanToPay', {
+                  amount: formatCurrency(totalMinor),
+                  defaultValue: `Scan with any UPI App to Pay ${formatCurrency(totalMinor)}`,
+                })}
               </p>
               <div className="p-2 bg-white rounded-lg border border-[#D7E5E2] shadow-xs inline-block">
                 <img
@@ -93,7 +99,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
 
             <div>
               <label className="block text-xs font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">
-                Or Enter UPI ID / VPA for Collect Request
+                {t('planPurchaseModal.orEnterUpi', { defaultValue: 'Or Enter UPI ID / VPA for Collect Request' })}
               </label>
               <input
                 type="text"
@@ -116,7 +122,9 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
         {paymentMethod === 'CARD' && (
           <div className="space-y-2.5 text-xs">
             <div>
-              <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">Card Number</label>
+              <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">
+                {t('planPurchaseModal.cardNumber', { defaultValue: 'Card Number' })}
+              </label>
               <input
                 type="text"
                 maxLength={19}
@@ -128,7 +136,9 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">Valid Thru</label>
+                <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">
+                  {t('planPurchaseModal.validThru', { defaultValue: 'Valid Thru' })}
+                </label>
                 <input
                   type="text"
                   maxLength={5}
@@ -139,7 +149,9 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
                 />
               </div>
               <div>
-                <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">CVV</label>
+                <label className="block font-medium text-[#123B3A] dark:text-[#E6F4F1] mb-1">
+                  {t('planPurchaseModal.cvv', { defaultValue: 'CVV' })}
+                </label>
                 <input
                   type="password"
                   maxLength={4}
@@ -156,7 +168,7 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
         {paymentMethod === 'NETBANKING' && (
           <div className="space-y-2 text-xs">
             <Select
-              label="Select Bank"
+              label={t('planPurchaseModal.selectBank', { defaultValue: 'Select Bank' })}
               value={selectedBank}
               onValueChange={onSelectedBankChange}
               options={[
@@ -175,9 +187,9 @@ export const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
       <div className="flex items-center justify-between text-[11px] text-[#566B69] dark:text-slate-400 pt-1">
         <div className="flex items-center gap-1.5">
           <ShieldCheck className="w-4 h-4 text-[#0F766E] dark:text-[#14B8A6]" />
-          <span>PCI-DSS Compliant • 256-Bit SSL Encryption</span>
+          <span>{t('planPurchaseModal.securityFootnote', { defaultValue: 'PCI-DSS Compliant • 256-Bit SSL Encryption' })}</span>
         </div>
-        <span>Billed in INR (₹)</span>
+        <span>{t('planPurchaseModal.billedInInr', { defaultValue: 'Billed in INR (₹)' })}</span>
       </div>
     </div>
   );

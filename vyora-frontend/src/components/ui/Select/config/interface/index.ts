@@ -16,6 +16,7 @@ export interface SelectProps {
   id?: string;
   name?: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
   onChange?: (e: { target: { value: string; name?: string } }) => void;
   onValueChange?: (value: string) => void;
 }

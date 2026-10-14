@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Smartphone, X, Download, QrCode, ExternalLink, Copy, Check } from 'lucide-react';
 
 interface MobileAppModalProps {
@@ -7,6 +8,7 @@ interface MobileAppModalProps {
 }
 
 export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('common');
   const [qrMode, setQrMode] = useState<'apk' | 'web'>('apk');
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -27,10 +29,12 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
               <div className="w-8 h-8 rounded-xl bg-[#0F766E] text-white flex items-center justify-center font-bold">
                 <Smartphone className="w-4 h-4" />
               </div>
-              <h3 className="text-base font-bold text-[#123B3A] dark:text-[#E6F4F1]">Connect Mobile Counter</h3>
+              <h3 className="text-base font-bold text-[#123B3A] dark:text-[#E6F4F1]">
+                {t('mobileAppModal.title', { defaultValue: 'Connect Mobile Counter' })}
+              </h3>
             </div>
             <p className="text-xs text-[#566B69] dark:text-slate-400 mt-1">
-              Run Vyora Mobile on your Android or iPhone device.
+              {t('mobileAppModal.subtitle', { defaultValue: 'Run Vyora Mobile on your Android or iPhone device.' })}
             </p>
           </div>
           <button
@@ -53,7 +57,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Download APK</span>
+            <span>{t('mobileAppModal.tabApk', { defaultValue: 'Download APK' })}</span>
           </button>
           <button
             type="button"
@@ -65,7 +69,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>Web / Expo</span>
+            <span>{t('mobileAppModal.tabWeb', { defaultValue: 'Web / Expo' })}</span>
           </button>
         </div>
 
@@ -91,8 +95,8 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             <QrCode className="w-3.5 h-3.5 shrink-0" />
             <span>
               {qrMode === 'apk'
-                ? 'Scan with Camera to Download APK (~73 MB)'
-                : 'Scan with Camera or Expo Go to Open'}
+                ? t('mobileAppModal.scanApk', { defaultValue: 'Scan with Camera to Download APK (~73 MB)' })
+                : t('mobileAppModal.scanWeb', { defaultValue: 'Scan with Camera or Expo Go to Open' })}
             </span>
           </p>
         </div>
@@ -101,15 +105,15 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
         <div className="space-y-1.5 text-xs text-[#123B3A] dark:text-[#E6F4F1]">
           <div className="flex items-start gap-2">
             <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-            <p>Point phone camera at the QR code above or tap download below.</p>
+            <p>{t('mobileAppModal.step1', { defaultValue: 'Point phone camera at the QR code above or tap download below.' })}</p>
           </div>
           <div className="flex items-start gap-2">
             <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-            <p>{qrMode === 'apk' ? 'Chrome will download vyora-v1.0.0.apk directly.' : 'Tap "Add to Home screen" in Chrome or open via Expo Go.'}</p>
+            <p>{qrMode === 'apk' ? t('mobileAppModal.step2Apk', { defaultValue: 'Chrome will download vyora-v1.0.0.apk directly.' }) : t('mobileAppModal.step2Web', { defaultValue: 'Tap "Add to Home screen" in Chrome or open via Expo Go.' })}</p>
           </div>
           <div className="flex items-start gap-2">
             <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-            <p>All sales and inventory stay 100% synchronized in real time!</p>
+            <p>{t('mobileAppModal.step3', { defaultValue: 'All sales and inventory stay 100% synchronized in real time!' })}</p>
           </div>
         </div>
 
@@ -127,7 +131,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors shadow-xs"
           >
             {qrMode === 'apk' ? <Download className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
-            <span>{qrMode === 'apk' ? 'Download Standalone APK (~73 MB)' : 'Launch Mobile Web App'}</span>
+            <span>{qrMode === 'apk' ? t('mobileAppModal.downloadApkBtn', { defaultValue: 'Download Standalone APK (~73 MB)' }) : t('mobileAppModal.launchWebBtn', { defaultValue: 'Launch Mobile Web App' })}</span>
           </a>
 
           <button
@@ -145,7 +149,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             title="Copy Link"
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+            <span>{copiedLink ? t('mobileAppModal.copied', { defaultValue: 'Copied' }) : t('mobileAppModal.copy', { defaultValue: 'Copy' })}</span>
           </button>
         </div>
       </div>

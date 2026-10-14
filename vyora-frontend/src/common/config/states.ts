@@ -50,3 +50,9 @@ export const INDIAN_STATE_OPTIONS = [
     value: s.name,
   })),
 ];
+
+export const getStateFromGstin = (gstin: string): IndianState | undefined => {
+  if (!gstin || gstin.length < 2) return undefined;
+  const gstCode = gstin.substring(0, 2);
+  return INDIAN_STATES.find((s) => s.gstCode === gstCode);
+};

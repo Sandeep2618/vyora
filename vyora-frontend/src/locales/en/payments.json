@@ -31,5 +31,29 @@
     "title": "No payment vouchers recorded",
     "description": "Record receipts from customers or payments to vendors to manage cash flow traceably.",
     "action": "Record Voucher"
+  },
+  "recordModal": {
+    "title": "Record Payment / Receipt Voucher",
+    "description": "Idempotent ledger voucher with customer/supplier balance adjustment",
+    "tabReceipt": "Receipt (From Customer)",
+    "tabPayment": "Payment (To Supplier)",
+    "selectCustomer": "Select Customer",
+    "selectSupplier": "Select Supplier",
+    "amount": "Payment Amount (₹)",
+    "method": "Payment Method",
+    "date": "Payment Date",
+    "reference": "Reference / UTR / Cheque No.",
+    "referencePlaceholder": "e.g. UTR-98214812",
+    "notes": "Notes (Optional)",
+    "notesPlaceholder": "e.g. Advance payment against order",
+    "confirm": "Confirm Voucher",
+    "methods": {
+      "bankTransfer": "Bank Transfer (NEFT/RTGS/IMPS)",
+      "upi": "UPI",
+      "cash": "Cash",
+      "cheque": "Cheque",
+      "card": "Debit / Credit Card",
+      "other": "Other"
+    }
   }
 }

@@ -18,8 +18,8 @@ export const DeleteProductModal: React.FC<DeleteProductModalProps> = ({
     <Modal
       isOpen={Boolean(product)}
       onClose={onClose}
-      title="Delete Product"
-      description={`Are you sure you want to delete ${product.name}?`}
+      title={t('deleteModal.title', { defaultValue: 'Delete Product' })}
+      description={t('deleteModal.confirm', { name: product.name, defaultValue: `Are you sure you want to delete ${product.name}?` })}
       footer={
         <>
           <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto">
@@ -37,8 +37,10 @@ export const DeleteProductModal: React.FC<DeleteProductModalProps> = ({
       }
     >
       <p className="text-xs text-[#566B69] dark:text-[#8FA8A4] leading-relaxed">
-        This action cannot be undone. Product{' '}
-        <strong className="text-[#123B3A] dark:text-[#E6F4F1]">{product.name}</strong> will be removed from your active catalog. Past finalized invoices referencing this product will retain snapshot historical data.
+        {t('deleteModal.warning', {
+          name: product.name,
+          defaultValue: `This action cannot be undone. Product ${product.name} will be removed from your active catalog. Past finalized invoices referencing this product will retain snapshot historical data.`,
+        })}
       </p>
     </Modal>
   );

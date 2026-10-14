@@ -10,7 +10,7 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
   invoice,
   onClose,
 }) => {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['invoices', 'common']);
   const [cancelReason, setCancelReason] = useState('');
 
   const cancelMutation = useCancelInvoice(() => {
@@ -31,12 +31,15 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
     <Modal
       isOpen={!!invoice}
       onClose={onClose}
-      title="Cancel Invoice"
-      description={`Cancel invoice ${invoice?.invoiceNumber}. This action is audited and reverses allocated stock and customer ledger balances.`}
+      title={t('cancelModal.title', { defaultValue: 'Cancel Invoice' })}
+      description={t('cancelModal.description', {
+        invoiceNumber: invoice?.invoiceNumber,
+        defaultValue: `Cancel invoice ${invoice?.invoiceNumber}. This action is audited and reverses allocated stock and customer ledger balances.`,
+      })}
       footer={
         <>
           <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            {t('actions.cancel')}
+            {t('actions.cancel', { ns: 'common' })}
           </Button>
           <Button
             variant="danger"
@@ -45,15 +48,15 @@ export const CancelInvoiceModal: React.FC<CancelInvoiceModalProps> = ({
             onClick={handleConfirm}
             className="w-full sm:w-auto"
           >
-            Confirm Cancellation
+            {t('cancelModal.confirm', { defaultValue: 'Confirm Cancellation' })}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <Input
-          label="Reason for Cancellation"
-          placeholder="e.g. Order cancelled by client or wrong billing details entered"
+          label={t('cancelModal.reason', { defaultValue: 'Reason for Cancellation' })}
+          placeholder={t('cancelModal.reasonPlaceholder', { defaultValue: 'e.g. Order cancelled by client or wrong billing details entered' })}
           value={cancelReason}
           onChange={(e) => setCancelReason(e.target.value)}
           required

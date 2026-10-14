@@ -40,8 +40,47 @@ export const BusinessProfileSchema = z.object({
 });
 export type BusinessProfileInput = z.infer<typeof BusinessProfileSchema>;
 
+export const INDIAN_GST_STATE_MAP: Record<string, string> = {
+  '01': 'Jammu and Kashmir',
+  '02': 'Himachal Pradesh',
+  '03': 'Punjab',
+  '04': 'Chandigarh',
+  '05': 'Uttarakhand',
+  '06': 'Haryana',
+  '07': 'Delhi',
+  '08': 'Rajasthan',
+  '09': 'Uttar Pradesh',
+  '10': 'Bihar',
+  '11': 'Sikkim',
+  '12': 'Arunachal Pradesh',
+  '13': 'Nagaland',
+  '14': 'Manipur',
+  '15': 'Mizoram',
+  '16': 'Tripura',
+  '17': 'Meghalaya',
+  '18': 'Assam',
+  '19': 'West Bengal',
+  '20': 'Jharkhand',
+  '21': 'Odisha',
+  '22': 'Chhattisgarh',
+  '23': 'Madhya Pradesh',
+  '24': 'Gujarat',
+  '26': 'Dadra and Nagar Haveli and Daman and Diu',
+  '27': 'Maharashtra',
+  '29': 'Karnataka',
+  '30': 'Goa',
+  '31': 'Lakshadweep',
+  '32': 'Kerala',
+  '33': 'Tamil Nadu',
+  '34': 'Puducherry',
+  '35': 'Andaman and Nicobar Islands',
+  '36': 'Telangana',
+  '37': 'Andhra Pradesh',
+  '38': 'Ladakh',
+};
+
 // Party (Customer / Supplier) Validation
-export const PartySchema = z.object({
+export const PartyBaseSchema = z.object({
   type: z.enum(['CUSTOMER', 'SUPPLIER', 'BOTH']),
   name: z.string().min(2, 'Party name is required'),
   contactPerson: z.string().optional(),
@@ -59,7 +98,7 @@ export const PartySchema = z.object({
     city: z.string().min(2, 'City is required'),
     state: z.string().min(2, 'State is required'),
     stateCode: z.string().optional(),
-    pincode: z.string().min(4, 'Pincode is required'),
+    pincode: z.string().min(4, 'Pincode is required').default('400001'),
   }),
   shippingAddress: z
     .object({
@@ -74,7 +113,41 @@ export const PartySchema = z.object({
   openingBalanceMinor: z.number().int().default(0),
   creditLimitMinor: z.number().int().optional(),
 });
-export type PartyInput = z.infer<typeof PartySchema>;
+
+export const PartySchema = z.preprocess((val: any) => {
+  if (!val || typeof val !== 'object') return val;
+  const input = { ...val };
+
+  // Handle flat address input from quick modals
+  if (!input.billingAddress) {
+    input.billingAddress = {
+      line1: input.address || input.line1 || 'Primary Address',
+      city: input.city || 'Mumbai',
+      state: input.state || '',
+      pincode: input.pincode || '400001',
+    };
+  } else {
+    input.billingAddress = { ...input.billingAddress };
+  }
+
+  // Auto-infer state from GSTIN if state is blank or missing
+  if (
+    (!input.billingAddress.state || !input.billingAddress.state.trim()) &&
+    input.gstin &&
+    input.gstin.length >= 2
+  ) {
+    const gstCode = input.gstin.substring(0, 2);
+    if (INDIAN_GST_STATE_MAP[gstCode]) {
+      input.billingAddress.state = INDIAN_GST_STATE_MAP[gstCode];
+      if (!input.billingAddress.stateCode) {
+        input.billingAddress.stateCode = gstCode;
+      }
+    }
+  }
+
+  return input;
+}, PartyBaseSchema);
+export type PartyInput = z.infer<typeof PartyBaseSchema>;
 
 // Product Validation
 export const ProductSchema = z.object({

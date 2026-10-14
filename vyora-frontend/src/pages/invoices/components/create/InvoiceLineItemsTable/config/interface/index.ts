@@ -18,4 +18,5 @@ export interface InvoiceLineItemsTableProps {
   onUpdateLine: (index: number, field: keyof LineFormItem, value: any) => void;
   onAddLine: () => void;
   onRemoveLine: (index: number) => void;
+  onAddNewProduct?: () => void;
 }

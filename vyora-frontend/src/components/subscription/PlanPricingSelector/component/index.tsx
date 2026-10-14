@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatCurrency } from '@vyora/utils';
 import { PlanPricingSelectorProps } from '../config/interface';
 
@@ -9,12 +10,14 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
   onBillingCycleChange,
   pricing,
 }) => {
+  const { t } = useTranslation('common');
+
   return (
     <div className="space-y-4">
       {/* 1. Plan Selector */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-[#123B3A] dark:text-[#E6F4F1] uppercase tracking-wider">
-          1. Choose Subscription Plan
+          {t('planPurchaseModal.step1Choose', { defaultValue: '1. Choose Subscription Plan' })}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Growth Plan */}
@@ -27,16 +30,18 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
             }`}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] text-sm">Growth Plan</span>
+              <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] text-sm">
+                {t('planPurchaseModal.growthPlan', { defaultValue: 'Growth Plan' })}
+              </span>
               <span className="bg-[#0F766E] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Popular
+                {t('status.popular', { defaultValue: 'Popular' })}
               </span>
             </div>
             <p className="text-xl font-black text-[#0F766E] dark:text-[#14B8A6]">
               ₹499<span className="text-xs font-normal text-[#566B69] dark:text-slate-400">/mo</span>
             </p>
             <p className="text-[11px] text-[#566B69] dark:text-slate-400 mt-1.5 leading-snug">
-              Up to 3 staff roles, unlimited invoices, supplier orders, & GSTR reports.
+              {t('planPurchaseModal.growthPlanDesc', { defaultValue: 'Up to 3 staff roles, unlimited invoices, supplier orders, & GSTR reports.' })}
             </p>
           </div>
 
@@ -50,16 +55,18 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
             }`}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] text-sm">Business Pro</span>
+              <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] text-sm">
+                {t('planPurchaseModal.businessPro', { defaultValue: 'Business Pro' })}
+              </span>
               <span className="bg-purple-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                Power
+                {t('status.power', { defaultValue: 'Power' })}
               </span>
             </div>
             <p className="text-xl font-black text-purple-700 dark:text-purple-400">
               ₹999<span className="text-xs font-normal text-[#566B69] dark:text-slate-400">/mo</span>
             </p>
             <p className="text-[11px] text-[#566B69] dark:text-slate-400 mt-1.5 leading-snug">
-              Unlimited staff seats, audited stock adjustments, audit logs, & 24/7 priority support.
+              {t('planPurchaseModal.businessProDesc', { defaultValue: 'Unlimited staff seats, audited stock adjustments, audit logs, & 24/7 priority support.' })}
             </p>
           </div>
         </div>
@@ -68,8 +75,12 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
       {/* 2. Billing Cycle Toggle */}
       <div className="flex items-center justify-between p-3 bg-[#F4F8F7] dark:bg-[#0D1C1B] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs">
         <div>
-          <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] block">Billing Cycle</span>
-          <span className="text-[11px] text-[#566B69] dark:text-slate-400">Save 20% by paying annually</span>
+          <span className="font-bold text-[#123B3A] dark:text-[#E6F4F1] block">
+            {t('planPurchaseModal.billingCycle', { defaultValue: 'Billing Cycle' })}
+          </span>
+          <span className="text-[11px] text-[#566B69] dark:text-slate-400">
+            {t('planPurchaseModal.save20', { defaultValue: 'Save 20% by paying annually' })}
+          </span>
         </div>
         <div className="flex items-center gap-1 bg-white dark:bg-[#162E2D] p-1 rounded-lg border border-[#D7E5E2] dark:border-[#1E3B38]">
           <button
@@ -81,7 +92,7 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
                 : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
             }`}
           >
-            Monthly
+            {t('planPurchaseModal.monthly', { defaultValue: 'Monthly' })}
           </button>
           <button
             type="button"
@@ -92,7 +103,7 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
                 : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
             }`}
           >
-            Annual <span className="text-[10px] text-amber-500 font-bold">-20%</span>
+            {t('planPurchaseModal.annual', { defaultValue: 'Annual' })} <span className="text-[10px] text-amber-500 font-bold">{t('planPurchaseModal.save20Badge', { defaultValue: '-20%' })}</span>
           </button>
         </div>
       </div>
@@ -100,15 +111,20 @@ export const PlanPricingSelector: React.FC<PlanPricingSelectorProps> = ({
       {/* Price Summary & Breakdown */}
       <div className="bg-[#F4F8F7] dark:bg-[#0D1C1B] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-4 space-y-2 text-xs">
         <div className="flex justify-between text-[#566B69] dark:text-slate-400">
-          <span>Base Plan Fee ({billingCycle === 'ANNUAL' ? '12 Months' : '1 Month'})</span>
+          <span>
+            {t('planPurchaseModal.basePlanFee', {
+              period: billingCycle === 'ANNUAL' ? t('planPurchaseModal.period12', { defaultValue: '12 Months' }) : t('planPurchaseModal.period1', { defaultValue: '1 Month' }),
+              defaultValue: `Base Plan Fee (${billingCycle === 'ANNUAL' ? '12 Months' : '1 Month'})`,
+            })}
+          </span>
           <span className="font-semibold text-[#123B3A] dark:text-[#E6F4F1]">{formatCurrency(pricing.base)}</span>
         </div>
         <div className="flex justify-between text-[#566B69] dark:text-slate-400">
-          <span>GST @ 18% (Tax Invoice provided)</span>
+          <span>{t('planPurchaseModal.gstTax', { defaultValue: 'GST @ 18% (Tax Invoice provided)' })}</span>
           <span className="font-semibold text-[#123B3A] dark:text-[#E6F4F1]">{formatCurrency(pricing.gst)}</span>
         </div>
         <div className="flex justify-between pt-2 border-t border-[#D7E5E2] dark:border-[#1E3B38] font-black text-sm text-[#123B3A] dark:text-[#E6F4F1]">
-          <span>Total Amount Due</span>
+          <span>{t('planPurchaseModal.totalDue', { defaultValue: 'Total Amount Due' })}</span>
           <span className="text-[#0F766E] dark:text-[#14B8A6]">{formatCurrency(pricing.total)}</span>
         </div>
       </div>

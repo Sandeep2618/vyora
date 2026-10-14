@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileEdit, CheckCircle2 } from 'lucide-react';
 import { formatCurrency, formatDateReadable } from '@/utils';
 import { Button } from '@/components/ui/Button';
 import { InvoicePrintTemplateProps } from '../config/interface';
@@ -7,6 +8,8 @@ export const InvoicePrintTemplate: React.FC<InvoicePrintTemplateProps> = ({
   invoice,
   isOwner,
   onRecordPaymentClick,
+  onFinalizeClick,
+  isFinalizing,
 }) => {
   return (
     <div className="bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-4 sm:p-8 lg:p-12 shadow-sm text-[#123B3A] dark:text-[#E6F4F1] print:border-none print:shadow-none print:p-0 print:bg-white print:text-black">
@@ -199,8 +202,39 @@ export const InvoicePrintTemplate: React.FC<InvoicePrintTemplateProps> = ({
         </div>
       </div>
 
-      {/* Dynamic UPI Payment QR Code */}
-      {invoice.dueAmountMinor > 0 && invoice.status !== 'CANCELLED' && (
+      {/* Draft Document Banner */}
+      {invoice.status === 'DRAFT' && (
+        <div className="mt-6 p-4 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50/80 dark:bg-amber-950/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-amber-100 dark:bg-amber-900/50 text-amber-850 dark:text-amber-300 rounded-xl shrink-0">
+              <FileEdit className="w-5 h-5 text-amber-700 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                Draft Document Preview
+              </p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300/80 mt-0.5">
+                This invoice is in Draft status. Sequential tax invoice number, inventory stock deductions, and customer balance updates are committed upon finalization.
+              </p>
+            </div>
+          </div>
+          {isOwner && onFinalizeClick && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onFinalizeClick}
+              isLoading={isFinalizing}
+              className="shrink-0"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-1.5" />
+              Finalize Document
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Dynamic UPI Payment QR Code (Only for Finalized Invoices) */}
+      {invoice.status !== 'DRAFT' && invoice.status !== 'CANCELLED' && invoice.dueAmountMinor > 0 && (
         <div className="mt-6 p-4 rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38] bg-[#F4F8F7]/60 dark:bg-[#0D1C1B] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-1.5 bg-white rounded-lg border border-[#D7E5E2] shrink-0 shadow-2xs">

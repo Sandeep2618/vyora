@@ -29,5 +29,29 @@
     "title": "No Products Added Yet",
     "description": "Add products and inventory stock to quickly generate invoices.",
     "action": "+ Add Your First Item"
+  },
+  "form": {
+    "titleAdd": "New Product",
+    "titleEdit": "Edit Product",
+    "subtitle": "Enter product details, pricing, and initial inventory stock",
+    "name": "Product / Service Name",
+    "namePlaceholder": "e.g. Premium Cotton Shirt",
+    "sku": "SKU / Item Code",
+    "skuPlaceholder": "e.g. SHIRT-COT-01",
+    "hsn": "HSN / SAC Code",
+    "hsnPlaceholder": "e.g. 6205",
+    "hsnHelper": "4 or 6 digit GST tariff code",
+    "sellingPrice": "Selling Price (₹)",
+    "purchaseCost": "Purchase Cost (₹)",
+    "taxSlab": "GST Tax Slab",
+    "unit": "Measurement Unit",
+    "openingStock": "Opening Stock",
+    "reorderLevel": "Reorder Alert Level",
+    "reorderHelper": "Alert when stock falls below"
+  },
+  "deleteModal": {
+    "title": "Delete Product",
+    "confirm": "Are you sure you want to delete {{name}}?",
+    "warning": "This action cannot be undone. Product {{name}} will be removed from your active catalog. Past finalized invoices referencing this product will retain snapshot historical data."
   }
 }
