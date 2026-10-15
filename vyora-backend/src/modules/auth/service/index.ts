@@ -319,9 +319,27 @@ export class AuthService {
       phone: user.phone,
       name: user.name,
       role: user.role,
+      avatarUrl: user.avatarUrl,
       businessId: user.defaultBusinessId?.toString(),
       createdAt: (user as any).createdAt?.toISOString() || new Date().toISOString(),
     };
+  }
+
+  static async updateProfile(userId: string, dto: { name?: string; avatarUrl?: string }): Promise<UserProfile> {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    if (dto.name !== undefined && dto.name.trim()) {
+      user.name = dto.name.trim();
+    }
+    if (dto.avatarUrl !== undefined) {
+      user.avatarUrl = dto.avatarUrl;
+    }
+
+    await user.save();
+    return this.getProfile(userId);
   }
 
   private static generateTokens(user: IUser, businessId?: string): AuthTokens {
@@ -345,6 +363,7 @@ export class AuthService {
         phone: user.phone,
         name: user.name,
         role: user.role,
+        avatarUrl: user.avatarUrl,
         businessId,
         createdAt: (user as any).createdAt?.toISOString() || new Date().toISOString(),
       },

@@ -39,6 +39,11 @@ export class AuthController {
     return ApiResponse.success(res, result);
   });
 
+  static updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await AuthService.updateProfile(req.user!.id, req.body);
+    return ApiResponse.success(res, result);
+  });
+
   static logout = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     return ApiResponse.success(res, { success: true, message: 'Logged out successfully' });
   });

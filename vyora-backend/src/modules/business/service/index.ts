@@ -299,6 +299,7 @@ export class BusinessService {
       _id: business._id.toString(),
       name: business.name,
       legalName: business.legalName,
+      logoUrl: (business as any).logoUrl,
       phone: business.phone,
       email: business.email,
       gstin: business.gstin,

@@ -24,6 +24,7 @@ router.post(
   AuthController.selectContext,
 );
 router.get('/me', authMiddleware, AuthController.getProfile);
+router.patch('/profile', authMiddleware, AuthController.updateProfile);
 router.post('/logout', authMiddleware, AuthController.logout);
 
 export const authRouter = router;
