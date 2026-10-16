@@ -23,48 +23,68 @@ export const tenantMiddleware = async (
 
   const businessId = rawBusinessId.trim();
 
-  if (req.user.role === 'ADMIN') {
-    req.businessId = businessId;
-    req.businessRole = 'ADMIN';
-    return next();
-  }
-
   try {
-    const membership = await MembershipModel.findOne({
-      userId: req.user.id,
-      businessId,
-      isActive: true,
-    });
+    let effectiveRole = req.user.role === 'ADMIN' ? 'ADMIN' : undefined;
+    let permissions = req.user.role === 'ADMIN' ? ['*'] : [];
+    let ownedBusiness: any = null;
 
-    if (membership) {
-      req.businessId = businessId;
-      req.businessRole = membership.role;
-      req.permissions = membership.permissions || [];
-      return next();
+    if (req.user.role !== 'ADMIN') {
+      const membership = await MembershipModel.findOne({
+        userId: req.user.id,
+        businessId,
+        isActive: true,
+      });
+
+      if (membership) {
+        effectiveRole = membership.role;
+        permissions = membership.permissions || [];
+      } else {
+        // Fallback: check if user is the direct owner of the business entity
+        ownedBusiness = await BusinessModel.findOne({
+          _id: businessId,
+          ownerUserId: req.user.id,
+        });
+
+        if (ownedBusiness) {
+          effectiveRole = 'OWNER';
+          permissions = [
+            'POS_CREATE_INVOICE',
+            'INVENTORY_VIEW_STOCK',
+            'INVENTORY_ADJUST_STOCK',
+            'REPORTS_VIEW',
+            'PURCHASES_MANAGE',
+          ];
+        } else {
+          return next(
+            new ForbiddenError('Forbidden: you do not have active membership in this business'),
+          );
+        }
+      }
     }
 
-    // Fallback: check if user is the direct owner of the business entity
-    const ownedBusiness = await BusinessModel.findOne({
-      _id: businessId,
-      ownerUserId: req.user.id,
-    });
+    req.businessId = businessId;
+    req.businessRole = effectiveRole as any;
+    req.permissions = permissions;
 
-    if (ownedBusiness) {
-      req.businessId = businessId;
-      req.businessRole = 'OWNER';
-      req.permissions = [
-        'POS_CREATE_INVOICE',
-        'INVENTORY_VIEW_STOCK',
-        'INVENTORY_ADJUST_STOCK',
-        'REPORTS_VIEW',
-        'PURCHASES_MANAGE',
-      ];
-      return next();
+    const biz =
+      ownedBusiness ||
+      (await BusinessModel.findById(businessId)
+        .select('subscriptionPlan subscriptionStatus subscriptionExpiresAt')
+        .lean());
+
+    if (biz) {
+      req.businessPlan = (biz as any).subscriptionPlan || 'growth';
+      const isExpired =
+        (biz as any).subscriptionStatus === 'expired' ||
+        (Boolean((biz as any).subscriptionExpiresAt) &&
+          new Date((biz as any).subscriptionExpiresAt) < new Date());
+      req.isPlanExpired = !!isExpired;
+    } else {
+      req.businessPlan = 'starter';
+      req.isPlanExpired = false;
     }
 
-    return next(
-      new ForbiddenError('Forbidden: you do not have active membership in this business'),
-    );
+    return next();
   } catch (err) {
     return next(err);
   }

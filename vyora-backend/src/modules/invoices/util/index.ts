@@ -11,6 +11,7 @@ export function buildBusinessSnapshot(business: any) {
     city: business.city,
     state: business.state,
     pincode: business.pincode,
+    upiId: business.upiId || '',
   };
 }
 

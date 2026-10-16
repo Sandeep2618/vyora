@@ -29,6 +29,7 @@ export const errorHandler = (
       message: err.message,
       error: err.errorCode,
       details: err.details,
+      ...(typeof err.details === 'object' && err.details !== null ? err.details : {}),
       requestId,
     });
   }

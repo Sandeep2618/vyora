@@ -4,6 +4,7 @@ export * from './auth';
 export * from './tenant';
 export * from './role';
 export * from './permission';
+export * from './plan';
 export * from './validation';
 export * from './rateLimiter';
 export * from './error';

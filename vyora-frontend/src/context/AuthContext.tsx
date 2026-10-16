@@ -84,6 +84,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setUser(data.user);
     await fetchBusinessProfile();
+
+    if (data.user.email && !data.user.email.endsWith('@vyora.in')) {
+      if (!localStorage.getItem('vyora_has_welcomed')) {
+        api.post('/auth/welcome', {
+          email: data.user.email,
+          name: data.user.name,
+        }).catch(() => {});
+        localStorage.setItem('vyora_has_welcomed', 'true');
+      }
+    }
   };
 
   const register = async (input: RegisterInput) => {
@@ -95,6 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setUser(data.user);
     await fetchBusinessProfile();
+
+    if (data.user.email && !data.user.email.endsWith('@vyora.in')) {
+      localStorage.setItem('vyora_has_welcomed', 'true');
+    }
   };
 
   const logout = () => {

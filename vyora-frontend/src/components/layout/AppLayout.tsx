@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -18,7 +18,6 @@ import {
   Smartphone,
   Sun,
   Moon,
-  Languages,
 } from 'lucide-react';
 import { useAuth, FeatureKey } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,6 +27,8 @@ import { SidebarNav, NavItem } from './SidebarNav';
 import { BottomNav } from './BottomNav';
 import { MobileAppModal } from './MobileAppModal';
 import { LanguageDropdown } from './LanguageDropdown';
+import { AccessDeniedModal } from '../ui/AccessDeniedModal';
+import { PlanPurchaseModal } from '@/components/subscription/modal/PlanPurchaseModal';
 
 export const AppLayout: React.FC = () => {
   const { user, business, logout, isOwner, plan, hasFeature } = useAuth();
@@ -36,6 +37,7 @@ export const AppLayout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     try {
       return localStorage.getItem('vyora_sidebar_collapsed') === 'true';
@@ -43,7 +45,49 @@ export const AppLayout: React.FC = () => {
       return false;
     }
   });
+
+  const [accessDeniedDetail, setAccessDeniedDetail] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message?: string;
+    requiredRole?: string;
+    errorType?: string;
+  }>({ isOpen: false });
+
   const navigate = useNavigate();
+
+  const isPlanExpired =
+    business?.subscriptionStatus === 'expired' ||
+    Boolean(
+      business?.subscriptionExpiresAt &&
+        new Date(business.subscriptionExpiresAt).getTime() < Date.now(),
+    );
+
+  useEffect(() => {
+    const handleForbidden = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const detail = customEvent.detail;
+      setAccessDeniedDetail({
+        isOpen: true,
+        title:
+          detail?.error === 'PlanLimitExceeded'
+            ? 'Plan Upgrade Required'
+            : detail?.error === 'PlanExpired'
+            ? 'Subscription Plan Expired'
+            : 'Access Restricted',
+        message: detail?.message,
+        requiredRole: detail?.requiredRoles
+          ? detail.requiredRoles.join(' or ')
+          : undefined,
+        errorType: detail?.error,
+      });
+    };
+
+    window.addEventListener('vyora:forbidden', handleForbidden);
+    return () => {
+      window.removeEventListener('vyora:forbidden', handleForbidden);
+    };
+  }, []);
 
   const toggleSidebarCollapse = () => {
     setIsSidebarCollapsed((prev) => {
@@ -55,19 +99,28 @@ export const AppLayout: React.FC = () => {
     });
   };
 
+  const isStarter = plan === 'starter';
+  const isStaff = user?.role === 'STAFF';
+
   const allNavItems: (NavItem & { feature?: FeatureKey })[] = [
-    { label: t('navigation.dashboard'), icon: LayoutDashboard, path: '/' },
-    { label: t('navigation.invoices'), icon: FileText, path: '/invoices', feature: 'INVOICES' },
-    { label: t('navigation.customers'), icon: Users, path: '/parties', feature: 'PARTIES' },
-    { label: t('navigation.products'), icon: Package, path: '/products', feature: 'PRODUCTS' },
-    { label: t('navigation.inventory'), icon: ArrowLeftRight, path: '/inventory', feature: 'INVENTORY' },
-    { label: t('navigation.purchase'), icon: ShoppingCart, path: '/purchases', feature: 'PURCHASES' },
-    { label: t('navigation.payments'), icon: CreditCard, path: '/payments', feature: 'PAYMENTS' },
-    { label: t('navigation.reports'), icon: BarChart3, path: '/reports', feature: 'REPORTS' },
-    { label: t('navigation.account'), icon: ShieldCheck, path: '/account' },
+    { label: t('navigation.dashboard', { defaultValue: 'Dashboard' }), icon: LayoutDashboard, path: '/' },
+    { label: t('navigation.invoices', { defaultValue: 'Invoices' }), icon: FileText, path: '/invoices', feature: 'INVOICES' },
+    { label: t('navigation.customers', { defaultValue: 'Customers' }), icon: Users, path: '/parties', feature: 'PARTIES' },
+    { label: t('navigation.products', { defaultValue: 'Products' }), icon: Package, path: '/products', feature: 'PRODUCTS' },
+    { label: t('navigation.inventory', { defaultValue: 'Inventory' }), icon: ArrowLeftRight, path: '/inventory', feature: 'INVENTORY' },
+    { label: t('navigation.purchase', { defaultValue: 'Purchase' }), icon: ShoppingCart, path: '/purchases', feature: 'PURCHASES' },
+    { label: t('navigation.payments', { defaultValue: 'Payments' }), icon: CreditCard, path: '/payments', feature: 'PAYMENTS' },
+    { label: t('navigation.reports', { defaultValue: 'Reports' }), icon: BarChart3, path: '/reports', feature: 'REPORTS' },
+    { label: t('navigation.account', { defaultValue: 'Account & Roles' }), icon: ShieldCheck, path: '/account' },
   ];
 
-  const navItems = allNavItems.filter((item) => !item.feature || hasFeature(item.feature));
+  const navItems = allNavItems.filter((item) => {
+    if (item.path === '/reports' && (isStarter || isStaff)) return false;
+    if (item.path === '/purchases' && isStaff) return false;
+    if (item.path === '/account' && isStaff) return false;
+    if (item.feature && !hasFeature(item.feature)) return false;
+    return true;
+  });
 
   return (
     <div className="flex h-screen bg-[#F4F8F7] dark:bg-[#0A1615] overflow-hidden">
@@ -154,7 +207,7 @@ export const AppLayout: React.FC = () => {
               title="Connect mobile phone or download APK"
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('actions.getMobileApp')}</span>
+              <span className="hidden sm:inline">{t('actions.getMobileApp', { defaultValue: 'Get Mobile App' })}</span>
             </button>
           </div>
 
@@ -207,34 +260,38 @@ export const AppLayout: React.FC = () => {
                       className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
                     >
                       <Building2 className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
-                      {t('actions.businessProfile')}
+                      {t('actions.businessProfile', { defaultValue: 'Business Profile' })}
                     </button>
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        navigate('/account?tab=ROLES');
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
-                      {t('actions.rolesAndPermissions')}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        navigate('/account?tab=BILLING');
-                      }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
-                    >
-                      <CreditCard className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
-                      {t('actions.billingAndPlans')}
-                    </button>
+                    {isOwner && (
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          navigate('/account?tab=ROLES');
+                        }}
+                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
+                        {t('actions.rolesAndPermissions', { defaultValue: 'Roles & Staff' })}
+                      </button>
+                    )}
+                    {isOwner && (
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          navigate('/account?tab=BILLING');
+                        }}
+                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
+                        {t('actions.billingAndPlans', { defaultValue: 'Billing & Plans' })}
+                      </button>
+                    )}
                     <button
                       onClick={logout}
                       className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] dark:text-rose-400 hover:bg-[#FEE2E2] dark:hover:bg-rose-950/40 flex items-center gap-2 border-t border-[#D7E5E2] dark:border-[#1E3B38] mt-1 cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      {t('actions.signOut')}
+                      {t('actions.signOut', { defaultValue: 'Sign Out' })}
                     </button>
                   </div>
                 </>
@@ -245,6 +302,31 @@ export const AppLayout: React.FC = () => {
 
         {/* Main Work Area */}
         <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 lg:p-6 pb-20 lg:pb-6 bg-[#F4F8F7] dark:bg-[#0A1615]">
+          {isPlanExpired && (
+            <div className="mb-4 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-[#123B3A] dark:text-[#F0FDFA]">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <h4 className="text-xs font-bold text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+                    Subscription Plan Expired
+                  </h4>
+                  <p className="text-xs text-[#566B69] dark:text-[#A0BDB8]">
+                    {isOwner
+                      ? 'Your subscription period has ended. Renew now via Bharat UPI to unlock full business features.'
+                      : `The workspace plan has expired. Please contact store owner ${business?.ownerName || 'the owner'}${business?.ownerPhone ? ` (${business.ownerPhone})` : ''} to renew.`}
+                  </p>
+                </div>
+              </div>
+              {isOwner && (
+                <button
+                  onClick={() => setIsPurchaseModalOpen(true)}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold shrink-0 transition-colors cursor-pointer shadow-2xs"
+                >
+                  Renew via UPI
+                </button>
+              )}
+            </div>
+          )}
           <Outlet />
         </main>
 
@@ -260,6 +342,26 @@ export const AppLayout: React.FC = () => {
         isOpen={isMobileModalOpen}
         onClose={() => setIsMobileModalOpen(false)}
       />
+
+      {/* 403 Forbidden Access Denied Modal */}
+      <AccessDeniedModal
+        isOpen={accessDeniedDetail.isOpen}
+        onClose={() => setAccessDeniedDetail({ isOpen: false })}
+        title={accessDeniedDetail.title}
+        message={accessDeniedDetail.message}
+        requiredRole={accessDeniedDetail.requiredRole}
+        errorType={accessDeniedDetail.errorType}
+        onUpgrade={() => setIsPurchaseModalOpen(true)}
+      />
+
+      {/* Plan Purchase UPI Modal for Owner */}
+      {isOwner && (
+        <PlanPurchaseModal
+          isOpen={isPurchaseModalOpen}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          targetPlan="growth"
+        />
+      )}
     </div>
   );
 };

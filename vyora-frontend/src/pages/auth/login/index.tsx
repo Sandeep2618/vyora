@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Mail } from 'lucide-react';
+import { api } from '@/lib/api';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  const inviteBiz = searchParams.get('inviteBiz');
+  const initialEmail = searchParams.get('email') || '';
+
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +26,11 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login({ email, password });
+      if (inviteBiz) {
+        try {
+          await api.post('/auth/accept-invite', { businessId: inviteBiz });
+        } catch {}
+      }
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Invalid email or password');
@@ -44,6 +54,13 @@ export const LoginPage: React.FC = () => {
 
         <h2 className="text-lg font-bold text-[#123B3A] mb-1">Welcome back</h2>
         <p className="text-xs text-[#566B69] mb-6">Sign in to your business ledger and invoicing portal</p>
+
+        {inviteBiz && (
+          <div className="mb-4 p-3 bg-[#E6F4F2] border border-[#D7E5E2] rounded-lg flex items-center gap-2.5 text-xs text-[#0F766E] font-medium">
+            <Mail className="w-4 h-4 shrink-0 text-[#0F766E]" />
+            <span>You have an active workspace invitation! Log in to join this store.</span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-[#FEE2E2] border border-[#FECACA] rounded-lg text-xs text-[#B91C1C]">

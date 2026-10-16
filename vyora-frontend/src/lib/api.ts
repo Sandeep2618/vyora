@@ -77,6 +77,23 @@ export async function apiRequest<T = any>(
     const data = await response.json().catch(() => null);
     const requestId = traceId || data?.requestId;
 
+    if (response.status === 403) {
+      window.dispatchEvent(
+        new CustomEvent('vyora:forbidden', {
+          detail: {
+            statusCode: 403,
+            error: data?.error,
+            requiredRoles: data?.requiredRoles,
+            currentRole: data?.currentRole,
+            requiredPlan: data?.requiredPlan,
+            currentPlan: data?.currentPlan,
+            isOwner: data?.isOwner,
+            message: Array.isArray(data?.message) ? data.message.join(', ') : data?.message,
+          },
+        }),
+      );
+    }
+
     if (!response.ok) {
       const errorMsg = data?.message || data?.error || `HTTP error ${response.status}`;
 

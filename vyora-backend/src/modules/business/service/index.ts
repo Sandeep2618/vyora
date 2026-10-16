@@ -8,6 +8,7 @@ import {
 } from '../../../util';
 import { BusinessProfileInput } from '@vyora/validation';
 import { UserRole, SubscriptionPlan } from '@vyora/shared-types';
+import { MailService } from '../../mail/mail.service';
 
 export class BusinessService {
   static async getBusinessById(businessId: string) {
@@ -15,7 +16,10 @@ export class BusinessService {
     if (!business) {
       throw new NotFoundError('Business');
     }
-    return this.mapBusiness(business);
+    const ownerUser = business.ownerUserId
+      ? await UserModel.findById(business.ownerUserId).select('name phone').lean()
+      : null;
+    return this.mapBusiness(business, ownerUser as any);
   }
 
   static async updateBusiness(businessId: string, dto: BusinessProfileInput) {
@@ -27,7 +31,32 @@ export class BusinessService {
     if (!business) {
       throw new NotFoundError('Business');
     }
-    return this.mapBusiness(business);
+    const ownerUser = business.ownerUserId
+      ? await UserModel.findById(business.ownerUserId).select('name phone').lean()
+      : null;
+    return this.mapBusiness(business, ownerUser as any);
+  }
+
+  static async updateSubscriptionPlan(businessId: string, plan: SubscriptionPlan) {
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+    const updated = await BusinessModel.findByIdAndUpdate(
+      businessId,
+      {
+        subscriptionPlan: plan,
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: (plan === 'starter' || plan === 'free') ? undefined : oneYearFromNow,
+      },
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundError('Business');
+    }
+    const ownerUser = updated.ownerUserId
+      ? await UserModel.findById(updated.ownerUserId).select('name phone').lean()
+      : null;
+    return this.mapBusiness(updated, ownerUser as any);
   }
 
   static async updateStaffPermissions(businessId: string, permissions: Record<string, boolean>) {
@@ -39,19 +68,10 @@ export class BusinessService {
     if (!business) {
       throw new NotFoundError('Business');
     }
-    return this.mapBusiness(business);
-  }
-
-  static async updateSubscriptionPlan(businessId: string, plan: SubscriptionPlan) {
-    const updated = await BusinessModel.findByIdAndUpdate(
-      businessId,
-      { subscriptionPlan: plan },
-      { new: true },
-    );
-    if (!updated) {
-      throw new NotFoundError('Business');
-    }
-    return this.mapBusiness(updated);
+    const ownerUser = business.ownerUserId
+      ? await UserModel.findById(business.ownerUserId).select('name phone').lean()
+      : null;
+    return this.mapBusiness(business, ownerUser as any);
   }
 
   static async getStaff(businessId: string) {
@@ -81,9 +101,48 @@ export class BusinessService {
   static async addStaffMember(
     businessId: string,
     data: { name: string; email: string; role: UserRole },
+    inviterName?: string,
   ) {
+    const business = await BusinessModel.findById(businessId);
+    if (!business) {
+      throw new NotFoundError('Business');
+    }
+
+    if (business.subscriptionPlan === 'starter' || (business.subscriptionPlan as string) === 'free') {
+      throw new ForbiddenError(
+        'Adding team members is not available on the Free Starter plan. Upgrade to the Growth plan to invite staff.',
+        'PlanLimitExceeded',
+        {
+          requiredPlan: 'growth',
+          currentPlan: 'starter',
+          isOwner: true,
+        },
+      );
+    }
+
+    if (business.subscriptionPlan === 'growth') {
+      const activeStaffCount = await MembershipModel.countDocuments({
+        businessId,
+        isActive: { $ne: false },
+      });
+      // Growth plan allows up to 5 staff members (including owner: 6 total)
+      if (activeStaffCount >= 6) {
+        throw new ForbiddenError(
+          'Growth plan is limited to 5 team members. Upgrade to Business Pro for unlimited staff.',
+          'PlanLimitExceeded',
+          {
+            requiredPlan: 'enterprise',
+            currentPlan: 'growth',
+            isOwner: true,
+          },
+        );
+      }
+    }
+
+    let isNewUser = false;
     let user = await UserModel.findOne({ email: data.email.toLowerCase() });
     if (!user) {
+      isNewUser = true;
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash('VyoraStaff@123', salt);
       user = new UserModel({
@@ -91,8 +150,8 @@ export class BusinessService {
         email: data.email.toLowerCase(),
         passwordHash,
         role: data.role,
-        roles: [data.role],
         defaultBusinessId: businessId,
+        isInvited: true,
       });
       await user.save();
     }
@@ -109,8 +168,21 @@ export class BusinessService {
       userId: user._id.toString(),
       businessId,
       role: data.role,
+      status: 'ACTIVE',
+      invitedBy: inviterName || 'The Business Owner',
     });
     await membership.save();
+
+    // Trigger invitation email asynchronously
+    MailService.sendStaffInviteEmail({
+      to: data.email.toLowerCase(),
+      name: data.name || user.name,
+      businessName: business.name || 'Vyora Workspace',
+      businessId,
+      inviterName: inviterName || 'The Business Owner',
+      role: data.role,
+      tempPassword: isNewUser ? 'VyoraStaff@123' : undefined,
+    }).catch(() => {});
 
     return {
       id: membership._id.toString(),
@@ -293,16 +365,18 @@ export class BusinessService {
     return updated.nextPurchaseNumber || 1;
   }
 
-  private static mapBusiness(business: IBusiness) {
+  private static mapBusiness(business: IBusiness, ownerUser?: { name: string; phone?: string }) {
     return {
       id: business._id.toString(),
       _id: business._id.toString(),
       name: business.name,
       legalName: business.legalName,
+      logoUrl: (business as any).logoUrl,
       phone: business.phone,
       email: business.email,
       gstin: business.gstin,
       pan: business.pan,
+      upiId: (business as any).upiId || '',
       addressLine1: business.addressLine1,
       addressLine2: business.addressLine2,
       city: business.city,
@@ -317,6 +391,10 @@ export class BusinessService {
       nextPurchaseNumber: business.nextPurchaseNumber,
       termsAndConditions: business.termsAndConditions,
       subscriptionPlan: business.subscriptionPlan || 'growth',
+      subscriptionStatus: (business as any).subscriptionStatus || 'active',
+      subscriptionExpiresAt: (business as any).subscriptionExpiresAt,
+      ownerName: ownerUser?.name || 'Store Owner',
+      ownerPhone: ownerUser?.phone || business.phone,
       staffPermissions: (business as any).staffPermissions || {
         invoices: true,
         parties: true,

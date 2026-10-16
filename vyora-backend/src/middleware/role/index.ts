@@ -10,7 +10,12 @@ export const requireRoles = (...allowedRoles: UserRole[]) => {
     if (!effectiveRole || !allowedRoles.includes(effectiveRole)) {
       return next(
         new ForbiddenError(
-          'Only business owners have permission to add, edit, or delete records. Staff accounts have view-only access.',
+          `Access denied. This action requires ${allowedRoles.join(' or ')} permission, but your role is ${effectiveRole || 'STAFF'}.`,
+          'ForbiddenRole',
+          {
+            requiredRoles: allowedRoles,
+            currentRole: effectiveRole || 'STAFF',
+          },
         ),
       );
     }

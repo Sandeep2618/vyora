@@ -35,6 +35,8 @@ declare global {
       user?: AuthenticatedUser;
       businessId?: string;
       businessRole?: UserRole;
+      businessPlan?: string;
+      isPlanExpired?: boolean;
       permissions?: string[];
     }
   }

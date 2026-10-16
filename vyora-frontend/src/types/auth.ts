@@ -4,10 +4,26 @@ export type UserRole = 'OWNER' | 'STAFF' | 'ADMIN';
 export interface UserProfile {
   id: string;
   email: string;
+  phone?: string;
   name: string;
   role: UserRole;
+  avatarUrl?: string;
   businessId?: string;
   createdAt: string;
+}
+
+export interface UserWorkspace {
+  id: string;
+  businessId: string;
+  membershipId: string;
+  name: string;
+  phone?: string;
+  city?: string;
+  role: UserRole;
+  roleName: string;
+  isCurrent: boolean;
+  status: 'PENDING' | 'ACTIVE';
+  joinedAt: string;
 }
 
 export interface AuthTokens {
@@ -53,6 +69,10 @@ export interface BusinessProfile {
   nextPurchaseNumber: number;
   termsAndConditions?: string;
   subscriptionPlan?: SubscriptionPlan;
+  subscriptionStatus?: 'active' | 'expired' | 'trial';
+  subscriptionExpiresAt?: string;
+  ownerName?: string;
+  ownerPhone?: string;
   staffPermissions?: {
     invoices?: boolean;
     parties?: boolean;

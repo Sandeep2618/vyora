@@ -3,14 +3,17 @@ import { z } from 'zod';
 // Auth Validation
 export const RegisterSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   businessName: z.string().min(2, 'Business name must be at least 2 characters').optional(),
 });
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 
 export const LoginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  emailOrPhone: z.string().optional(),
   password: z.string().min(1, 'Password is required'),
 });
 export type LoginInput = z.infer<typeof LoginSchema>;
@@ -19,20 +22,23 @@ export type LoginInput = z.infer<typeof LoginSchema>;
 export const BusinessProfileSchema = z.object({
   name: z.string().min(2, 'Business name is required'),
   legalName: z.string().optional(),
-  phone: z.string().min(8, 'Phone number is required'),
-  email: z.string().email('Invalid email address'),
+  logoUrl: z.string().optional().or(z.literal('')),
+  signatureUrl: z.string().optional().or(z.literal('')),
+  upiId: z.string().optional().or(z.literal('')),
+  phone: z.string().optional().or(z.literal('')),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
   gstin: z
     .string()
     .regex(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GSTIN format')
     .optional()
     .or(z.literal('')),
   pan: z.string().optional(),
-  addressLine1: z.string().min(3, 'Address is required'),
+  addressLine1: z.string().optional().or(z.literal('')),
   addressLine2: z.string().optional(),
-  city: z.string().min(2, 'City is required'),
-  state: z.string().min(2, 'State is required'),
-  stateCode: z.string().length(2, '2-digit state code required (e.g. 27)').optional(),
-  pincode: z.string().min(4, 'Valid pincode required'),
+  city: z.string().optional().or(z.literal('')),
+  state: z.string().optional().or(z.literal('')),
+  stateCode: z.string().length(2, '2-digit state code required (e.g. 27)').optional().or(z.literal('')),
+  pincode: z.string().optional().or(z.literal('')),
   currency: z.string().default('INR'),
   invoicePrefix: z.string().min(1).default('INV-'),
   invoiceNumberPadding: z.number().int().min(1).max(8).default(4),
@@ -155,6 +161,7 @@ export const ProductSchema = z.object({
   sku: z.string().min(1, 'SKU is required'),
   hsnCode: z.string().optional(),
   description: z.string().optional(),
+  imageUrl: z.string().optional().or(z.literal('')),
   unit: z.enum(['PCS', 'BOX', 'KG', 'LTR', 'MTR', 'SET', 'UNT', 'PKT']).default('PCS'),
   sellingPriceMinor: z.number().int().nonnegative('Selling price must be >= 0'),
   purchasePriceMinor: z.number().int().nonnegative('Purchase price must be >= 0'),
@@ -319,12 +326,24 @@ export const StockAdjustmentSchema = z.object({
 export type StockAdjustmentInput = z.infer<typeof StockAdjustmentSchema>;
 
 // Expense Validation
+export const ExpenseItemLineSchema = z.object({
+  itemName: z.string().min(1, 'Item name is required'),
+  quantity: z.number().min(0.0001, 'Quantity must be greater than 0'),
+  rateMinor: z.number().min(0, 'Rate must be 0 or positive'),
+  amountMinor: z.number().min(0, 'Amount must be 0 or positive'),
+});
+export type ExpenseItemLineInput = z.infer<typeof ExpenseItemLineSchema>;
+
 export const CreateExpenseSchema = z.object({
-  category: z.string().min(2, 'Category is required'),
+  expenseNumber: z.string().optional(),
+  category: z.string().min(1, 'Category is required'),
   amountMinor: z.number().int().positive('Amount must be greater than 0'),
   expenseDate: z.string().min(1, 'Expense date is required'),
   paymentMethod: z.enum(['CASH', 'BANK_TRANSFER', 'UPI', 'CHEQUE', 'CARD', 'OTHER']),
   vendorName: z.string().optional(),
   notes: z.string().optional(),
+  isGst: z.boolean().optional(),
+  items: z.array(ExpenseItemLineSchema).optional(),
 });
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;
+

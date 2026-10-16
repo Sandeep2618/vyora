@@ -20,7 +20,13 @@ router.put(
   validateRequest({ body: BusinessProfileSchema }),
   BusinessController.updateCurrent,
 );
-router.put('/plan', requireRoles('OWNER', 'ADMIN'), BusinessController.updatePlan);
+router.patch(
+  '/current',
+  requireRoles('OWNER', 'ADMIN'),
+  validateRequest({ body: BusinessProfileSchema }),
+  BusinessController.updateCurrent,
+);
+router.put('/plan', requireRoles('OWNER'), BusinessController.updatePlan);
 router.put(
   '/permissions',
   requireRoles('OWNER', 'ADMIN'),

@@ -23,6 +23,10 @@ export interface IBusiness extends Document {
   termsAndConditions?: string;
   ownerUserId: string;
   subscriptionPlan: SubscriptionPlan;
+  subscriptionStatus?: 'active' | 'expired' | 'trial';
+  subscriptionExpiresAt?: Date;
+  upiId?: string;
+  logoUrl?: string;
   staffPermissions: {
     invoices: boolean;
     parties: boolean;
@@ -40,8 +44,10 @@ const BusinessSchema = new Schema<IBusiness>(
   {
     name: { type: String, required: true, trim: true },
     legalName: { type: String, trim: true },
+    logoUrl: { type: String },
     gstin: { type: String, trim: true, uppercase: true },
     pan: { type: String, trim: true, uppercase: true },
+    upiId: { type: String, trim: true },
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, lowercase: true, trim: true },
     addressLine1: { type: String, required: true },
@@ -60,9 +66,15 @@ const BusinessSchema = new Schema<IBusiness>(
     ownerUserId: { type: String, required: true, index: true },
     subscriptionPlan: {
       type: String,
-      enum: ['starter', 'growth', 'enterprise'],
+      enum: ['starter', 'free', 'growth', 'enterprise'],
       default: 'growth',
     },
+    subscriptionStatus: {
+      type: String,
+      enum: ['active', 'expired', 'trial'],
+      default: 'active',
+    },
+    subscriptionExpiresAt: { type: Date },
     staffPermissions: {
       type: Object,
       default: {
@@ -84,6 +96,8 @@ export interface IMembership extends Document {
   businessId: string;
   role: UserRole;
   permissions: string[];
+  status?: string;
+  invitedBy?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -103,6 +117,8 @@ const MembershipSchema = new Schema<IMembership>(
       type: [String],
       default: ['POS_CREATE_INVOICE', 'INVENTORY_VIEW_STOCK'],
     },
+    status: { type: String, default: 'ACTIVE' },
+    invitedBy: { type: String },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },

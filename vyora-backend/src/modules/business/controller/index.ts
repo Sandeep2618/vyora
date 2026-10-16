@@ -30,7 +30,7 @@ export class BusinessController {
   });
 
   static addStaff = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const result = await BusinessService.addStaffMember(req.businessId!, req.body);
+    const result = await BusinessService.addStaffMember(req.businessId!, req.body, req.user?.name);
     return ApiResponse.created(res, result);
   });
 

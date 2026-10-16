@@ -24,8 +24,12 @@ export class UnauthorizedError extends AppError {
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message = 'Forbidden: insufficient permissions') {
-    super(403, message, 'FORBIDDEN');
+  constructor(
+    message = 'Forbidden: insufficient permissions',
+    errorCode = 'Forbidden',
+    details: any = null,
+  ) {
+    super(403, message, errorCode, details);
   }
 }
 

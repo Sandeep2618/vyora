@@ -7,6 +7,7 @@ export interface UserProfile {
   phone?: string;
   name: string;
   role: UserRole;
+  avatarUrl?: string;
   businessId?: string;
   createdAt: string;
 }
@@ -17,7 +18,8 @@ export interface AuthTokens {
   user: UserProfile;
 }
 
-export type SubscriptionPlan = 'free' | 'growth' | 'enterprise';
+export type SubscriptionPlan = 'starter' | 'free' | 'growth' | 'enterprise';
+export type SubscriptionTier = SubscriptionPlan;
 
 export interface UserPersonas {
   userId: string;
@@ -31,11 +33,26 @@ export interface UserPersonas {
   customerShops: Array<{ businessId: string; shopName: string; shopPhone?: string; balanceMinor: number }>;
 }
 
+export interface UserWorkspace {
+  id: string;
+  businessId: string;
+  membershipId: string;
+  name: string;
+  phone?: string;
+  city?: string;
+  role: UserRole;
+  roleName: string;
+  isCurrent: boolean;
+  status: 'PENDING' | 'ACTIVE';
+  joinedAt: string;
+}
+
 // Business Entity
 export interface BusinessProfile {
   id: string;
   name: string;
   legalName?: string;
+  logoUrl?: string;
   gstin?: string;
   pan?: string;
   phone: string;

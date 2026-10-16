@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Building2, Phone } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
@@ -20,7 +20,7 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation('common');
-  const { business, updateSubscriptionPlan } = useAuth();
+  const { business, updateSubscriptionPlan, isOwner } = useAuth();
 
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>(
     targetPlan === 'starter' ? 'growth' : targetPlan,
@@ -83,6 +83,54 @@ export const PlanPurchaseModal: React.FC<PlanPurchaseModalProps> = ({
     onSuccess?.(selectedPlan);
     onClose();
   };
+
+  if (!isOwner) {
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Owner Authorization Required"
+        description="Plan upgrades and billing are managed exclusively by the store owner."
+        maxWidth="md"
+        footer={
+          <Button type="button" onClick={onClose} className="w-full">
+            Understood
+          </Button>
+        }
+      >
+        <div className="p-6 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-[#E6F4F2] dark:bg-[#142B2A] border border-[#A0D2CA] dark:border-[#1E4D49] flex items-center justify-center text-[#0F766E] dark:text-[#14B8A6]">
+            <Building2 className="w-7 h-7" />
+          </div>
+          <h4 className="text-base font-bold text-[#123B3A] dark:text-[#E6F4F1]">
+            Contact Your Store Owner
+          </h4>
+          <p className="text-xs text-[#566B69] dark:text-slate-400 leading-relaxed max-w-sm mx-auto">
+            Only the store owner has authorization to purchase, upgrade, or renew the Vyora subscription plan. Please reach out to your owner to complete this action:
+          </p>
+          <div className="bg-[#F4F8F7] dark:bg-[#142B2A] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-3.5 text-xs text-left max-w-sm mx-auto space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-[#566B69] dark:text-slate-400">Store Owner:</span>
+              <strong className="text-[#123B3A] dark:text-[#E6F4F1]">{business?.ownerName || 'The Business Owner'}</strong>
+            </div>
+            {business?.ownerPhone && (
+              <div className="flex justify-between items-center">
+                <span className="text-[#566B69] dark:text-slate-400">Phone:</span>
+                <strong className="text-[#0F766E] dark:text-[#14B8A6] flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5" />
+                  {business.ownerPhone}
+                </strong>
+              </div>
+            )}
+            <div className="flex justify-between items-center">
+              <span className="text-[#566B69] dark:text-slate-400">Workspace:</span>
+              <strong className="text-[#123B3A] dark:text-[#E6F4F1]">{business?.name || 'Vyora Workspace'}</strong>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal

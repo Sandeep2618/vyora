@@ -139,6 +139,35 @@ export class ProductsService {
     return { success: true, message: 'Product removed successfully' };
   }
 
+  static async adjustStock(
+    businessId: string,
+    id: string,
+    quantityDelta: number,
+    reason = 'Stock Replenishment / Restock',
+    userId?: string,
+  ) {
+    const product = await ProductModel.findOne({ _id: id, businessId, isArchived: false });
+    if (!product) {
+      throw new NotFoundError('Product');
+    }
+
+    product.currentStock = Math.max(0, product.currentStock + quantityDelta);
+    await product.save();
+
+    await InventoryService.recordMovement({
+      businessId,
+      productId: product._id.toString(),
+      quantityDelta,
+      movementType: quantityDelta >= 0 ? 'PURCHASE' : 'SALE',
+      referenceType: 'MANUAL',
+      reason,
+      performedByUserId: userId || 'system',
+      allowNegative: false,
+    });
+
+    return this.mapProduct(product);
+  }
+
   private static mapProduct(product: IProduct) {
     return {
       id: product._id.toString(),

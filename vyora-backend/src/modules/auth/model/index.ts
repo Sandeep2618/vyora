@@ -11,6 +11,7 @@ export interface IUser extends Document {
   roles: UserRole[];
   defaultBusinessId?: string;
   avatarUrl?: string;
+  isInvited?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,7 @@ const UserSchema = new Schema<IUser>(
     },
     defaultBusinessId: { type: String, ref: 'Business', index: true },
     avatarUrl: { type: String },
+    isInvited: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

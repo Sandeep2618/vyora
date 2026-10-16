@@ -24,6 +24,11 @@ router.post(
   AuthController.selectContext,
 );
 router.get('/me', authMiddleware, AuthController.getProfile);
+router.put('/profile', authMiddleware, AuthController.updateProfile);
+router.patch('/profile', authMiddleware, AuthController.updateProfile);
+router.get('/businesses', authMiddleware, AuthController.getMyBusinesses);
+router.post('/switch-business', authMiddleware, AuthController.switchBusiness);
+router.post('/accept-invite', authMiddleware, AuthController.acceptInvite);
 router.post('/logout', authMiddleware, AuthController.logout);
 
 export const authRouter = router;

@@ -28,6 +28,11 @@ router.put(
   validateRequest({ body: ProductSchema }),
   ProductsController.update,
 );
+router.patch(
+  '/:id/stock',
+  requireRoles('OWNER', 'ADMIN'),
+  ProductsController.adjustStock,
+);
 router.delete(
   '/:id',
   requireRoles('OWNER', 'ADMIN'),

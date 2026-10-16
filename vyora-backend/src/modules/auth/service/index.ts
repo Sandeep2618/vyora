@@ -3,12 +3,14 @@ import jwt from 'jsonwebtoken';
 import { UserModel, IUser } from '../model';
 import { BusinessModel, MembershipModel } from '../../business/model';
 import { PartyModel } from '../../parties/model';
+import { MailService } from '../../mail/mail.service';
 import { config } from '../../../config';
 import {
   ConflictError,
   UnauthorizedError,
   NotFoundError,
   BadRequestError,
+  ForbiddenError,
 } from '../../../util';
 import {
   RegisterInput,
@@ -17,23 +19,52 @@ import {
   VerifyOtpInput,
   SelectContextInput,
 } from '../validator';
-import { AuthTokens, UserProfile, UserPersonas } from '@vyora/shared-types';
+import { AuthTokens, UserProfile, UserPersonas, UserWorkspace } from '@vyora/shared-types';
 
 export class AuthService {
   private static otpStore = new Map<string, { otp: string; expiresAt: number }>();
 
   static async register(dto: RegisterInput): Promise<AuthTokens> {
-    const existing = await UserModel.findOne({ email: dto.email.toLowerCase() });
-    if (existing) {
-      throw new ConflictError('An account with this email already exists');
+    const cleanPhone = (dto.phone || '').trim().replace(/[^0-9]/g, '');
+    const cleanEmail = (dto.email || '').trim().toLowerCase();
+
+    if (!cleanEmail && !cleanPhone) {
+      throw new BadRequestError('Either email or mobile number is required to register');
     }
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(dto.password, salt);
 
+    const existing = await UserModel.findOne({
+      $or: [
+        ...(cleanEmail ? [{ email: cleanEmail }] : []),
+        ...(cleanPhone ? [{ phone: cleanPhone }] : []),
+      ],
+    });
+
+    if (existing) {
+      if (existing.isInvited) {
+        existing.name = dto.name;
+        existing.passwordHash = passwordHash;
+        if (cleanPhone) existing.phone = cleanPhone;
+        if (cleanEmail) existing.email = cleanEmail;
+        existing.isInvited = false;
+        await existing.save();
+
+        const activeBizId = existing.defaultBusinessId?.toString() || '';
+        return this.generateTokens(existing, activeBizId);
+      }
+
+      if (cleanPhone && existing.phone === cleanPhone) {
+        throw new ConflictError('An account with this mobile number already exists');
+      }
+      throw new ConflictError('An account with this email already exists');
+    }
+
     const user = new UserModel({
       name: dto.name,
-      email: dto.email.toLowerCase(),
+      email: cleanEmail || undefined,
+      phone: cleanPhone || undefined,
       passwordHash,
       role: 'OWNER',
       roles: ['OWNER'],
@@ -43,13 +74,13 @@ export class AuthService {
     const businessName = dto.businessName || `${dto.name}'s Business`;
     const business = new BusinessModel({
       name: businessName,
-      phone: '9876543210',
-      email: dto.email.toLowerCase(),
-      addressLine1: 'Main Street',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      stateCode: '27',
-      pincode: '400001',
+      phone: cleanPhone || '',
+      email: cleanEmail || '',
+      addressLine1: '',
+      city: '',
+      state: '',
+      stateCode: '',
+      pincode: '',
       currency: 'INR',
       invoicePrefix: 'INV-',
       invoiceNumberPadding: 4,
@@ -57,6 +88,7 @@ export class AuthService {
       purchasePrefix: 'BILL-',
       nextPurchaseNumber: 1,
       ownerUserId: user._id.toString(),
+      subscriptionPlan: 'growth',
     });
     await business.save();
 
@@ -77,31 +109,188 @@ export class AuthService {
     user.defaultBusinessId = business._id.toString();
     await user.save();
 
+    // Trigger welcome email asynchronously
+    if (cleanEmail && !cleanEmail.endsWith('@vyora.in')) {
+      MailService.sendWelcomeEmail({
+        to: cleanEmail,
+        name: user.name,
+        businessName: business.name,
+      }).catch(() => {});
+    }
+
     return this.generateTokens(user, business._id.toString());
   }
 
   static async login(dto: LoginInput): Promise<AuthTokens> {
-    const user = await UserModel.findOne({ email: dto.email.toLowerCase() });
+    const rawIdentifier = (dto.emailOrPhone || dto.email || dto.phone || '').trim();
+    const cleanPhone = rawIdentifier.replace(/[^0-9]/g, '');
+    const isPhone = cleanPhone.length === 10;
+
+    let user: any = null;
+    if (isPhone) {
+      user = await UserModel.findOne({ phone: cleanPhone });
+      if (!user) {
+        user = await UserModel.findOne({ email: `${cleanPhone}@vyora.in` });
+      }
+    } else {
+      user = await UserModel.findOne({ email: rawIdentifier.toLowerCase() });
+    }
+
     if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid mobile number/email or password');
     }
 
     const isValid = await bcrypt.compare(dto.password, user.passwordHash || '');
     if (!isValid) {
-      throw new UnauthorizedError('Invalid email or password');
+      throw new UnauthorizedError('Invalid mobile number/email or password');
     }
 
     let businessId = user.defaultBusinessId?.toString();
     if (!businessId) {
-      const membership = await MembershipModel.findOne({ userId: user._id.toString() });
+      const membership = await MembershipModel.findOne({
+        userId: user._id.toString(),
+        isActive: { $ne: false },
+      });
       if (membership) {
         businessId = membership.businessId.toString();
         user.defaultBusinessId = businessId;
+        user.role = membership.role;
         await user.save();
       }
     }
 
     return this.generateTokens(user, businessId);
+  }
+
+  static async getMyBusinesses(userId: string): Promise<UserWorkspace[]> {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    const memberships = await MembershipModel.find({
+      userId: user._id.toString(),
+      isActive: { $ne: false },
+    });
+
+    const currentBizId = user.defaultBusinessId?.toString();
+    const businessIds = memberships.map((m) => m.businessId);
+    const businesses = await BusinessModel.find({ _id: { $in: businessIds } });
+
+    return memberships.map((m) => {
+      const b = businesses.find((biz) => biz._id.toString() === m.businessId);
+      const roleName =
+        m.role === 'OWNER'
+          ? 'Business Owner'
+          : m.role === 'ADMIN'
+          ? 'Store Manager'
+          : 'Billing Staff';
+
+      return {
+        id: m.businessId,
+        businessId: m.businessId,
+        membershipId: m._id.toString(),
+        name: b?.name || 'Vyora Store',
+        phone: b?.phone || '',
+        city: b?.city || '',
+        role: m.role,
+        roleName,
+        isCurrent: m.businessId === currentBizId,
+        status: ((m as any).status || 'ACTIVE') as 'PENDING' | 'ACTIVE',
+        joinedAt: (m as any).createdAt ? (m as any).createdAt.toISOString() : new Date().toISOString(),
+      };
+    });
+  }
+
+  static async switchBusiness(userId: string, targetBusinessId: string) {
+    const [user, membership, business] = await Promise.all([
+      UserModel.findById(userId),
+      MembershipModel.findOne({
+        userId,
+        businessId: targetBusinessId,
+        isActive: { $ne: false },
+      }),
+      BusinessModel.findById(targetBusinessId),
+    ]);
+
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+    if (!membership || !business) {
+      throw new ForbiddenError('You do not have active membership in this business workspace');
+    }
+
+    user.defaultBusinessId = targetBusinessId;
+    user.role = membership.role;
+    await user.save();
+
+    const tokens = this.generateTokens(user, targetBusinessId);
+    return {
+      tokens,
+      business: {
+        id: business._id.toString(),
+        name: business.name,
+        role: membership.role,
+        phone: business.phone,
+        email: business.email,
+        subscriptionPlan: business.subscriptionPlan || 'growth',
+      },
+    };
+  }
+
+  static async acceptInvite(userId: string, targetBusinessId: string) {
+    const [user, membership, business] = await Promise.all([
+      UserModel.findById(userId),
+      MembershipModel.findOne({
+        userId,
+        businessId: targetBusinessId,
+      }),
+      BusinessModel.findById(targetBusinessId),
+    ]);
+
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+    if (!membership || !business) {
+      throw new NotFoundError('Invitation not found for this business');
+    }
+
+    membership.isActive = true;
+    (membership as any).status = 'ACTIVE';
+    await membership.save();
+
+    user.defaultBusinessId = targetBusinessId;
+    user.role = membership.role;
+    user.isInvited = false;
+    await user.save();
+
+    const tokens = this.generateTokens(user, targetBusinessId);
+    return {
+      success: true,
+      tokens,
+      business: {
+        id: business._id.toString(),
+        name: business.name,
+        role: membership.role,
+      },
+    };
+  }
+
+  static async updateProfile(userId: string, dto: { name?: string; avatarUrl?: string }): Promise<UserProfile> {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    if (dto.name !== undefined && dto.name.trim()) {
+      user.name = dto.name.trim();
+    }
+    if (dto.avatarUrl !== undefined) {
+      user.avatarUrl = dto.avatarUrl;
+    }
+
+    await user.save();
+    return this.getProfile(userId);
   }
 
   static async sendOtp(dto: SendOtpInput): Promise<{ success: boolean; message: string; devOtp?: string }> {
@@ -319,6 +508,7 @@ export class AuthService {
       phone: user.phone,
       name: user.name,
       role: user.role,
+      avatarUrl: user.avatarUrl,
       businessId: user.defaultBusinessId?.toString(),
       createdAt: (user as any).createdAt?.toISOString() || new Date().toISOString(),
     };
@@ -345,6 +535,7 @@ export class AuthService {
         phone: user.phone,
         name: user.name,
         role: user.role,
+        avatarUrl: user.avatarUrl,
         businessId,
         createdAt: (user as any).createdAt?.toISOString() || new Date().toISOString(),
       },
