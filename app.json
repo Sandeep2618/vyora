@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "32333551-5c93-440e-9c54-c15d3a7f1c8b"
+      }
+    },
+    "android": {
+      "package": "com.sandipyadavvsteam.vyora"
+    }
+  }
+}

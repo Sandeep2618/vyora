@@ -4,6 +4,7 @@ import { UserRole, SubscriptionPlan } from '@vyora/shared-types';
 export interface IBusiness extends Document {
   name: string;
   legalName?: string;
+  logoUrl?: string;
   gstin?: string;
   pan?: string;
   phone: string;
@@ -26,7 +27,6 @@ export interface IBusiness extends Document {
   subscriptionStatus?: 'active' | 'expired' | 'trial';
   subscriptionExpiresAt?: Date;
   upiId?: string;
-  logoUrl?: string;
   staffPermissions: {
     invoices: boolean;
     parties: boolean;
@@ -44,7 +44,7 @@ const BusinessSchema = new Schema<IBusiness>(
   {
     name: { type: String, required: true, trim: true },
     legalName: { type: String, trim: true },
-    logoUrl: { type: String },
+    logoUrl: { type: String, trim: true },
     gstin: { type: String, trim: true, uppercase: true },
     pan: { type: String, trim: true, uppercase: true },
     upiId: { type: String, trim: true },

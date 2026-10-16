@@ -58,7 +58,6 @@ export class AuthController {
     const result = await AuthService.acceptInvite(req.user!.id, req.body.businessId);
     return ApiResponse.success(res, result);
   });
-
   static logout = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     return ApiResponse.success(res, { success: true, message: 'Logged out successfully' });
   });
