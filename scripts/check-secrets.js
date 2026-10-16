@@ -30,6 +30,31 @@ const SECRET_PATTERNS = [
     mask: (str) => str.slice(0, 4) + '************',
   },
   {
+    name: 'Resend API Key',
+    regex: /\bre_[a-zA-Z0-9]{8,}_[a-zA-Z0-9]{20,}\b/g,
+    mask: (str) => 're_****_' + str.slice(-4),
+  },
+  {
+    name: 'Stripe Secret / Restricted Key',
+    regex: /\b(?:sk|rk)_(?:live|test)_[0-9a-zA-Z]{24,}\b/g,
+    mask: (str) => str.slice(0, 7) + '************',
+  },
+  {
+    name: 'Razorpay Key Secret',
+    regex: /\brzp_(?:live|test)_[0-9a-zA-Z]{14,}\b/g,
+    mask: (str) => 'rzp_****_' + str.slice(-4),
+  },
+  {
+    name: 'Google / Firebase API Key',
+    regex: /\bAIza[0-9A-Za-z\-_]{35}\b/g,
+    mask: (str) => 'AIza****' + str.slice(-4),
+  },
+  {
+    name: 'Expo Access Token',
+    regex: /\bexpt_[0-9a-zA-Z_\-]{30,}\b/g,
+    mask: (str) => 'expt_****' + str.slice(-4),
+  },
+  {
     name: 'Database Password / Auth Key Assignment',
     regex: /(?:db_password|auth_key|jwt_secret)\s*[:=]\s*['"][^'"]{8,}['"]/gi,
     mask: (str) => str.split(/[:=]/)[0] + '= "****"',
@@ -44,6 +69,10 @@ const FORBIDDEN_FILE_PATTERNS = [
   /passwords\.txt$/i,
   /secrets\.json$/i,
   /credentials\.json$/i,
+  /serviceAccountKey.*\.json$/i,
+  /google-services\.json$/i,
+  /GoogleService-Info\.plist$/i,
+  /\.(?:keystore|jks|p12|p8|mobileprovision)$/i,
 ];
 
 function getStagedOrChangedFiles() {
@@ -56,7 +85,18 @@ function getStagedOrChangedFiles() {
       .filter(Boolean);
     staged.forEach((f) => files.add(f));
 
-    // 2. If nothing staged, also check unstaged changed files
+    // 2. Files changed in unpushed commits (prevents pushing secrets already committed locally)
+    try {
+      const unpushed = execSync('git log @{u}..HEAD --name-only --oneline', { encoding: 'utf8' })
+        .split('\n')
+        .map((f) => f.trim())
+        .filter((f) => f && !f.match(/^[0-9a-f]{6,}\s/));
+      unpushed.forEach((f) => files.add(f));
+    } catch {
+      // Ignored if no upstream or detached HEAD
+    }
+
+    // 3. If nothing staged or unpushed, also check unstaged changed files
     if (files.size === 0) {
       const unstaged = execSync('git diff --name-only', { encoding: 'utf8' })
         .split('\n')

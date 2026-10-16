@@ -16,20 +16,25 @@ export interface SendStaffInviteEmailOptions {
 }
 
 export class MailService {
-  private static readonly welcomeApiKey =
-    process.env.RESEND_WELCOME_API_KEY || process.env.RESEND_API_KEY || '';
+  private static get welcomeApiKey(): string {
+    return process.env.RESEND_WELCOME_API_KEY || process.env.RESEND_API_KEY || '';
+  }
 
-  private static readonly inviteApiKey =
-    process.env.RESEND_INVITE_API_KEY || process.env.RESEND_API_KEY || '';
+  private static get inviteApiKey(): string {
+    return process.env.RESEND_INVITE_API_KEY || process.env.RESEND_API_KEY || '';
+  }
 
-  private static readonly fromEmail =
-    process.env.RESEND_FROM_EMAIL || 'Vyora <onboarding@resend.dev>';
+  private static get fromEmail(): string {
+    return process.env.RESEND_FROM_EMAIL || 'Vyora <onboarding@resend.dev>';
+  }
 
-  private static readonly appUrl =
-    process.env.APP_WEB_URL || 'https://vyora-mauve.vercel.app';
+  private static get appUrl(): string {
+    return process.env.APP_WEB_URL || 'https://vyora-mauve.vercel.app';
+  }
 
-  private static readonly loginUrl =
-    process.env.APP_LOGIN_URL || 'https://vyora-mauve.vercel.app/login';
+  private static get loginUrl(): string {
+    return process.env.APP_LOGIN_URL || 'https://vyora-mauve.vercel.app/login';
+  }
 
   /**
    * Send Welcome Email when a user installs/opens the app or registers for the first time.
