@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   sku: string;
   hsnCode?: string;
   description?: string;
+  imageUrl?: string;
   unit: ItemUnit;
   sellingPriceMinor: number;
   purchasePriceMinor: number;
@@ -26,6 +27,7 @@ const ProductSchema = new Schema<IProduct>(
     sku: { type: String, required: true, trim: true, uppercase: true },
     hsnCode: { type: String, trim: true },
     description: { type: String, trim: true },
+    imageUrl: { type: String, trim: true },
     unit: {
       type: String,
       default: 'PCS',

@@ -22,6 +22,7 @@ export class ProductsService {
       sku: dto.sku.toUpperCase(),
       hsnCode: dto.hsnCode,
       description: dto.description,
+      imageUrl: dto.imageUrl,
       unit: dto.unit || 'PCS',
       sellingPriceMinor: dto.sellingPriceMinor,
       purchasePriceMinor: dto.purchasePriceMinor,
@@ -71,6 +72,9 @@ export class ProductsService {
     product.sku = dto.sku.toUpperCase();
     product.hsnCode = dto.hsnCode;
     product.description = dto.description;
+    if (dto.imageUrl !== undefined) {
+      product.imageUrl = dto.imageUrl;
+    }
     product.unit = dto.unit || product.unit;
     product.sellingPriceMinor = dto.sellingPriceMinor;
     product.purchasePriceMinor = dto.purchasePriceMinor;
@@ -184,6 +188,7 @@ export class ProductsService {
       openingStock: product.openingStock,
       currentStock: product.currentStock,
       reorderLevel: product.reorderLevel,
+      imageUrl: product.imageUrl || undefined,
       isArchived: product.isArchived,
       createdAt: (product as any).createdAt,
       updatedAt: (product as any).updatedAt,
