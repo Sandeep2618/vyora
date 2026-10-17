@@ -3,6 +3,8 @@ import { AuthService } from '../service';
 import { asyncHandler, ApiResponse } from '../../../util';
 import { AuthenticatedRequest } from '../../../common';
 
+import { MailService } from '../../mail/mail.service';
+
 export class AuthController {
   static register = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const result = await AuthService.register(req.body);
@@ -58,7 +60,20 @@ export class AuthController {
     const result = await AuthService.acceptInvite(req.user!.id, req.body.businessId);
     return ApiResponse.success(res, result);
   });
+
   static logout = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     return ApiResponse.success(res, { success: true, message: 'Logged out successfully' });
+  });
+
+  static sendWelcomeEmail = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { email, name, businessName } = req.body || {};
+    if (email && !email.endsWith('@vyora.in')) {
+      MailService.sendWelcomeEmail({
+        to: email,
+        name: name || 'Valued Partner',
+        businessName,
+      }).catch(() => {});
+    }
+    return ApiResponse.success(res, { success: true, message: 'Welcome email triggered' });
   });
 }

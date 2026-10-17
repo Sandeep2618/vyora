@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import { AuthController } from '../controller';
 import { authMiddleware, validateRequest } from '../../../middleware';
-import { asyncHandler, ApiResponse } from '../../../util';
-import { MailService } from '../../mail/mail.service';
 import {
   RegisterSchema,
   LoginSchema,
@@ -35,20 +33,7 @@ router.post('/accept-invite', authMiddleware, AuthController.acceptInvite);
 router.post('/logout', authMiddleware, AuthController.logout);
 
 // Welcome email trigger route
-router.post(
-  '/welcome',
-  asyncHandler(async (req, res) => {
-    const { email, name, businessName } = req.body || {};
-    if (email && !email.endsWith('@vyora.in')) {
-      MailService.sendWelcomeEmail({
-        to: email,
-        name: name || 'Valued Partner',
-        businessName,
-      }).catch(() => {});
-    }
-    return ApiResponse.success(res, { success: true, message: 'Welcome email triggered' });
-  }),
-);
+router.post('/welcome', AuthController.sendWelcomeEmail);
 
 export const authRouter = router;
 
