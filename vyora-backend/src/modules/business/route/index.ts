@@ -13,6 +13,7 @@ const router = Router();
 // All business routes require valid authentication and business context
 router.use(authMiddleware, tenantMiddleware);
 
+router.post('/', requireRoles('OWNER'), BusinessController.create);
 router.get('/current', BusinessController.getCurrent);
 router.put(
   '/current',

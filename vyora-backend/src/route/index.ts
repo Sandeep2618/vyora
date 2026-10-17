@@ -12,6 +12,7 @@ import { dashboardRouter } from '../modules/dashboard';
 import { reportsRouter } from '../modules/reports';
 import { auditRouter } from '../modules/audit';
 import { healthRouter } from '../modules/health';
+import { appReleaseRouter } from '../modules/app';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/dashboard', dashboardRouter);
 router.use('/reports', reportsRouter);
 router.use('/audit', auditRouter);
 router.use('/health', healthRouter);
+router.use('/app', appReleaseRouter);
 
 export const apiRouter = router;

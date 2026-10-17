@@ -365,6 +365,124 @@ export class BusinessService {
     return updated.nextPurchaseNumber || 1;
   }
 
+  static async createBusiness(
+    userId: string,
+    currentBusinessId: string | undefined,
+    dto: {
+      name: string;
+      phone?: string;
+      email?: string;
+      addressLine1?: string;
+      city?: string;
+      state?: string;
+      stateCode?: string;
+      pincode?: string;
+      gstin?: string;
+      currency?: string;
+      invoicePrefix?: string;
+    },
+  ) {
+    if (!dto.name || !dto.name.trim()) {
+      throw new ConflictError('Store or business name is required');
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User');
+    }
+
+    let userPlan: SubscriptionPlan = 'starter';
+    let subStatus = 'active';
+    let subExpiresAt: Date | undefined;
+
+    if (currentBusinessId) {
+      const curBiz = await BusinessModel.findById(currentBusinessId);
+      if (curBiz) {
+        userPlan = (curBiz.subscriptionPlan as SubscriptionPlan) || 'starter';
+        subStatus = (curBiz as any).subscriptionStatus || 'active';
+        subExpiresAt = (curBiz as any).subscriptionExpiresAt;
+      }
+    } else {
+      const existingOwned = await BusinessModel.findOne({ ownerUserId: userId });
+      if (existingOwned) {
+        userPlan = (existingOwned.subscriptionPlan as SubscriptionPlan) || 'starter';
+        subStatus = (existingOwned as any).subscriptionStatus || 'active';
+        subExpiresAt = (existingOwned as any).subscriptionExpiresAt;
+      }
+    }
+
+    const ownedCount = await BusinessModel.countDocuments({ ownerUserId: userId });
+
+    if (userPlan === 'starter' && ownedCount >= 1) {
+      throw new ForbiddenError(
+        'The Free Starter plan allows 1 store only. Please upgrade to Growth or Enterprise to add more stores.',
+        'PlanLimitExceeded',
+        {
+          currentPlan: 'starter',
+          allowedStores: 1,
+          currentStores: ownedCount,
+        },
+      );
+    }
+
+    if (userPlan === 'growth' && ownedCount >= 3) {
+      throw new ForbiddenError(
+        'The Growth plan allows up to 3 stores. Upgrade to Enterprise for unlimited stores.',
+        'PlanLimitExceeded',
+        {
+          currentPlan: 'growth',
+          allowedStores: 3,
+          currentStores: ownedCount,
+        },
+      );
+    }
+
+    const newBusiness = new BusinessModel({
+      name: dto.name.trim(),
+      phone: dto.phone?.trim() || user.phone || '',
+      email: dto.email?.trim() || user.email || '',
+      addressLine1: dto.addressLine1?.trim() || '',
+      city: dto.city?.trim() || '',
+      state: dto.state?.trim() || '',
+      stateCode: dto.stateCode?.trim() || '',
+      pincode: dto.pincode?.trim() || '',
+      gstin: dto.gstin?.trim() || undefined,
+      currency: dto.currency || 'INR',
+      invoicePrefix: dto.invoicePrefix?.trim() || 'INV-',
+      invoiceNumberPadding: 4,
+      nextInvoiceNumber: 1,
+      purchasePrefix: 'BILL-',
+      nextPurchaseNumber: 1,
+      ownerUserId: user._id.toString(),
+      subscriptionPlan: userPlan,
+      subscriptionStatus: subStatus,
+      subscriptionExpiresAt: subExpiresAt,
+    });
+    await newBusiness.save();
+
+    const membership = new MembershipModel({
+      userId: user._id.toString(),
+      businessId: newBusiness._id.toString(),
+      role: 'OWNER',
+      isActive: true,
+      status: 'ACTIVE',
+      permissions: [
+        'POS_CREATE_INVOICE',
+        'POS_VIEW_INVOICES',
+        'INVENTORY_VIEW',
+        'INVENTORY_EDIT',
+        'PARTY_VIEW',
+        'PARTY_EDIT',
+        'REPORTS_VIEW',
+        'SETTINGS_EDIT',
+        'STAFF_MANAGE',
+      ],
+    });
+    await membership.save();
+
+    return this.mapBusiness(newBusiness, user as any);
+  }
+
   private static mapBusiness(business: IBusiness, ownerUser?: { name: string; phone?: string }) {
     return {
       id: business._id.toString(),

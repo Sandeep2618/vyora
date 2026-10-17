@@ -4,6 +4,15 @@ import { asyncHandler, ApiResponse } from '../../../util';
 import { AuthenticatedRequest } from '../../../common';
 
 export class BusinessController {
+  static create = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await BusinessService.createBusiness(
+      req.user!.id,
+      req.businessId,
+      req.body,
+    );
+    return ApiResponse.created(res, result);
+  });
+
   static getCurrent = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const result = await BusinessService.getBusinessById(req.businessId!);
     return ApiResponse.success(res, result);

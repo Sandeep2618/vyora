@@ -412,5 +412,94 @@ ComponentName/
 4. **Global Reusability Principle**:
    - Modals and Drawers are maintained as shared primitives in `src/components/ui/`. Any enhancement or bugfix made to `Modal/` or `Drawer/` applies globally across all modals, drawers, and views in the entire application.
 
+---
+
+## 16. Express 5.3 Modular Monolith Architecture & Endpoint Directory
+
+In October 2026, the backend was refactored into a high-performance Express 5.3 + TypeScript + Mongoose 8 modular monolith (`vyora-backend`).
+
+### Key Controller & Route Modules:
+- **Health** (1): `GET /api/v1/health`
+- **Auth & Multitenancy** (10):
+  - `POST /api/v1/auth/register` (creates user and auto-generates first business workspace)
+  - `POST /api/v1/auth/login` (generates JWT session token)
+  - `POST /api/v1/auth/otp/send` & `POST /api/v1/auth/otp/verify` (mobile counter OTP flow)
+  - `GET /api/v1/auth/me` (retrieves active user identity & business context)
+  - `PATCH /api/v1/auth/profile` & `PUT /api/v1/auth/profile` (updates user name & avatar)
+  - `GET /api/v1/auth/businesses` (lists all business workspaces the user belongs to)
+  - `POST /api/v1/auth/switch-business` (switches active tenant context and issues refreshed JWT)
+  - `POST /api/v1/auth/accept-invite` (accepts pending invitation to an external workspace)
+  - `POST /api/v1/auth/logout` (invalidates session)
+- **Business & Staff Management** (5):
+  - `GET /api/v1/business/current` (active business profile, tax rates, GSTIN, owner info)
+  - `POST /api/v1/business/members` (invites staff member and triggers asynchronous invite email)
+  - `PATCH /api/v1/business/members/:id/role` (updates role; primary owner demotion protected)
+  - `PATCH /api/v1/business/members/:id/status` (activates/deactivates staff member)
+  - `DELETE /api/v1/business/members/:id` (removes team member from business)
+- **Products & Margin Shield** (5):
+  - `GET /api/v1/products` (lists products; masks `purchasePriceMinor = 0` for `STAFF`)
+  - `POST /api/v1/products`, `GET /products/:id`, `PUT /products/:id`, `DELETE /products/:id`
+- **Invoices, Purchases & Payments** (12): Full GST counter billing, live tax calculations, purchase stock increments, inward/outward payment receipts.
+- **Reports & Dashboard** (6): Authoritative sales register, purchase register, stock valuation, customer receivables, dashboard metrics.
+
+---
+
+## 17. Subscription Governance & Role-Based Access Control
+
+### 17.1 Subscription Tiering Hierarchy
+* **Starter (Free)**: Basic counter billing (`INVOICES`, `PRODUCTS`, `PARTIES`, `INVENTORY`). Zero staff allowed. Restrictive modules (`REPORTS`, `PURCHASES`, `PAYMENTS`, `ROLES`) are **completely hidden** from navigation and views via `hasFeature(...)` in `AppLayout.tsx`.
+* **Growth**: Unlocks `PURCHASES`, `PAYMENTS`, `REPORTS`, and up to 5 staff members.
+* **Enterprise**: Unlimited staff, multi-warehouse stock adjustments, and custom billing prefix.
+
+### 17.2 Subscription Expiration Governance
+* **Store Owner**: Sees top warning banner with *"Renew via UPI"* and one-click access to [`PlanPurchaseModal`](file:///D:/project/vyora/vyora-frontend/src/components/subscription/modal/PlanPurchaseModal/component/index.tsx) with dynamic Bharat UPI QR code generation in minor units (paisa).
+* **Manager & Staff**: The checkout form is **strictly hidden**. Instead, they see an informative *"Owner Authorization Required"* screen detailing the owner's name, phone number, and store identity.
+* **403 Forbidden Guidance**: [`AccessDeniedModal`](file:///D:/project/vyora/vyora-frontend/src/components/ui/AccessDeniedModal.tsx) categorizes errors into `PlanExpired`, `PlanLimitExceeded`, or `ForbiddenRole` and provides direct guidance.
+
+---
+
+## 18. Mobile App Ecosystem (`vyora-app`)
+
+Located at `D:\project\vyora-app` (React Native 0.86 + Expo 57):
+1. **EAS Over-The-Air (OTA) Continuous Updates**:
+   - Updates published via `npm run update:preview` (`npx eas-cli update --channel preview`).
+   - Downloads silently in background (`fallbackToCacheTimeout: 0`).
+2. **Centralized Versioning & Release Highlights**:
+   - Maintained in `src/constants/version.ts` (`APP_VERSION`, `APP_RELEASE_DATE`, `LATEST_RELEASE_NOTES`).
+   - Dynamically injected into `MenuScreen.tsx`, `LoginScreen.tsx`, and `FeedbackModal.tsx`.
+3. **Automated "What's New in Vyora" Modal**:
+   - Inspects `@vyora_last_seen_version` in `AsyncStorage`.
+   - On detecting a new version, automatically pops up [`WhatsNewModal.tsx`](file:///D:/project/vyora-app/src/components/WhatsNewModal.tsx) highlighting new features with icons and summaries.
+4. **Permanent Feedback & Bug Reporting**:
+   - Web3Forms receives direct `formData.append('attachment', ...)` file delivery straight to the developer's email inbox (never expires).
+   - Permanent cloud preview links hosted on Catbox.moe (`https://files.catbox.moe/xxxxxx.jpg`).
+
+---
+
+## 19. Vyora Git Secret Guard & Pre-Push Defense
+
+Located at `scripts/check-secrets.js` and wired to `.git/hooks/pre-commit` and `.git/hooks/pre-push`:
+* Scans staged files and unpushed commits (`git log @{u}..HEAD`).
+* Detects and blocks:
+  - Resend API keys (`re_[a-zA-Z0-9_]{20,}`)
+  - Stripe Secret/Restricted keys (`sk_...`, `rk_...`)
+  - Razorpay secrets (`rzp_...`)
+  - Google / Firebase keys (`AIza...`)
+  - Expo access tokens (`expt_...`)
+  - MongoDB connection URIs with embedded passwords
+  - Mobile signing credentials (`*.keystore`, `*.jks`, `*.p12`, `*.p8`, `google-services.json`, `GoogleService-Info.plist`)
+  - Untracked `.env` files (except `.env.example`)
+* Execution command: `node scripts/check-secrets.js` (or `npm run check-secrets`).
+
+---
+
+## 20. Verified Release Readiness Verdict
+
+* **vyora-backend**: `pnpm --dir vyora-backend build` &rarr; `tsc && tsc-alias`: **0 errors**.
+* **vyora-frontend**: `pnpm --dir vyora-frontend build` &rarr; `tsc -b && vite build`: **0 errors**.
+* **vyora-app**: `npm run build` &rarr; `expo export --platform web`: **483 modules bundled cleanly**.
+* **Secret Guard**: `node scripts/check-secrets.js` &rarr; **Passed: No sensitive credentials or secrets detected**.
+* **Branch Status**: `feal/struture` synchronized with `origin/feal/struture`.
+
 
 

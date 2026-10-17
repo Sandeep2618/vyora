@@ -88,7 +88,7 @@ export class AuthService {
       purchasePrefix: 'BILL-',
       nextPurchaseNumber: 1,
       ownerUserId: user._id.toString(),
-      subscriptionPlan: 'growth',
+      subscriptionPlan: 'starter',
     });
     await business.save();
 
