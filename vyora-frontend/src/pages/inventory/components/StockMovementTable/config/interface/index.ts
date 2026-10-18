@@ -1,3 +1,4 @@
+import React from 'react';
 import { MovementItem } from '@/pages/inventory/config';
 
 export interface StockMovementTableProps {
@@ -5,4 +6,5 @@ export interface StockMovementTableProps {
   isLoading: boolean;
   canAdjust?: boolean;
   onOpenAdjustment: () => void;
+  headerActions?: React.ReactNode;
 }

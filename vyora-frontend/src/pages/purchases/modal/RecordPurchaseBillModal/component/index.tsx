@@ -33,6 +33,17 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
   const isSubmitDisabled =
     !supplierId || !billNumber.trim() || !hasProducts || lines.every((l) => !l.productId);
 
+  const productOptions = React.useMemo(
+    () => [
+      { label: t('recordModal.selectProduct', { defaultValue: 'Select product...' }), value: '' },
+      ...products.map((p) => ({
+        label: `${p.name} ${p.sku ? `(${p.sku})` : ''}`,
+        value: p.id,
+      })),
+    ],
+    [products, t]
+  );
+
   return (
     <Modal
       isOpen={isOpen}
@@ -130,14 +141,14 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
               {lines.map((line, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-2 items-center text-xs">
                   {/* Product Dropdown */}
-                  <div className="col-span-5 relative">
-                    <select
+                  <div className="col-span-5">
+                    <Select
                       value={line.productId}
-                      onChange={(e) => {
-                        const prod = products.find((p) => p.id === e.target.value);
+                      onValueChange={(val) => {
+                        const prod = products.find((p) => p.id === val);
                         onLinesChange((prev) => {
                           const copy = [...prev];
-                          copy[idx].productId = e.target.value;
+                          copy[idx].productId = val;
                           if (prod) {
                             copy[idx].unitPriceMajor = minorToMajor(prod.purchasePriceMinor);
                             copy[idx].taxRatePercent = prod.taxRatePercent;
@@ -145,16 +156,9 @@ export const RecordPurchaseBillModal: React.FC<RecordPurchaseBillModalProps> = (
                           return copy;
                         });
                       }}
-                      className="w-full h-10 appearance-none pl-3 pr-8 bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs font-semibold text-[#123B3A] dark:text-[#E6F4F1] shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 focus:border-[#0F766E] dark:focus:border-[#14B8A6] transition-all cursor-pointer"
-                    >
-                      <option value="">{t('recordModal.selectProduct', { defaultValue: 'Select product...' })}</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} {p.sku ? `(${p.sku})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#566B69] dark:text-[#8FA8A4] pointer-events-none opacity-70" />
+                      options={productOptions}
+                      placeholder={t('recordModal.selectProduct', { defaultValue: 'Select product...' })}
+                    />
                   </div>
 
                   {/* Quantity */}

@@ -1,6 +1,13 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/Select';
 import { PaginationProps } from '../config/interface';
 import { DEFAULT_PAGE_SIZE_OPTIONS } from '../config/constant';
 import { calculatePageNumbers } from '../util';
@@ -39,17 +46,24 @@ export const Pagination: React.FC<PaginationProps> = ({
         {onItemsPerPageChange && (
           <div className="flex items-center gap-1.5 pl-2 border-l border-[#D7E5E2] dark:border-[#1E3B38]">
             <span className="hidden sm:inline text-[11px]">Rows:</span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-              className="px-2 py-1 text-xs bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg text-[#123B3A] dark:text-[#F0FDFA] focus:outline-none focus:border-[#0F766E] dark:focus:border-[#14B8A6]"
+            <SelectRoot
+              value={String(itemsPerPage)}
+              onValueChange={(val) => onItemsPerPageChange(Number(val))}
             >
-              {pageSizeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                size="sm"
+                className="h-7 w-[68px] px-2 text-xs font-semibold bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-md shadow-2xs"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="min-w-[68px]">
+                {pageSizeOptions.map((opt) => (
+                  <SelectItem key={opt} value={String(opt)}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
           </div>
         )}
       </div>

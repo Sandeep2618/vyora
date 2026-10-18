@@ -1,5 +1,12 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/Select';
 import { ITableController, ITableOption } from '../../config/interface';
 import { TABLE_CLASSES, DEFAULT_PAGE_SIZE_OPTIONS } from '../../config/constant';
 
@@ -64,17 +71,24 @@ export function TableFooter<T = any>({
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-[#566B69] dark:text-[#8FA8A4]">Rows per page:</span>
-          <select
-            value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-            className="h-7 px-2 text-xs font-medium bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-md text-[#123B3A] dark:text-[#E6F4F1] focus:outline-none focus:ring-1 focus:ring-[#0F766E] cursor-pointer"
+          <SelectRoot
+            value={String(pageSize)}
+            onValueChange={(val) => setPageSize(Number(val))}
           >
-            {pageSizeOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              size="sm"
+              className="h-7 w-[68px] px-2 text-xs font-semibold bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-md shadow-2xs"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="min-w-[68px]">
+              {pageSizeOptions.map((opt) => (
+                <SelectItem key={opt} value={String(opt)}>
+                  {opt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
         </div>
 
         <div className="text-xs text-[#566B69] dark:text-[#8FA8A4]">

@@ -194,4 +194,26 @@ export class ProductsService {
       updatedAt: (product as any).updatedAt,
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      search?: string;
+      lowStockOnly?: boolean;
+    },
+  ) {
+    const filter: any = { businessId, isArchived: false };
+    if (query.search) {
+      filter.$or = [
+        { name: { $regex: query.search, $options: 'i' } },
+        { sku: { $regex: query.search, $options: 'i' } },
+        { hsnCode: { $regex: query.search, $options: 'i' } },
+      ];
+    }
+    if (query.lowStockOnly) {
+      filter.$expr = { $lte: ['$currentStock', '$reorderLevel'] };
+    }
+
+    return ProductModel.find(filter).sort({ name: 1 }).lean();
+  }
 }

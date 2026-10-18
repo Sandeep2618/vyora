@@ -14,6 +14,8 @@ import { PurchasesPage } from './pages/purchases';
 import { PaymentsPage } from './pages/payments';
 import { ReportsPage } from './pages/reports';
 import { AccountHubPage } from './pages/account';
+import { ExpensesPage } from './pages/expenses';
+import { PlanGateRoute } from './components/auth/PlanGateRoute';
 
 import { ToastProvider } from './components/ui/Toast';
 import { Analytics } from '@vercel/analytics/react';
@@ -77,12 +79,48 @@ export const App: React.FC = () => {
                 <Route path="parties" element={<PartiesPage />} />
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="inventory" element={<InventoryPage />} />
-                <Route path="purchases" element={<PurchasesPage />} />
+                <Route
+                  path="purchases"
+                  element={
+                    <PlanGateRoute requiredRole="OWNER" featureName="Supplier Purchases">
+                      <PurchasesPage />
+                    </PlanGateRoute>
+                  }
+                />
                 <Route path="payments" element={<PaymentsPage />} />
-                <Route path="reports" element={<ReportsPage />} />
-                <Route path="account" element={<AccountHubPage />} />
-                <Route path="roles" element={<AccountHubPage />} />
-                <Route path="settings" element={<AccountHubPage />} />
+                <Route path="expenses" element={<ExpensesPage />} />
+                <Route
+                  path="reports"
+                  element={
+                    <PlanGateRoute requiredPlan="growth" featureName="Reports & Analytics">
+                      <ReportsPage />
+                    </PlanGateRoute>
+                  }
+                />
+                <Route
+                  path="account"
+                  element={
+                    <PlanGateRoute requiredRole="OWNER" featureName="Account & Roles">
+                      <AccountHubPage />
+                    </PlanGateRoute>
+                  }
+                />
+                <Route
+                  path="roles"
+                  element={
+                    <PlanGateRoute requiredRole="OWNER" featureName="Roles & Rights">
+                      <AccountHubPage />
+                    </PlanGateRoute>
+                  }
+                />
+                <Route
+                  path="settings"
+                  element={
+                    <PlanGateRoute requiredRole="OWNER" featureName="Business Settings">
+                      <AccountHubPage />
+                    </PlanGateRoute>
+                  }
+                />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

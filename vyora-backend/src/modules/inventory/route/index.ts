@@ -25,6 +25,8 @@ router.post(
   InventoryController.adjustStock,
 );
 router.get('/movements', InventoryController.getMovements);
+router.get('/movements/export', InventoryController.exportCsv);
+router.get('/export', InventoryController.exportCsv);
 router.get('/ledger/:productId', InventoryController.getLedger);
 
 export const inventoryRouter = router;

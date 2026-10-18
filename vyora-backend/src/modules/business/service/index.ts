@@ -413,13 +413,13 @@ export class BusinessService {
 
     const ownedCount = await BusinessModel.countDocuments({ ownerUserId: userId });
 
-    if (userPlan === 'starter' && ownedCount >= 1) {
+    if (userPlan === 'starter' && ownedCount >= 2) {
       throw new ForbiddenError(
-        'The Free Starter plan allows 1 store only. Please upgrade to Growth or Enterprise to add more stores.',
+        'The Free Starter plan allows up to 2 stores. Please upgrade to Growth or Enterprise to add more stores.',
         'PlanLimitExceeded',
         {
           currentPlan: 'starter',
-          allowedStores: 1,
+          allowedStores: 2,
           currentStores: ownedCount,
         },
       );

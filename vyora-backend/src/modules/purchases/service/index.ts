@@ -164,4 +164,32 @@ export class PurchasesService {
       updatedAt: (doc as any).updatedAt,
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      search?: string;
+      status?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+  ) {
+    const filter: any = { businessId };
+    if (query.status) filter.status = query.status;
+    if (query.startDate || query.endDate) {
+      filter.billDate = {};
+      if (query.startDate) filter.billDate.$gte = query.startDate;
+      if (query.endDate) filter.billDate.$lte = query.endDate;
+    }
+    if (query.search) {
+      const regex = new RegExp(query.search, 'i');
+      filter.$or = [
+        { billNumber: regex },
+        { 'supplierSnapshot.name': regex },
+        { 'supplierSnapshot.phone': regex },
+      ];
+    }
+
+    return PurchaseBillModel.find(filter).sort({ billDate: -1, createdAt: -1 }).lean();
+  }
 }

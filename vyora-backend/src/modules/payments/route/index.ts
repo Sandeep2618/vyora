@@ -20,6 +20,7 @@ router.post(
 );
 
 router.get('/', PaymentsController.findAll);
+router.get('/export', PaymentsController.exportCsv);
 router.get('/:id', PaymentsController.findOne);
 
 export const paymentsRouter = router;

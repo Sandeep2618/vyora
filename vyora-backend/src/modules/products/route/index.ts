@@ -21,6 +21,7 @@ router.post(
 
 router.get('/', ProductsController.findAll);
 router.post('/paging', ProductsController.findAll);
+router.get('/export', ProductsController.exportCsv);
 router.get('/:id', ProductsController.findOne);
 router.put(
   '/:id',

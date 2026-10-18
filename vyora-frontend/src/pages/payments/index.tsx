@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, CreditCard } from 'lucide-react';
+import { Plus, CreditCard, Filter, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatCurrency, majorToMinor } from '@vyora/utils';
 import { Party, PaymentRecord, PaymentMethod, PaymentType } from '@vyora/shared-types';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { Card } from '@/components/ui/Card';
+import { Select } from '@/components/ui/Select';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { toast } from '@/components/ui/Toast';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { PaymentsFilterToolbar, PaymentsTable } from './components';
+import { PaymentsTable } from './components';
 import { RecordVoucherModal } from './modal';
 
 export const PaymentsPage: React.FC = () => {
@@ -19,7 +19,6 @@ export const PaymentsPage: React.FC = () => {
   const { t } = useTranslation(['payments', 'common']);
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'RECEIPT' | 'PAYMENT'>('ALL');
   const [methodFilter, setMethodFilter] = useState<string>('ALL');
   const [showFilters, setShowFilters] = useState(false);
@@ -74,7 +73,7 @@ export const PaymentsPage: React.FC = () => {
     },
   });
 
-  // Client-side filtering
+  // Client-side filtering by type and method
   const filteredPayments = useMemo(() => {
     if (!paymentsData?.items) return [];
 
@@ -84,24 +83,15 @@ export const PaymentsPage: React.FC = () => {
         matchesType = p.type === typeFilter;
       }
       const matchesMethod = methodFilter === 'ALL' || p.paymentMethod === methodFilter;
-      const q = search.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        p.paymentNumber.toLowerCase().includes(q) ||
-        p.partyName.toLowerCase().includes(q) ||
-        (p.referenceNumber && p.referenceNumber.toLowerCase().includes(q));
-
-      return matchesType && matchesMethod && matchesSearch;
+      return matchesType && matchesMethod;
     });
-  }, [paymentsData?.items, typeFilter, methodFilter, search]);
+  }, [paymentsData?.items, typeFilter, methodFilter]);
 
-  const hasActiveFilters = typeFilter !== 'ALL' || methodFilter !== 'ALL' || search !== '';
-  const showToolbar = (paymentsData?.items && paymentsData.items.length > 0) || hasActiveFilters;
+  const hasActiveFilters = typeFilter !== 'ALL' || methodFilter !== 'ALL';
 
   const clearAllFilters = () => {
     setTypeFilter('ALL');
     setMethodFilter('ALL');
-    setSearch('');
   };
 
   const partyOptions = [
@@ -112,8 +102,41 @@ export const PaymentsPage: React.FC = () => {
     })) || []),
   ];
 
+  const headerActions = (
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => setShowFilters((prev) => !prev)}
+        className={`h-8.5 px-2.5 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 cursor-pointer ${
+          showFilters || hasActiveFilters
+            ? 'bg-[#E6F4F2] dark:bg-[#162E2D] border-[#0F766E] text-[#0F766E] dark:text-[#14B8A6]'
+            : 'bg-white dark:bg-[#112322] border-[#D7E5E2] dark:border-[#1E3B38] text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A] dark:hover:text-[#F0FDFA]'
+        }`}
+        title={t('actions.filter', { ns: 'common' })}
+      >
+        <Filter className="w-3.5 h-3.5" />
+        <span className="hidden sm:inline">{t('actions.filter', { ns: 'common' })}</span>
+        {hasActiveFilters && (
+          <span className="w-2 h-2 rounded-full bg-[#0F766E] dark:bg-[#14B8A6]" />
+        )}
+      </button>
+
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={clearAllFilters}
+          className="h-8.5 px-2.5 text-xs font-medium text-[#B91C1C] dark:text-rose-400 hover:bg-[#FEF2F2] dark:hover:bg-rose-950/40 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+          title={t('actions.reset', { ns: 'common' })}
+        >
+          <X className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{t('actions.reset', { ns: 'common' })}</span>
+        </button>
+      )}
+    </div>
+  );
+
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
+    <div className="space-y-4 max-w-7xl mx-auto">
       {/* Header */}
       <PageHeader
         title={t('title')}
@@ -127,39 +150,51 @@ export const PaymentsPage: React.FC = () => {
         )}
       </PageHeader>
 
-      {/* Payments Table Card */}
-      <Card className="p-3.5 sm:p-5 space-y-4">
-        {isLoading ? (
-          <div className="py-12 text-center text-xs text-[#566B69] dark:text-[#8FA8A4]">
-            {t('status.loading', { ns: 'common' })}
-          </div>
-        ) : !showToolbar ? (
-          <EmptyState
-            icon={CreditCard}
-            title={t('empty.title')}
-            description={t('empty.description')}
-            actionLabel={isOwner ? t('empty.action') : undefined}
-            onAction={isOwner ? () => setIsModalOpen(true) : undefined}
+      {/* Filter Toolbar Drawer */}
+      {showFilters && (
+        <div className="p-3.5 bg-[#F4F8F7] dark:bg-[#162E2D] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in">
+          <Select
+            label={t('filter.voucherType', { defaultValue: 'Voucher Type' })}
+            value={typeFilter}
+            onValueChange={(val) => setTypeFilter(val as any)}
+            options={[
+              { label: t('filter.all'), value: 'ALL' },
+              { label: t('filter.receipt'), value: 'RECEIPT' },
+              { label: t('filter.payment'), value: 'PAYMENT' },
+            ]}
           />
-        ) : (
-          <>
-            <PaymentsFilterToolbar
-              search={search}
-              onSearchChange={setSearch}
-              typeFilter={typeFilter}
-              onTypeFilterChange={setTypeFilter}
-              methodFilter={methodFilter}
-              onMethodFilterChange={setMethodFilter}
-              showFilters={showFilters}
-              onToggleFilters={() => setShowFilters(!showFilters)}
-              onClearFilters={clearAllFilters}
-              hasActiveFilters={hasActiveFilters}
-              totalCount={filteredPayments.length}
-            />
-            <PaymentsTable payments={filteredPayments} />
-          </>
-        )}
-      </Card>
+
+          <Select
+            label={t('filter.paymentMethod', { defaultValue: 'Payment Method' })}
+            value={methodFilter}
+            onValueChange={setMethodFilter}
+            options={[
+              { label: t('filter.allMethods'), value: 'ALL' },
+              { label: t('filter.bankTransfer'), value: 'BANK_TRANSFER' },
+              { label: t('filter.upi'), value: 'UPI' },
+              { label: t('filter.cash'), value: 'CASH' },
+              { label: t('filter.cheque'), value: 'CHEQUE' },
+            ]}
+          />
+        </div>
+      )}
+
+      {/* Payments Content */}
+      {isLoading ? (
+        <div className="py-12 text-center text-xs text-[#566B69] dark:text-[#8FA8A4]">
+          {t('status.loading', { ns: 'common' })}
+        </div>
+      ) : !paymentsData?.items?.length && !hasActiveFilters ? (
+        <EmptyState
+          icon={CreditCard}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          actionLabel={isOwner ? t('empty.action') : undefined}
+          onAction={isOwner ? () => setIsModalOpen(true) : undefined}
+        />
+      ) : (
+        <PaymentsTable payments={filteredPayments} headerActions={headerActions} />
+      )}
 
       {/* Record Payment Voucher Modal */}
       <RecordVoucherModal

@@ -172,4 +172,50 @@ export class InventoryService {
       })),
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      productId?: string;
+      movementType?: string;
+      search?: string;
+    },
+  ) {
+    const filter: any = { businessId };
+    if (query.productId) {
+      filter.productId = query.productId;
+    }
+    if (query.movementType) {
+      filter.movementType = query.movementType;
+    }
+
+    const movements = await InventoryMovementModel.find(filter).sort({ createdAt: -1 }).lean();
+    const productIds = Array.from(new Set(movements.map((m) => m.productId)));
+    const products = await ProductModel.find({ _id: { $in: productIds }, businessId }).lean();
+    const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
+    let items = movements.map((m) => {
+      const prod = productMap.get(m.productId);
+      return {
+        ...m,
+        productName: prod?.name || 'Unknown Item',
+        sku: prod?.sku || '-',
+        unit: prod?.unit || 'PCS',
+        balanceAfter: m.balanceAfter ?? m.resultingStock,
+      };
+    });
+
+    if (query.search) {
+      const s = query.search.toLowerCase();
+      items = items.filter(
+        (i) =>
+          i.productName.toLowerCase().includes(s) ||
+          i.sku.toLowerCase().includes(s) ||
+          (i.reason && i.reason.toLowerCase().includes(s)) ||
+          i.movementType.toLowerCase().includes(s),
+      );
+    }
+
+    return items;
+  }
 }

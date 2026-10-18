@@ -6,6 +6,7 @@ import { api } from '../../lib/api';
 import { majorToMinor } from '@vyora/utils';
 import { Party, Product, PurchaseBill } from '@vyora/shared-types';
 import { Button } from '../../components/ui/Button';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { toast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
@@ -78,42 +79,34 @@ export const PurchasesPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#123B3A] dark:text-[#F0FDFA]">{t('title')}</h2>
-          <p className="text-xs sm:text-sm text-[#566B69] dark:text-[#8FA8A4] mt-0.5">
-            {t('subtitle')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {isOwner && (
-            <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5">
-              <Plus className="w-4 h-4" />
-              <span>{t('button.recordBill')}</span>
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Bills Table Card */}
-      <div className="bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-4 shadow-2xs space-y-4">
-        {isLoading ? (
-          <div className="py-12 text-center text-xs text-[#566B69] dark:text-[#8FA8A4]">
-            {t('common.loading', { defaultValue: 'Loading purchase bills...' })}
-          </div>
-        ) : bills?.items && bills.items.length > 0 ? (
-          <PurchasesTable bills={bills.items} />
-        ) : (
-          <EmptyState
-            icon={ShoppingCart}
-            title={t('empty.title')}
-            description={t('empty.description')}
-            actionLabel={isOwner ? t('empty.action') : undefined}
-            onAction={isOwner ? () => setIsModalOpen(true) : undefined}
-          />
+      <PageHeader
+        title={t('title')}
+        description={t('subtitle')}
+      >
+        {isOwner && (
+          <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5 shadow-sm">
+            <Plus className="w-4 h-4" />
+            <span>{t('button.recordBill')}</span>
+          </Button>
         )}
-      </div>
+      </PageHeader>
+
+      {/* Purchases Content */}
+      {isLoading ? (
+        <div className="py-12 text-center text-xs text-[#566B69] dark:text-[#8FA8A4]">
+          {t('common.loading', { defaultValue: 'Loading purchase bills...' })}
+        </div>
+      ) : bills?.items && bills.items.length > 0 ? (
+        <PurchasesTable bills={bills.items} />
+      ) : (
+        <EmptyState
+          icon={ShoppingCart}
+          title={t('empty.title')}
+          description={t('empty.description')}
+          actionLabel={isOwner ? t('empty.action') : undefined}
+          onAction={isOwner ? () => setIsModalOpen(true) : undefined}
+        />
+      )}
 
       {/* Record Purchase Bill Modal */}
       <RecordPurchaseBillModal

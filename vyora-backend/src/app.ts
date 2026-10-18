@@ -34,7 +34,7 @@ export function createApp(): Application {
         'Idempotency-Key',
         '*',
       ],
-      exposedHeaders: ['X-Request-Id'],
+      exposedHeaders: ['X-Request-Id', 'Content-Disposition'],
     }),
   );
 

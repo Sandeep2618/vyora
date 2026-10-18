@@ -20,3 +20,5 @@ export interface PaymentRecord {
   receivedByUserId: string;
   createdAt: string;
 }
+
+export type Payment = PaymentRecord;

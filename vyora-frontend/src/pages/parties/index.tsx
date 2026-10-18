@@ -10,6 +10,7 @@ import { useParties, useDeleteParty } from '@/hooks/useParties';
 import { BalanceFilter } from './config';
 import { PartyFilterToolbar, PartyTable } from './components';
 import { PartyFormModal, DeletePartyModal } from './modal';
+import { PartyLedgerModal } from './modal/PartyLedgerModal';
 
 export const PartiesPage: React.FC = () => {
   const { isOwner } = useAuth();
@@ -22,6 +23,7 @@ export const PartiesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [partyToEdit, setPartyToEdit] = useState<Party | null>(null);
   const [partyToDelete, setPartyToDelete] = useState<Party | null>(null);
+  const [partyForLedger, setPartyForLedger] = useState<Party | null>(null);
 
   const { data, isLoading } = useParties({ type: activeTab });
   const deleteMutation = useDeleteParty();
@@ -116,6 +118,7 @@ export const PartiesPage: React.FC = () => {
           hasActiveFilters={hasActiveFilters}
           isOwner={isOwner}
           onResetFilters={clearAllFilters}
+          onViewLedger={(party) => setPartyForLedger(party)}
           onEdit={(party) => {
             setPartyToEdit(party);
             setIsModalOpen(true);
@@ -127,6 +130,13 @@ export const PartiesPage: React.FC = () => {
           }}
         />
       </Card>
+
+      {/* Customer Khata Ledger Statement & WhatsApp Reminder Modal */}
+      <PartyLedgerModal
+        isOpen={Boolean(partyForLedger)}
+        party={partyForLedger}
+        onClose={() => setPartyForLedger(null)}
+      />
 
       {/* Add / Edit Party Modal */}
       <PartyFormModal

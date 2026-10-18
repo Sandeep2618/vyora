@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Zap, Banknote, QrCode, CreditCard } from 'lucide-react';
 import { api } from '@/lib/api';
-import { majorToMinor, minorToMajor } from '@vyora/utils';
+import { majorToMinor, minorToMajor, formatCurrency } from '@vyora/utils';
 import { Party, Product, Invoice, BusinessProfile } from '@vyora/shared-types';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/components/ui/Toast';
 import { InvoiceCustomerHeader } from '../components/create/InvoiceCustomerHeader';
 import { InvoiceLineItemsTable, LineFormItem } from '../components/create/InvoiceLineItemsTable';
 import { InvoiceTotalsSummary, InvoicePreviewTotals } from '../components/create/InvoiceTotalsSummary';
@@ -44,6 +45,8 @@ export const CreateInvoicePage: React.FC = () => {
     return d.toISOString().split('T')[0];
   });
   const [notes, setNotes] = useState('');
+  const [posPaymentMode, setPosPaymentMode] = useState<'CASH' | 'UPI' | 'CREDIT'>('CASH');
+  const [cashTendered, setCashTendered] = useState<string>('');
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
 
@@ -151,7 +154,7 @@ export const CreateInvoicePage: React.FC = () => {
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: ({ finalize }: { finalize: boolean }) => {
+    mutationFn: async ({ finalize, autoPaymentMode }: { finalize: boolean; autoPaymentMode?: 'CASH' | 'UPI' }) => {
       const validLines = lines.filter((l) => l.productId && (Number(l.quantity) || 0) > 0);
       const payload = {
         customerId,
@@ -167,12 +170,37 @@ export const CreateInvoicePage: React.FC = () => {
           taxRatePercent: l.taxRatePercent,
         })),
       };
-      return api.post<Invoice>(`/invoices?finalize=${finalize}`, payload);
+      const created = await api.post<Invoice>(`/invoices?finalize=${finalize}`, payload);
+
+      // If fast 1-tap counter sale, immediately record full payment receipt
+      if (autoPaymentMode && created.grandTotalMinor > 0) {
+        try {
+          await api.post('/payments', {
+            invoiceId: created.id,
+            amountMinor: created.grandTotalMinor,
+            paymentMethod: autoPaymentMode,
+            paymentDate: issueDate || new Date().toISOString().split('T')[0],
+            notes: `Counter 1-Tap ${autoPaymentMode} settlement`,
+            idempotencyKey: `auto-rcpt-${created.id}-${Date.now()}`,
+          });
+        } catch (paymentErr) {
+          console.warn('Instant payment receipt auto-record failed:', paymentErr);
+        }
+      }
+      return created;
     },
     onSuccess: (data: Invoice) => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
+      toast.success('Invoice Created', 'Document saved successfully');
       navigate(`/invoices/${data.id}`);
     },
   });
+
+  const grandTotalMinor = previewTotals?.grandTotalMinor ?? 0;
+  const grandTotalMajor = grandTotalMinor / 100;
+  const cashReceivedNum = parseFloat(cashTendered) || 0;
+  const changeDue = Math.max(0, cashReceivedNum - grandTotalMajor);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -257,6 +285,119 @@ export const CreateInvoicePage: React.FC = () => {
             notes={notes}
             onNotesChange={setNotes}
           />
+
+          {/* Fast Counter POS Settlement Box */}
+          <div className="bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-5 shadow-2xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#D7E5E2] dark:border-[#1E3B38]">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-[#123B3A] dark:text-[#E6F4F1]">
+                <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>Fast Counter Settlement</span>
+              </div>
+              <span className="text-[10px] font-semibold text-[#0F766E] dark:text-[#14B8A6] uppercase tracking-wider bg-[#0F766E]/10 px-2 py-0.5 rounded-full">
+                POS
+              </span>
+            </div>
+
+            {/* Mode Selector */}
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#F4F8F7] dark:bg-[#142B2A] rounded-xl border border-[#D7E5E2] dark:border-[#1E3B38]">
+              <button
+                type="button"
+                onClick={() => setPosPaymentMode('CASH')}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  posPaymentMode === 'CASH'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A]'
+                }`}
+              >
+                <Banknote className="w-3.5 h-3.5" />
+                <span>Cash</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPosPaymentMode('UPI')}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  posPaymentMode === 'UPI'
+                    ? 'bg-purple-600 text-white shadow-2xs'
+                    : 'text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A]'
+                }`}
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>UPI</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPosPaymentMode('CREDIT')}
+                className={`py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1 ${
+                  posPaymentMode === 'CREDIT'
+                    ? 'bg-[#123B3A] dark:bg-[#1E3B38] text-white shadow-2xs'
+                    : 'text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A]'
+                }`}
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                <span>Credit</span>
+              </button>
+            </div>
+
+            {/* Cash Tendered & Change Return */}
+            {posPaymentMode === 'CASH' && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs font-semibold text-[#123B3A] dark:text-[#E6F4F1]">
+                  <span>Cash Received (₹):</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={cashTendered}
+                    onChange={(e) => setCashTendered(e.target.value)}
+                    placeholder={grandTotalMajor > 0 ? String(grandTotalMajor) : '0.00'}
+                    className="w-28 text-right px-2.5 py-1 text-xs font-bold bg-[#F4F8F7] dark:bg-[#142B2A] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg text-[#123B3A] dark:text-[#F0FDFA] focus:outline-none focus:ring-1 focus:ring-emerald-600"
+                  />
+                </div>
+                {cashReceivedNum > grandTotalMajor && (
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                    <span>Return Change:</span>
+                    <span>₹{changeDue.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Fast 1-Tap Action Button */}
+            {posPaymentMode === 'CASH' && (
+              <button
+                type="button"
+                disabled={createMutation.isPending || !customerId || lines.every((l) => !l.productId)}
+                onClick={() => createMutation.mutate({ finalize: true, autoPaymentMode: 'CASH' })}
+                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                <span>1-Tap Cash Sale ({formatCurrency(grandTotalMinor)})</span>
+              </button>
+            )}
+
+            {posPaymentMode === 'UPI' && (
+              <button
+                type="button"
+                disabled={createMutation.isPending || !customerId || lines.every((l) => !l.productId)}
+                onClick={() => createMutation.mutate({ finalize: true, autoPaymentMode: 'UPI' })}
+                className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>1-Tap UPI Sale ({formatCurrency(grandTotalMinor)})</span>
+              </button>
+            )}
+
+            {posPaymentMode === 'CREDIT' && (
+              <button
+                type="button"
+                disabled={createMutation.isPending || !customerId || lines.every((l) => !l.productId)}
+                onClick={() => createMutation.mutate({ finalize: true })}
+                className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#0D655E] disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+              >
+                <span>Create Invoice (Due Later)</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

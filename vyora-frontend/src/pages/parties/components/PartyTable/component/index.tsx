@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, MessageSquare, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Party } from '@/types';
 import { formatCurrency } from '@/utils';
@@ -17,6 +17,7 @@ export const PartyTable: React.FC<PartyTableProps> = ({
   onEdit,
   onDelete,
   onAddFirst,
+  onViewLedger,
 }) => {
   const { t } = useTranslation(['parties', 'common']);
 
@@ -33,8 +34,15 @@ export const PartyTable: React.FC<PartyTableProps> = ({
           title: t('columns.name'),
           sortable: true,
           render: (party) => (
-            <div className="font-bold text-[#123B3A] dark:text-[#F0FDFA]">
-              {party.name}
+            <div>
+              <button
+                type="button"
+                onClick={() => onViewLedger && onViewLedger(party)}
+                className="font-bold text-left text-[#123B3A] dark:text-[#F0FDFA] hover:text-[#0F766E] dark:hover:text-[#14B8A6] transition-colors cursor-pointer"
+                title="View customer ledger statement"
+              >
+                {party.name}
+              </button>
               {party.contactPerson && (
                 <p className="text-[10px] text-[#566B69] dark:text-[#8FA8A4] font-normal">
                   Attn: {party.contactPerson}
@@ -90,8 +98,22 @@ export const PartyTable: React.FC<PartyTableProps> = ({
           align: 'right',
           render: (party) => {
             const { className, type } = getBalanceVariant(party.currentBalanceMinor);
+            const isDue = type === 'due' && (party.currentBalanceMinor || 0) > 0;
+
+            const handleSendWhatsApp = (e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (!party.phone) return;
+              const clean = party.phone.replace(/[^0-9]/g, '');
+              const phoneWithCountry = clean.length === 10 ? `91${clean}` : clean;
+              const amountRupees = (party.currentBalanceMinor / 100).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+              });
+              const msg = `Namaste ${party.name} Ji,\n\nThis is a friendly payment reminder from *Vyora Store*.\n\nPending Ledger Balance: *₹${amountRupees}*\n\nKindly clear via UPI or Cash at the counter. Thank you!`;
+              window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(msg)}`, '_blank');
+            };
+
             return (
-              <div className="text-right font-bold">
+              <div className="flex items-center justify-end gap-2 text-right font-bold">
                 <span className={className}>
                   {formatCurrency(Math.abs(party.currentBalanceMinor))}
                   <span className="text-[10px] ml-1 font-normal">
@@ -102,6 +124,16 @@ export const PartyTable: React.FC<PartyTableProps> = ({
                       : t('balance.settled')}
                   </span>
                 </span>
+                {isDue && party.phone && (
+                  <button
+                    type="button"
+                    onClick={handleSendWhatsApp}
+                    className="p-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded transition-colors"
+                    title="Send WhatsApp payment reminder"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             );
           },

@@ -13,7 +13,7 @@ export const LoginPage: React.FC = () => {
   const inviteBiz = searchParams.get('inviteBiz');
   const initialEmail = searchParams.get('email') || '';
 
-  const [email, setEmail] = useState(initialEmail);
+  const [identifier, setIdentifier] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,10 +22,23 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const trimmed = identifier.trim();
+    if (!trimmed) {
+      setError('Please enter your mobile number or email');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await login({ email, password });
+      const cleanPhone = trimmed.replace(/[^0-9]/g, '');
+      const isPhone = cleanPhone.length === 10;
+      const payload: any = isPhone
+        ? { phone: cleanPhone, emailOrPhone: cleanPhone, password }
+        : { email: trimmed.toLowerCase(), emailOrPhone: trimmed.toLowerCase(), password };
+
+      await login(payload);
       if (inviteBiz) {
         try {
           await api.post('/auth/accept-invite', { businessId: inviteBiz });
@@ -33,7 +46,7 @@ export const LoginPage: React.FC = () => {
       }
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.message || 'Invalid mobile number/email or password');
     } finally {
       setIsLoading(false);
     }
@@ -70,12 +83,12 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Email Address"
-            type="email"
+            label="Mobile Number or Email"
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@company.com"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="10-digit mobile or you@company.com"
           />
 
           <Input

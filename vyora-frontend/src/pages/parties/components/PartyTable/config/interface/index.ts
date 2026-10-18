@@ -10,4 +10,5 @@ export interface PartyTableProps {
   onEdit: (party: Party) => void;
   onDelete: (party: Party) => void;
   onAddFirst: () => void;
+  onViewLedger?: (party: Party) => void;
 }

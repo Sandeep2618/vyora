@@ -144,6 +144,59 @@ export async function apiRequest<T = any>(
   }
 }
 
+export async function downloadFile(endpoint: string, defaultFilename?: string): Promise<void> {
+  const token = localStorage.getItem('vyora_token');
+  const businessId = localStorage.getItem('vyora_business_id');
+
+  const headers: Record<string, string> = {
+    Accept: 'text/csv, application/octet-stream, */*',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (businessId && businessId !== 'undefined' && businessId !== 'null') {
+    headers['x-business-id'] = businessId;
+  }
+
+  const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    let errorMsg = `Download failed with HTTP ${response.status}`;
+    try {
+      const data = await response.json();
+      errorMsg = data?.message || data?.error || errorMsg;
+    } catch {
+      // not JSON
+    }
+    throw new ApiError(errorMsg, response.status);
+  }
+
+  let filename = defaultFilename || 'export.csv';
+  const disposition = response.headers.get('content-disposition');
+  if (disposition && disposition.includes('filename=')) {
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    if (match && match[1]) {
+      filename = match[1].trim();
+    }
+  }
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', blobUrl);
+  link.setAttribute('download', filename.endsWith('.csv') ? filename : `${filename}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+}
+
 export const api = {
   get: <T>(url: string) => apiRequest<T>(url, { method: 'GET' }),
   post: <T>(url: string, body?: any, headers?: Record<string, string>) =>
@@ -163,4 +216,5 @@ export const api = {
       body: body ? JSON.stringify(body) : undefined,
     }),
   delete: <T>(url: string) => apiRequest<T>(url, { method: 'DELETE' }),
+  download: (url: string, defaultFilename?: string) => downloadFile(url, defaultFilename),
 };

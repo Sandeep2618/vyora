@@ -49,10 +49,10 @@ export const TopProductsWidget: React.FC<TopProductsWidgetProps> = ({ products }
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="py-8 text-center text-[#566B69] dark:text-[#8FA8A4]">
+                <td colSpan={3} className="py-7 text-center text-[#566B69] dark:text-[#8FA8A4]">
                   <div className="flex flex-col items-center justify-center">
-                    <div className="w-9 h-9 rounded-lg bg-[#E6F4F2] dark:bg-[#162E2D] text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-2">
-                      <span className="text-base font-bold">📦</span>
+                    <div className="w-10 h-10 rounded-xl bg-[#0F766E]/10 dark:bg-[#0F766E]/20 text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-2">
+                      <span className="text-sm">📦</span>
                     </div>
                     <span className="font-semibold text-[#123B3A] dark:text-[#F0FDFA]">{t('empty.noData', { ns: 'common' })}</span>
                     <span className="text-[11px] text-[#566B69] dark:text-[#8FA8A4] mt-0.5">

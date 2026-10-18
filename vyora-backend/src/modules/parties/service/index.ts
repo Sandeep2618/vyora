@@ -110,4 +110,23 @@ export class PartiesService {
       updatedAt: (party as any).updatedAt,
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      type?: PartyType | 'ALL';
+      search?: string;
+    },
+  ) {
+    const filter: any = { businessId, isArchived: false };
+    if (query.type && query.type !== 'ALL') {
+      filter.$or = [{ type: query.type }, { type: 'BOTH' }];
+    }
+    if (query.search) {
+      const regex = new RegExp(query.search, 'i');
+      filter.$or = [{ name: regex }, { phone: regex }, { email: regex }, { gstin: regex }];
+    }
+
+    return PartyModel.find(filter).sort({ name: 1 }).lean();
+  }
 }

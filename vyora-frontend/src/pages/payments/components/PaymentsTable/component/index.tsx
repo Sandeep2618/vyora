@@ -6,7 +6,7 @@ import { Table, ITableOption } from '@/components/Table';
 import { PaymentRecord } from '@vyora/shared-types';
 import { PaymentsTableProps } from '../config/interface';
 
-export const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments }) => {
+export const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments, headerActions }) => {
   const { t } = useTranslation(['payments', 'common']);
 
   const tableOption: ITableOption<PaymentRecord> = useMemo(
@@ -14,7 +14,11 @@ export const PaymentsTable: React.FC<PaymentsTableProps> = ({ payments }) => {
       module: 'payments',
       rowKey: 'id',
       data: payments,
-      search: false,
+      headerActions,
+      countPill: true,
+      search: {
+        placeholder: t('actions.search', { ns: 'common', defaultValue: 'Search vouchers, party...' }),
+      },
       column: [
         {
           dataIndex: 'paymentNumber',

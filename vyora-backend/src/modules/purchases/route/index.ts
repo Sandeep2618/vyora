@@ -20,6 +20,7 @@ router.post(
 );
 
 router.get('/', PurchasesController.findAll);
+router.get('/export', PurchasesController.exportCsv);
 router.get('/:id', PurchasesController.findOne);
 
 export const purchasesRouter = router;

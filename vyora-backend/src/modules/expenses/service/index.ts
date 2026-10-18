@@ -172,4 +172,36 @@ export class ExpensesService {
       createdAt: (doc as any).createdAt,
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      category?: string;
+      startDate?: string;
+      endDate?: string;
+      search?: string;
+    },
+  ) {
+    const filter: any = { businessId };
+    if (query.category) {
+      filter.category = query.category;
+    }
+    if (query.startDate || query.endDate) {
+      filter.expenseDate = {};
+      if (query.startDate) filter.expenseDate.$gte = query.startDate;
+      if (query.endDate) filter.expenseDate.$lte = query.endDate;
+    }
+    if (query.search) {
+      const regex = new RegExp(query.search, 'i');
+      filter.$or = [
+        { expenseNumber: regex },
+        { vendorName: regex },
+        { category: regex },
+        { notes: regex },
+      ];
+    }
+
+    const expenses = await ExpenseRecordModel.find(filter).sort({ expenseDate: -1, createdAt: -1 }).lean();
+    return expenses.map((e) => this.mapExpense(e as any));
+  }
 }

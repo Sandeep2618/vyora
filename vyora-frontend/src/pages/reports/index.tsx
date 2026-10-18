@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BarChart3, Download } from 'lucide-react';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/Button';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { DatePicker } from '../../components/ui/DatePicker';
 import { PlanPurchaseModal } from '@/components/subscription/modal/PlanPurchaseModal';
 import { useAuth } from '../../context/AuthContext';
@@ -87,24 +88,18 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[#123B3A] dark:text-[#F0FDFA]">{t('title')}</h2>
-          <p className="text-xs sm:text-sm text-[#566B69] dark:text-[#8FA8A4] mt-0.5">
-            {t('subtitle')}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => window.print()} className="no-print">
-            <Download className="w-4 h-4 mr-1.5" />
-            {t('button.printReport')}
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t('title')}
+        description={t('subtitle')}
+      >
+        <Button variant="outline" onClick={() => window.print()} className="no-print shadow-2xs">
+          <Download className="w-4 h-4 mr-1.5" />
+          {t('button.printReport')}
+        </Button>
+      </PageHeader>
 
       {/* Navigation Tabs and Date Range Filter */}
-      <div className="bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl p-4 shadow-2xs space-y-4 no-print">
+      <div className="bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-2xl p-4 sm:p-5 shadow-xs space-y-4 no-print">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-2 bg-[#F4F8F7] dark:bg-[#0D1C1B] p-1 rounded-lg border border-[#D7E5E2] dark:border-[#1E3B38] overflow-x-auto max-w-full">
             <button

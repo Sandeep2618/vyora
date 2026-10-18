@@ -11,6 +11,7 @@ export const StockMovementTable: React.FC<StockMovementTableProps> = ({
   isLoading,
   canAdjust = true,
   onOpenAdjustment,
+  headerActions,
 }) => {
   const { t } = useTranslation(['inventory', 'common']);
 
@@ -19,7 +20,11 @@ export const StockMovementTable: React.FC<StockMovementTableProps> = ({
       module: 'inventory',
       rowKey: 'id',
       data: movements,
-      search: false,
+      headerActions,
+      countPill: true,
+      search: {
+        placeholder: t('actions.search', { ns: 'common', defaultValue: 'Search product, SKU, reason...' }),
+      },
       column: [
         {
           dataIndex: 'createdAt',

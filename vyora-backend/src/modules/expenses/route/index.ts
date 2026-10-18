@@ -18,6 +18,7 @@ router.post(
 );
 
 router.get('/', ExpensesController.findAll);
+router.get('/export', ExpensesController.exportCsv);
 router.get('/categories', ExpensesController.getCategories);
 router.delete('/:id', ExpensesController.remove);
 

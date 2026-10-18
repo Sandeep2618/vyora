@@ -29,18 +29,18 @@ export const SalesChart: React.FC<SalesChartProps> = ({ salesTrend }) => {
       </div>
 
       {!hasSales ? (
-        <div className="py-10 flex flex-col items-center justify-center text-center">
-          <div className="w-12 h-12 rounded-xl bg-[#E6F4F2] dark:bg-[#162E2D] text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-3">
-            <BarChart2 className="w-6 h-6 opacity-80" />
+        <div className="py-6 sm:py-8 flex flex-col items-center justify-center text-center">
+          <div className="w-10 h-10 rounded-xl bg-[#0F766E]/10 dark:bg-[#0F766E]/20 text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-2.5">
+            <BarChart2 className="w-5 h-5" />
           </div>
           <h4 className="text-sm font-bold text-[#123B3A] dark:text-[#F0FDFA] mb-1">{t('salesOverview.noSalesTitle')}</h4>
-          <p className="text-xs text-[#566B69] dark:text-[#8FA8A4] max-w-sm mb-4 leading-relaxed">
+          <p className="text-xs text-[#566B69] dark:text-[#8FA8A4] max-w-sm mb-3.5 leading-relaxed">
             {t('salesOverview.noSalesDesc')}
           </p>
           <Button
             size="sm"
             onClick={() => navigate('/invoices/create')}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{t('actions.create', { ns: 'common' })}</span>

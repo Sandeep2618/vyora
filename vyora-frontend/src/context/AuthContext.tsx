@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { api } from '../lib/api';
-import { UserProfile, BusinessProfile, AuthTokens, SubscriptionPlan, UserRole } from '../types';
+import { UserProfile, BusinessProfile, AuthTokens, SubscriptionPlan, UserRole, UserWorkspace } from '../types';
 import { LoginInput, RegisterInput } from '@vyora/validation';
 
 export type FeatureKey =
@@ -29,6 +29,11 @@ interface AuthContextType {
   refreshBusiness: () => Promise<void>;
   updateSubscriptionPlan: (plan: SubscriptionPlan) => Promise<void>;
   updateStaffPermissions: (permissions: Record<string, boolean>) => Promise<void>;
+  myBusinesses: UserWorkspace[];
+  isLoadingBusinesses: boolean;
+  refreshMyBusinesses: () => Promise<void>;
+  switchBusiness: (businessId: string) => Promise<void>;
+  createStore: (data: any) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,7 +44,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
   const [business, setBusiness] = useState<BusinessProfile | null>(null);
+  const [myBusinesses, setMyBusinesses] = useState<UserWorkspace[]>([]);
+  const [isLoadingBusinesses, setIsLoadingBusinesses] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const refreshMyBusinesses = async () => {
+    try {
+      setIsLoadingBusinesses(true);
+      let list: UserWorkspace[] = [];
+      try {
+        const res = await api.get<any>('/auth/businesses');
+        list = Array.isArray(res) ? res : res?.data || [];
+      } catch {
+        const res = await api.get<any>('/auth/my-businesses');
+        list = Array.isArray(res) ? res : res?.data || [];
+      }
+      setMyBusinesses(list);
+    } catch (err) {
+      console.warn('Could not refresh businesses list:', err);
+    } finally {
+      setIsLoadingBusinesses(false);
+    }
+  };
+
+  const switchBusiness = async (businessId: string) => {
+    try {
+      setIsLoading(true);
+      const res = await api.post<any>('/auth/switch-business', { businessId });
+      if (res?.tokens?.accessToken) {
+        localStorage.setItem('vyora_token', res.tokens.accessToken);
+      }
+      localStorage.setItem('vyora_business_id', businessId);
+
+      await fetchBusinessProfile();
+      await refreshMyBusinesses();
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to switch workspace:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createStore = async (data: any) => {
+    try {
+      setIsLoading(true);
+      const res = await api.post<any>('/business', data);
+      const newBiz = res?.data || res;
+      const newId = newBiz?.id || newBiz?._id;
+      if (newId) {
+        await switchBusiness(newId);
+      }
+      return newBiz;
+    } catch (err) {
+      console.error('Failed to create store:', err);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchBusinessProfile = async () => {
     try {
@@ -63,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(profile);
           localStorage.setItem('vyora_user', JSON.stringify(profile));
           await fetchBusinessProfile();
+          await refreshMyBusinesses();
         } catch {
           localStorage.removeItem('vyora_token');
           localStorage.removeItem('vyora_user');
@@ -185,6 +250,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshBusiness,
         updateSubscriptionPlan,
         updateStaffPermissions,
+        myBusinesses,
+        isLoadingBusinesses,
+        refreshMyBusinesses,
+        switchBusiness,
+        createStore,
       }}
     >
       {children}

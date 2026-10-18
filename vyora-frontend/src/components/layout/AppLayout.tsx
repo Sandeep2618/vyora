@@ -18,6 +18,7 @@ import {
   Smartphone,
   Sun,
   Moon,
+  Receipt,
 } from 'lucide-react';
 import { useAuth, FeatureKey } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,6 +29,7 @@ import { BottomNav } from './BottomNav';
 import { MobileAppModal } from './MobileAppModal';
 import { LanguageDropdown } from './LanguageDropdown';
 import { AccessDeniedModal } from '../ui/AccessDeniedModal';
+import { StoreSwitcherDropdown } from './StoreSwitcherDropdown';
 import { PlanPurchaseModal } from '@/components/subscription/modal/PlanPurchaseModal';
 
 export const AppLayout: React.FC = () => {
@@ -51,6 +53,8 @@ export const AppLayout: React.FC = () => {
     title?: string;
     message?: string;
     requiredRole?: string;
+    requiredPlan?: string;
+    type?: 'PLAN_RESTRICTION' | 'ROLE_RESTRICTION';
     errorType?: string;
   }>({ isOpen: false });
 
@@ -67,8 +71,11 @@ export const AppLayout: React.FC = () => {
     const handleForbidden = (e: Event) => {
       const customEvent = e as CustomEvent;
       const detail = customEvent.detail;
+      const isPlan = detail?.error === 'PlanLimitExceeded' || detail?.error === 'PlanExpired';
       setAccessDeniedDetail({
         isOpen: true,
+        type: isPlan ? 'PLAN_RESTRICTION' : 'ROLE_RESTRICTION',
+        requiredPlan: detail?.requiredPlan || (isPlan ? 'growth' : undefined),
         title:
           detail?.error === 'PlanLimitExceeded'
             ? 'Plan Upgrade Required'
@@ -110,6 +117,7 @@ export const AppLayout: React.FC = () => {
     { label: t('navigation.inventory', { defaultValue: 'Inventory' }), icon: ArrowLeftRight, path: '/inventory', feature: 'INVENTORY' },
     { label: t('navigation.purchase', { defaultValue: 'Purchase' }), icon: ShoppingCart, path: '/purchases', feature: 'PURCHASES' },
     { label: t('navigation.payments', { defaultValue: 'Payments' }), icon: CreditCard, path: '/payments', feature: 'PAYMENTS' },
+    { label: t('navigation.expenses', { defaultValue: 'Expenses' }), icon: Receipt, path: '/expenses' },
     { label: t('navigation.reports', { defaultValue: 'Reports' }), icon: BarChart3, path: '/reports', feature: 'REPORTS' },
     { label: t('navigation.account', { defaultValue: 'Account & Roles' }), icon: ShieldCheck, path: '/account' },
   ];
@@ -163,8 +171,8 @@ export const AppLayout: React.FC = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-14 sm:h-16 bg-white dark:bg-[#112322] border-b border-[#D7E5E2] dark:border-[#1E3B38] flex items-center justify-between px-3 sm:px-6 flex-shrink-0 z-20">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <header className="h-14 sm:h-16 bg-white dark:bg-[#112322] border-b border-[#D7E5E2] dark:border-[#1E3B38] flex items-center justify-between px-3.5 sm:px-6 flex-shrink-0 z-20">
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
             {/* Hamburger button visible ONLY on screen < 1024px */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -174,49 +182,16 @@ export const AppLayout: React.FC = () => {
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Business Badge */}
-            <div className="h-9 flex items-center gap-1.5 px-3 bg-[#F4F8F7] dark:bg-[#142B2A] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs font-semibold text-[#123B3A] dark:text-[#F0FDFA] shrink-0 shadow-2xs">
-              <Building2 className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
-              <span className="truncate max-w-[100px] sm:max-w-[160px]">
-                {business?.name || 'My Business'}
-              </span>
-            </div>
-
-            {/* Plan Badge */}
-            <span
-              className={cn(
-                'hidden sm:inline-flex items-center h-9 px-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border shrink-0',
-                plan === 'enterprise'
-                  ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
-                  : plan === 'growth'
-                  ? 'bg-teal-50 dark:bg-teal-950/40 text-[#0F766E] dark:text-[#14B8A6] border-[#A0D2CA] dark:border-[#1E4D49]'
-                  : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-              )}
-            >
-              {plan === 'enterprise'
-                ? t('plans.enterprise', { defaultValue: 'Business Pro' })
-                : plan === 'growth'
-                ? t('plans.growth', { defaultValue: 'Growth' })
-                : t('plans.starter', { defaultValue: 'Starter' })}
-            </span>
-
-            {/* Mobile App Sync & QR Scanner Button */}
-            <button
-              onClick={() => setIsMobileModalOpen(true)}
-              className="inline-flex items-center h-9 gap-1.5 px-3 bg-[#E6F4F2] dark:bg-[#142B2A] text-[#0F766E] dark:text-[#14B8A6] border border-[#A0D2CA] dark:border-[#1E4D49] rounded-xl text-xs font-bold hover:bg-[#D7EBE8] dark:hover:bg-[#1E3E3C] transition-colors shrink-0 shadow-2xs cursor-pointer"
-              title="Connect mobile phone or download APK"
-            >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('actions.getMobileApp', { defaultValue: 'Get Mobile App' })}</span>
-            </button>
+            {/* Interactive Multi-Store Switcher Dropdown */}
+            <StoreSwitcherDropdown />
           </div>
 
           {/* Right Header: Theme, Language & User Profile */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="h-9 w-9 flex items-center justify-center rounded-xl text-[#123B3A] dark:text-[#F0FDFA] bg-white dark:bg-[#0D1C1B] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] border border-[#D7E5E2] dark:border-[#1E3B38] transition-colors shrink-0 cursor-pointer shadow-2xs"
+              className="h-9 w-9 flex items-center justify-center rounded-xl text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A] dark:hover:text-[#F0FDFA] bg-[#F4F8F7]/80 dark:bg-[#0D1C1B] hover:bg-[#E6F0EE] dark:hover:bg-[#142B2A] border border-[#D7E5E2] dark:border-[#1E3B38] transition-colors shrink-0 cursor-pointer shadow-2xs"
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle dark mode"
             >
@@ -229,14 +204,14 @@ export const AppLayout: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-white dark:bg-[#0D1C1B] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] text-left transition-colors border border-[#D7E5E2] dark:border-[#1E3B38] cursor-pointer shadow-2xs"
+                className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-[#F4F8F7]/80 dark:bg-[#0D1C1B] hover:bg-[#E6F0EE] dark:hover:bg-[#142B2A] text-left transition-colors border border-[#D7E5E2] dark:border-[#1E3B38] cursor-pointer shadow-2xs"
               >
-                <div className="w-6 h-6 rounded-lg bg-[#E6F4F2] dark:bg-[#142B2A] text-[#0F766E] dark:text-[#14B8A6] border border-[#A0D2CA] dark:border-[#1E4D49] flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-6 h-6 rounded-lg bg-[#0F766E] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                   {user?.name?.slice(0, 1).toUpperCase()}
                 </div>
                 <div className="hidden md:block text-left leading-tight">
-                  <p className="text-xs font-bold text-[#123B3A] dark:text-[#F0FDFA] truncate max-w-[100px]">{user?.name}</p>
-                  <p className="text-[10px] text-[#566B69] dark:text-[#8FA8A4] truncate max-w-[100px]">{business?.city || 'India'}</p>
+                  <p className="text-xs font-bold text-[#123B3A] dark:text-[#F0FDFA] truncate max-w-[120px]">{user?.name}</p>
+                  <p className="text-[10px] text-[#566B69] dark:text-[#8FA8A4] truncate max-w-[120px]">{business?.city || 'India'}</p>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-[#566B69] dark:text-[#8FA8A4]" />
               </button>
@@ -247,17 +222,20 @@ export const AppLayout: React.FC = () => {
                     className="fixed inset-0 z-40"
                     onClick={() => setIsUserMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl shadow-lg py-1 z-50 animate-in fade-in">
-                    <div className="px-4 py-2 border-b border-[#D7E5E2] dark:border-[#1E3B38]">
-                      <p className="text-xs font-semibold text-[#123B3A] dark:text-[#F0FDFA] truncate">{user?.name}</p>
+                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-2xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-4 py-2.5 border-b border-[#D7E5E2] dark:border-[#1E3B38]">
+                      <p className="text-xs font-bold text-[#123B3A] dark:text-[#F0FDFA] truncate">{user?.name}</p>
                       <p className="text-[10px] text-[#566B69] dark:text-[#8FA8A4] truncate">{user?.email}</p>
+                      <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#0F766E]/10 text-[#0F766E] dark:text-[#14B8A6]">
+                        {plan === 'enterprise' ? 'Business Pro' : plan === 'growth' ? 'Growth Plan' : 'Starter Plan'}
+                      </div>
                     </div>
                     <button
                       onClick={() => {
                         setIsUserMenuOpen(false);
                         navigate('/account?tab=PROFILE');
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer transition-colors"
                     >
                       <Building2 className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
                       {t('actions.businessProfile', { defaultValue: 'Business Profile' })}
@@ -268,7 +246,7 @@ export const AppLayout: React.FC = () => {
                           setIsUserMenuOpen(false);
                           navigate('/account?tab=ROLES');
                         }}
-                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
+                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer transition-colors"
                       >
                         <ShieldCheck className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
                         {t('actions.rolesAndPermissions', { defaultValue: 'Roles & Staff' })}
@@ -280,15 +258,25 @@ export const AppLayout: React.FC = () => {
                           setIsUserMenuOpen(false);
                           navigate('/account?tab=BILLING');
                         }}
-                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer"
+                        className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer transition-colors"
                       >
                         <CreditCard className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
                         {t('actions.billingAndPlans', { defaultValue: 'Billing & Plans' })}
                       </button>
                     )}
                     <button
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsMobileModalOpen(true);
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-[#123B3A] dark:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#142B2A] flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <Smartphone className="w-3.5 h-3.5 text-[#0F766E] dark:text-[#14B8A6]" />
+                      {t('actions.getMobileApp', { defaultValue: 'Get Mobile App' })}
+                    </button>
+                    <button
                       onClick={logout}
-                      className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] dark:text-rose-400 hover:bg-[#FEE2E2] dark:hover:bg-rose-950/40 flex items-center gap-2 border-t border-[#D7E5E2] dark:border-[#1E3B38] mt-1 cursor-pointer"
+                      className="w-full text-left px-4 py-2 text-xs text-[#B91C1C] dark:text-rose-400 hover:bg-[#FEE2E2] dark:hover:bg-rose-950/40 flex items-center gap-2 border-t border-[#D7E5E2] dark:border-[#1E3B38] mt-1 cursor-pointer transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       {t('actions.signOut', { defaultValue: 'Sign Out' })}
@@ -350,6 +338,8 @@ export const AppLayout: React.FC = () => {
         title={accessDeniedDetail.title}
         message={accessDeniedDetail.message}
         requiredRole={accessDeniedDetail.requiredRole}
+        requiredPlan={accessDeniedDetail.requiredPlan}
+        type={accessDeniedDetail.type}
         errorType={accessDeniedDetail.errorType}
         onUpgrade={() => setIsPurchaseModalOpen(true)}
       />

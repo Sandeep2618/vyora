@@ -58,10 +58,10 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         {isMobileDrawer && onCloseMobile && (
           <button
             onClick={onCloseMobile}
-            className="p-1.5 rounded-lg text-[#566B69] dark:text-[#A0BDB8] hover:text-[#123B3A] dark:hover:text-white hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A] dark:hover:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] transition-colors cursor-pointer"
             aria-label="Close menu"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         )}
 
@@ -69,14 +69,11 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         {!isMobileDrawer && onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
-            className={cn(
-              'p-1.5 rounded-lg text-[#566B69] dark:text-[#A0BDB8] hover:text-[#123B3A] dark:hover:text-white hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] border border-[#D7E5E2] dark:border-[#1E3B38] transition-colors cursor-pointer shrink-0',
-              isCollapsed && 'w-8 h-8 flex items-center justify-center p-0',
-            )}
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-[#566B69] dark:text-[#8FA8A4] hover:text-[#123B3A] dark:hover:text-[#F0FDFA] hover:bg-[#F4F8F7] dark:hover:bg-[#1A3836] transition-all cursor-pointer shrink-0"
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
         )}
       </div>
@@ -93,14 +90,14 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
             className={({ isActive }: { isActive: boolean }) =>
               cn(
                 'flex items-center rounded-xl text-xs font-semibold transition-all group relative',
-                isCollapsed ? 'justify-center p-2.5 my-1' : 'gap-3 px-3.5 py-2.5',
+                isCollapsed ? 'justify-center p-2.5 my-1' : 'gap-3 px-3 py-2.5',
                 isActive
                   ? 'bg-[#0F766E] text-white shadow-xs font-bold'
-                  : 'text-[#4A6360] dark:text-[#A0BDB8] hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] hover:text-[#123B3A] dark:hover:text-[#F0FDFA]',
+                  : 'text-[#4A6360] dark:text-[#8FA8A4] hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] hover:text-[#123B3A] dark:hover:text-[#F0FDFA]',
               )
             }
           >
-            <item.icon className={cn('w-4 h-4 shrink-0', isCollapsed && 'w-5 h-5')} />
+            <item.icon className={cn('w-4 h-4 shrink-0', isCollapsed && 'w-4.5 h-4.5')} />
             {!isCollapsed && <span className="truncate">{item.label}</span>}
           </NavLink>
         ))}
@@ -108,7 +105,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 
       {/* Plan Card (Shown only when expanded) */}
       {!isCollapsed && (
-        <div className="p-3 mx-3 mb-3 bg-[#F4F8F7] dark:bg-[#162E2D] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs">
+        <div className="p-3 mx-3 mb-3 bg-[#F4F8F7]/80 dark:bg-[#142B2A]/60 border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-xs">
           <div className="flex items-center justify-between mb-1">
             <span className="font-bold text-[#123B3A] dark:text-[#F0FDFA] text-[11px] uppercase tracking-wider">
               {plan === 'enterprise'
@@ -125,7 +122,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                 : t('plans.freeBadge', { defaultValue: 'FREE' })}
             </span>
           </div>
-          <p className="text-[#566B69] dark:text-[#A0BDB8] text-[11px] leading-relaxed">
+          <p className="text-[#566B69] dark:text-[#8FA8A4] text-[10.5px] leading-relaxed">
             {plan === 'enterprise'
               ? t('plans.enterpriseDesc', { defaultValue: 'Unlimited staff, audited stock' })
               : plan === 'growth'

@@ -48,6 +48,7 @@ export interface Invoice {
     legalName?: string;
     phone: string;
     email: string;
+    upiId?: string;
     gstin?: string;
     address: string;
     city: string;

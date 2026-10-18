@@ -15,6 +15,7 @@ export const RegisterPage: React.FC = () => {
 
   const [name, setName] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,13 +25,21 @@ export const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const cleanPhone = phone.trim().replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit Indian mobile number');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await register({
-        name,
-        businessName: businessName || (inviteBiz ? 'My Business' : undefined),
-        email,
+        name: name.trim(),
+        businessName: businessName.trim() || (inviteBiz ? 'My Business' : undefined),
+        phone: cleanPhone,
+        email: email.trim().toLowerCase() || undefined,
         password,
       });
       if (inviteBiz) {
@@ -92,10 +101,30 @@ export const RegisterPage: React.FC = () => {
             placeholder="e.g. Sharma Retail & Supplies"
           />
 
+          <div>
+            <label className="block text-xs font-semibold text-[#123B3A] mb-1.5">
+              Mobile Number *
+            </label>
+            <div className="relative flex rounded-xl border border-[#D7E5E2] bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#0F766E] focus-within:border-transparent transition-all">
+              <span className="inline-flex items-center px-3 bg-[#F4F8F7] border-r border-[#D7E5E2] text-xs font-bold text-[#123B3A]">
+                🇮🇳 +91
+              </span>
+              <input
+                type="tel"
+                required
+                maxLength={10}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))}
+                placeholder="9876543210"
+                className="w-full px-3 py-2 text-sm bg-transparent text-[#123B3A] placeholder-[#8FA8A4] focus:outline-none"
+              />
+            </div>
+            <p className="text-[11px] text-[#566B69] mt-1">Used for WhatsApp invoices, customer receipts & sign-in</p>
+          </div>
+
           <Input
-            label="Work Email"
+            label="Work Email (Optional)"
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="rahul@sharmaretail.com"

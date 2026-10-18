@@ -55,6 +55,7 @@ export interface BusinessProfile {
   pan?: string;
   phone: string;
   email: string;
+  upiId?: string;
   addressLine1: string;
   addressLine2?: string;
   city: string;

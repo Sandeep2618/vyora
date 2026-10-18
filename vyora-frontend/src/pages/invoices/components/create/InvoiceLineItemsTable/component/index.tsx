@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, ChevronDown, AlertCircle, PackagePlus } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, PackagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { InvoiceLineItemsTableProps } from '../config/interface';
 import { calculateLineTotal } from '../util';
 
@@ -15,6 +16,31 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
   onAddNewProduct,
 }) => {
   const { t } = useTranslation('invoices');
+
+  const productOptions = useMemo(
+    () => [
+      {
+        label:
+          products.length === 0
+            ? t('createPage.noItemsInCatalog', { defaultValue: 'No items in catalog' })
+            : t('createPage.selectItem', { defaultValue: 'Select item...' }),
+        value: '',
+      },
+      ...(onAddNewProduct
+        ? [
+            {
+              label: `+ ${t('createPage.newProduct', { defaultValue: 'Add New Product...' })}`,
+              value: '__NEW_PRODUCT__',
+            },
+          ]
+        : []),
+      ...products.map((p) => ({
+        label: `${p.name} (${t('createPage.stock', { defaultValue: 'Stock' })}: ${p.currentStock} ${p.unit})`,
+        value: p.id,
+      })),
+    ],
+    [products, onAddNewProduct, t]
+  );
 
   const handleSelectChange = (index: number, value: string) => {
     if (value === '__NEW_PRODUCT__') {
@@ -37,10 +63,10 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
               variant="outline"
               type="button"
               onClick={onAddNewProduct}
-              className="text-xs h-8 px-2.5 flex items-center gap-1 border-[#0F766E]/40 text-[#0F766E] dark:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D]"
+              className="text-xs h-8 px-2.5 flex items-center gap-1.5 border-[#0F766E]/40 text-[#0F766E] dark:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D]"
             >
               <PackagePlus className="w-3.5 h-3.5" />
-              <span>{t('createPage.newProduct', { defaultValue: '+ New Product' })}</span>
+              <span>{t('createPage.newProduct', { defaultValue: 'New Product' })}</span>
             </Button>
           )}
           <Button
@@ -48,7 +74,7 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
             variant="outline"
             type="button"
             onClick={onAddLine}
-            className="text-xs h-8 px-2.5 flex items-center gap-1"
+            className="text-xs h-8 px-2.5 flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>{t('createPage.addItem', { defaultValue: 'Add Item' })}</span>
@@ -70,10 +96,10 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
             <button
               type="button"
               onClick={onAddNewProduct}
-              className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-[#0F766E] text-white hover:bg-[#0D665F] transition-colors shadow-2xs cursor-pointer"
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-[#0F766E] text-white hover:bg-[#0D665F] transition-colors shadow-2xs cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{t('createPage.addProductNow', { defaultValue: '+ Add Product to Catalog' })}</span>
+              <span>{t('createPage.addProductNow', { defaultValue: 'Add Product to Catalog' })}</span>
             </button>
           )}
         </div>
@@ -100,30 +126,13 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
                 <tr key={idx} className="hover:bg-[#F4F8F7]/50 dark:hover:bg-[#162E2D]/40 transition-colors">
                   <td className="py-2 px-2 text-[#566B69] dark:text-slate-400 font-medium text-center">{idx + 1}</td>
                   <td className="py-2 px-2">
-                    <div className="relative">
-                      <select
-                        value={line.productId}
-                        onChange={(e) => handleSelectChange(idx, e.target.value)}
-                        className="w-full h-8.5 appearance-none pl-2.5 pr-7 bg-white dark:bg-[#0D1C1B] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg text-xs font-medium text-[#123B3A] dark:text-[#E6F4F1] focus:outline-none focus:ring-1.5 focus:ring-[#0F766E] focus:border-[#0F766E] dark:focus:border-[#14B8A6] cursor-pointer shadow-2xs"
-                      >
-                        <option value="">
-                          {products.length === 0
-                            ? t('createPage.noItemsInCatalog', { defaultValue: 'No items in catalog' })
-                            : t('createPage.selectItem', { defaultValue: 'Select item...' })}
-                        </option>
-                        {onAddNewProduct && (
-                          <option value="__NEW_PRODUCT__">
-                            + {t('createPage.newProduct', { defaultValue: 'Add New Product...' })}
-                          </option>
-                        )}
-                        {products.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name} ({t('createPage.stock', { defaultValue: 'Stock' })}: {p.currentStock} {p.unit})
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#566B69] dark:text-[#8FA8A4] pointer-events-none opacity-70" />
-                    </div>
+                    <Select
+                      size="sm"
+                      value={line.productId}
+                      onValueChange={(val) => handleSelectChange(idx, val)}
+                      options={productOptions}
+                      placeholder={t('createPage.selectItem', { defaultValue: 'Select item...' })}
+                    />
                   </td>
                   <td className="py-2 px-2">
                     <input
@@ -180,13 +189,6 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
             })}
           </tbody>
         </table>
-      </div>
-
-      <div className="pt-1">
-        <Button size="sm" variant="ghost" type="button" onClick={onAddLine} className="text-xs h-8">
-          <Plus className="w-3.5 h-3.5 mr-1" />
-          <span>{t('createPage.addItem', { defaultValue: 'Add Item' })}</span>
-        </Button>
       </div>
     </div>
   );

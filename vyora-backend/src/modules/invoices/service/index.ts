@@ -383,4 +383,33 @@ export class InvoicesService {
     await invoice.save();
     return mapInvoiceDocument(invoice);
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      customerId?: string;
+      status?: InvoiceStatus;
+      startDate?: string;
+      endDate?: string;
+      search?: string;
+    },
+  ) {
+    const filter: any = { businessId };
+    if (query.customerId) filter.customerId = query.customerId;
+    if (query.status) filter.status = query.status;
+    if (query.startDate || query.endDate) {
+      filter.issueDate = {};
+      if (query.startDate) filter.issueDate.$gte = query.startDate;
+      if (query.endDate) filter.issueDate.$lte = query.endDate;
+    }
+    if (query.search) {
+      filter.$or = [
+        { invoiceNumber: { $regex: query.search, $options: 'i' } },
+        { 'customerSnapshot.name': { $regex: query.search, $options: 'i' } },
+        { 'customerSnapshot.phone': { $regex: query.search, $options: 'i' } },
+      ];
+    }
+
+    return InvoiceModel.find(filter).sort({ issueDate: -1, createdAt: -1 }).lean();
+  }
 }

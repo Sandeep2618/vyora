@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { toast } from '@/components/ui/Toast';
 import { InvoicePrintTemplate } from '../components/view/InvoicePrintTemplate';
+import { ThermalReceiptTemplate } from '../components/view/ThermalReceiptTemplate';
 import { RecordPaymentModal } from '../components/view/modal';
 
 export const InvoiceViewPage: React.FC = () => {
@@ -18,6 +19,7 @@ export const InvoiceViewPage: React.FC = () => {
   const queryClient = useQueryClient();
   const { isOwner } = useAuth();
 
+  const [printFormat, setPrintFormat] = useState<'A4' | 'THERMAL'>('A4');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [payAmountMajor, setPayAmountMajor] = useState<number | string>('');
   const [payMethod, setPayMethod] = useState<PaymentMethod>('BANK_TRANSFER');
@@ -124,6 +126,32 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {/* Format selector */}
+          <div className="inline-flex rounded-lg border border-[#D7E5E2] dark:border-slate-700 p-0.5 bg-[#F2F7F6] dark:bg-slate-800">
+            <button
+              type="button"
+              onClick={() => setPrintFormat('A4')}
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                printFormat === 'A4'
+                  ? 'bg-white dark:bg-slate-900 text-[#123B3A] dark:text-[#E6F4F1] shadow-xs'
+                  : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
+              }`}
+            >
+              A4 Invoice
+            </button>
+            <button
+              type="button"
+              onClick={() => setPrintFormat('THERMAL')}
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                printFormat === 'THERMAL'
+                  ? 'bg-white dark:bg-slate-900 text-[#123B3A] dark:text-[#E6F4F1] shadow-xs'
+                  : 'text-[#566B69] dark:text-slate-400 hover:text-[#123B3A] dark:hover:text-slate-200'
+              }`}
+            >
+              80mm Thermal
+            </button>
+          </div>
+
           {isOwner && invoice.status === 'DRAFT' && (
             <Button
               isLoading={finalizeMutation.isPending}
@@ -156,14 +184,18 @@ export const InvoiceViewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* A4 Printable Document Container */}
-      <InvoicePrintTemplate
-        invoice={invoice}
-        isOwner={isOwner}
-        onRecordPaymentClick={handleOpenPayment}
-        onFinalizeClick={() => finalizeMutation.mutate()}
-        isFinalizing={finalizeMutation.isPending}
-      />
+      {/* Printable Document Container (A4 or 80mm Thermal Receipt) */}
+      {printFormat === 'THERMAL' ? (
+        <ThermalReceiptTemplate invoice={invoice} />
+      ) : (
+        <InvoicePrintTemplate
+          invoice={invoice}
+          isOwner={isOwner}
+          onRecordPaymentClick={handleOpenPayment}
+          onFinalizeClick={() => finalizeMutation.mutate()}
+          isFinalizing={finalizeMutation.isPending}
+        />
+      )}
 
       {/* Record Payment Voucher Modal */}
       <RecordPaymentModal

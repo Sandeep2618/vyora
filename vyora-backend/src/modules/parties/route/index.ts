@@ -19,6 +19,7 @@ router.post(
   PartiesController.create,
 );
 router.get('/', PartiesController.findAll);
+router.get('/export', PartiesController.exportCsv);
 router.get('/:id', PartiesController.findOne);
 router.put(
   '/:id',

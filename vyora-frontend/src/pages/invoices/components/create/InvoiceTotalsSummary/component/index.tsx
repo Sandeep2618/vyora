@@ -1,6 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Lightbulb } from 'lucide-react';
 import { formatCurrency } from '@/utils';
 import { InvoiceTotalsSummaryProps } from '../config/interface';
 
@@ -58,20 +57,6 @@ export const InvoiceTotalsSummary: React.FC<InvoiceTotalsSummaryProps> = ({
             {formatCurrency(previewTotals?.grandTotalMinor ?? 0)}
           </span>
         </div>
-      </div>
-
-      {/* Quick Tip Box */}
-      <div className="bg-[#E6F4F2] dark:bg-[#162E2D] border border-[#B3DCD6]/60 dark:border-[#1E3B38] rounded-xl p-4 text-xs">
-        <div className="flex items-center gap-1.5 text-[#0F766E] dark:text-[#14B8A6] font-bold mb-1">
-          <Lightbulb className="w-4 h-4 shrink-0" />
-          <span>{t('createPage.quickTipTitle', { defaultValue: 'Quick Tip' })}</span>
-        </div>
-        <p className="text-[#566B69] dark:text-[#8FA8A4] leading-relaxed">
-          {t('createPage.quickTipDesc', {
-            defaultValue:
-              'Finalizing an invoice assigns an irreversible sequential invoice number, atomically commits stock deductions, and updates client dues.',
-          })}
-        </p>
       </div>
 
       {/* Notes Field */}

@@ -14,7 +14,10 @@ export const PurchasesTable: React.FC<PurchasesTableProps> = ({ bills }) => {
       module: 'purchases',
       rowKey: 'id',
       data: bills,
-      search: false,
+      countPill: true,
+      search: {
+        placeholder: t('actions.search', { ns: 'common', defaultValue: 'Search bills, supplier...' }),
+      },
       column: [
         {
           dataIndex: 'billNumber',

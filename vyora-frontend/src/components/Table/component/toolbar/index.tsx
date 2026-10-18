@@ -9,6 +9,7 @@ import {
 import { ITableController, ITableOption } from '../../config/interface';
 import { TABLE_CLASSES } from '../../config/constant';
 import { exportToCsv } from '../../util/export';
+import { downloadFile } from '@/lib/api';
 
 interface ITableToolbarProps<T = any> {
   controller: ITableController<T>;
@@ -22,6 +23,7 @@ export function TableToolbar<T = any>({
   onExport,
 }: ITableToolbarProps<T>) {
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -60,16 +62,53 @@ export function TableToolbar<T = any>({
     return null;
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (onExport) {
       onExport();
       return;
     }
-    const filename =
-      typeof option.export === 'object' && option.export?.filename
-        ? option.export.filename
-        : `${option.module}-export.csv`;
-    exportToCsv(controller.visibleColumns, controller.rows, filename);
+
+    const exportConfig = typeof option.export === 'object' ? option.export : undefined;
+    const filename = exportConfig?.filename || `${option.module || 'export'}-export.csv`;
+
+    let endpoint = exportConfig?.endpoint;
+    if (!endpoint && option.module) {
+      const moduleMap: Record<string, string> = {
+        invoices: '/invoices/export',
+        products: '/products/export',
+        parties: '/parties/export',
+        purchases: '/purchases/export',
+        payments: '/payments/export',
+        inventory: '/inventory/export',
+        'stock-movements': '/inventory/export',
+        expenses: '/expenses/export',
+        'reports-sales': '/reports/sales-register/export',
+        'reports-purchases': '/reports/purchase-register/export',
+        'reports-stock': '/reports/stock-summary/export',
+        'reports-dues': '/reports/customer-dues/export',
+      };
+      endpoint = moduleMap[option.module];
+    }
+
+    if (endpoint) {
+      try {
+        setIsExporting(true);
+        let exportUrl = endpoint;
+        if (controller.searchValue) {
+          const sep = exportUrl.includes('?') ? '&' : '?';
+          exportUrl += `${sep}search=${encodeURIComponent(controller.searchValue)}`;
+        }
+        await downloadFile(exportUrl, filename);
+        return;
+      } catch (err) {
+        console.warn('Backend export failed, falling back to client rows export:', err);
+        exportToCsv(controller.visibleColumns, controller.rows, filename);
+      } finally {
+        setIsExporting(false);
+      }
+    } else {
+      exportToCsv(controller.visibleColumns, controller.rows, filename);
+    }
   };
 
   const searchPlaceholder =
@@ -194,11 +233,20 @@ export function TableToolbar<T = any>({
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex items-center gap-1.5 h-8.5 px-2.5 text-xs text-[#123B3A] dark:text-[#E6F4F1] bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] transition-colors focus:outline-none focus:ring-1.5 focus:ring-[#0F766E] cursor-pointer"
+              disabled={isExporting}
+              className="inline-flex items-center gap-1.5 h-8.5 px-2.5 text-xs text-[#123B3A] dark:text-[#E6F4F1] bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg hover:bg-[#F4F8F7] dark:hover:bg-[#162E2D] disabled:opacity-50 transition-colors focus:outline-none focus:ring-1.5 focus:ring-[#0F766E] cursor-pointer"
               title="Export CSV"
             >
-              <Download className="w-3.5 h-3.5 text-[#566B69] dark:text-[#8FA8A4]" />
-              <span className="hidden sm:inline font-medium">Export</span>
+              <Download
+                className={`w-3.5 h-3.5 ${
+                  isExporting
+                    ? 'animate-bounce text-[#0F766E] dark:text-[#14B8A6]'
+                    : 'text-[#566B69] dark:text-[#8FA8A4]'
+                }`}
+              />
+              <span className="hidden sm:inline font-medium">
+                {isExporting ? 'Exporting...' : 'Export'}
+              </span>
             </button>
           )}
         </div>

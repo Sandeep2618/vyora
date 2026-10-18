@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { PartiesService } from '../service';
-import { asyncHandler, ApiResponse } from '../../../util';
+import { asyncHandler, ApiResponse, generateCsv, sendCsvResponse, minorToMajor } from '../../../util';
 import { AuthenticatedRequest } from '../../../common';
 import { PartyType } from '@vyora/shared-types';
 
@@ -38,5 +38,35 @@ export class PartiesController {
   static delete = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const result = await PartiesService.delete(req.businessId!, req.params.id as string);
     return ApiResponse.success(res, result);
+  });
+
+  static exportCsv = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const type = req.query.type as PartyType;
+    const search = req.query.search as string;
+
+    const parties = await PartiesService.getExportData(req.businessId!, {
+      type,
+      search,
+    });
+
+    const columns = [
+      { header: 'Party Name', key: 'name' },
+      { header: 'Type', key: 'type' },
+      { header: 'Contact Person', key: 'contactPerson' },
+      { header: 'Phone', key: 'phone' },
+      { header: 'Email', key: 'email' },
+      { header: 'GSTIN', key: 'gstin' },
+      { header: 'PAN', key: 'pan' },
+      { header: 'City', key: 'billingAddress.city' },
+      { header: 'State', key: 'billingAddress.state' },
+      { header: 'Pincode', key: 'billingAddress.pincode' },
+      { header: 'Current Balance', format: (p: any) => minorToMajor(p.currentBalanceMinor || 0) },
+      { header: 'Opening Balance', format: (p: any) => minorToMajor(p.openingBalanceMinor || 0) },
+    ];
+
+    const csv = generateCsv(columns, parties);
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filenamePrefix = type ? type.toLowerCase() : 'parties';
+    return sendCsvResponse(res, `${filenamePrefix}_${dateStr}.csv`, csv);
   });
 }

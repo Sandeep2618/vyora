@@ -11,6 +11,7 @@
     "purchase": "Purchase",
     "purchases": "Purchases",
     "payments": "Payments",
+    "expenses": "Expenses",
     "reports": "Reports",
     "account": "Account & Roles",
     "settings": "Settings",
@@ -166,5 +167,22 @@
     "launchWebBtn": "Launch Mobile Web App",
     "copy": "Copy",
     "copied": "Copied"
+  },
+  "roles": {
+    "owner": "Business Owner",
+    "admin": "Store Manager",
+    "staff": "Billing Staff"
+  },
+  "accessDenied": {
+    "planUpgradeRequired": "Plan Upgrade Required",
+    "permissionRestricted": "Access Restricted",
+    "activeRole": "Active Role:",
+    "planMessage": "This feature is available on Growth and Enterprise plans. Upgrade your subscription to unlock unlimited access.",
+    "roleMessage": "Your current role does not have permission to access or modify this section. Please ask your business owner to adjust your staff rights in Vyora.",
+    "redirecting": "Redirecting to Billing in {{seconds}}s...",
+    "contactOwner": "Contact Business Owner to Unlock",
+    "ownerNotice": "Only the store owner has authorization to purchase or renew the subscription plan.",
+    "upgradeNow": "Upgrade Plan Now",
+    "returnDashboard": "Return to Dashboard"
   }
 }

@@ -29,9 +29,9 @@ export const SalesByCategory: React.FC<SalesByCategoryProps> = ({
             </div>
           </div>
         ) : (
-          <div className="py-10 flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 rounded-xl bg-[#E6F4F2] dark:bg-[#162E2D] text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-3">
-              <PieChart className="w-6 h-6 opacity-80" />
+          <div className="py-6 sm:py-8 flex flex-col items-center justify-center text-center">
+            <div className="w-10 h-10 rounded-xl bg-[#0F766E]/10 dark:bg-[#0F766E]/20 text-[#0F766E] dark:text-[#14B8A6] flex items-center justify-center mb-2.5">
+              <PieChart className="w-5 h-5" />
             </div>
             <h4 className="text-sm font-bold text-[#123B3A] dark:text-[#F0FDFA] mb-1">
               {t('empty.noData', { ns: 'common' })}

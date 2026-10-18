@@ -20,6 +20,7 @@ router.post(
   InvoicesController.create,
 );
 router.get('/', InvoicesController.findAll);
+router.get('/export', InvoicesController.exportCsv);
 router.get('/:id', InvoicesController.findOne);
 router.post(
   '/:id/finalize',

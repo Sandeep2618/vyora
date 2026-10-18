@@ -184,4 +184,35 @@ export class PaymentsService {
       updatedAt: (doc as any).updatedAt,
     };
   }
+
+  static async getExportData(
+    businessId: string,
+    query: {
+      type?: string;
+      partyId?: string;
+      startDate?: string;
+      endDate?: string;
+      search?: string;
+    },
+  ) {
+    const filter: any = { businessId };
+    if (query.type) filter.type = query.type;
+    if (query.partyId) filter.partyId = query.partyId;
+    if (query.startDate || query.endDate) {
+      filter.paymentDate = {};
+      if (query.startDate) filter.paymentDate.$gte = query.startDate;
+      if (query.endDate) filter.paymentDate.$lte = query.endDate;
+    }
+    if (query.search) {
+      const regex = new RegExp(query.search, 'i');
+      filter.$or = [
+        { paymentNumber: regex },
+        { partyName: regex },
+        { referenceNumber: regex },
+        { notes: regex },
+      ];
+    }
+
+    return PaymentModel.find(filter).sort({ paymentDate: -1, createdAt: -1 }).lean();
+  }
 }

@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { InventoryService } from '../service';
-import { asyncHandler, ApiResponse } from '../../../util';
+import { asyncHandler, ApiResponse, generateCsv, sendCsvResponse } from '../../../util';
 import { AuthenticatedRequest } from '../../../common';
 
 export class InventoryController {
@@ -37,5 +37,33 @@ export class InventoryController {
       limit,
     );
     return ApiResponse.success(res, result);
+  });
+
+  static exportCsv = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const productId = req.query.productId as string | undefined;
+    const movementType = req.query.movementType as string | undefined;
+    const search = req.query.search as string | undefined;
+
+    const items = await InventoryService.getExportData(req.businessId!, {
+      productId,
+      movementType,
+      search,
+    });
+
+    const columns = [
+      { header: 'Date', format: (m: any) => (m.createdAt ? new Date(m.createdAt).toLocaleString('en-IN') : '') },
+      { header: 'Product Name', key: 'productName' },
+      { header: 'SKU', key: 'sku' },
+      { header: 'Unit', key: 'unit' },
+      { header: 'Movement Type', key: 'movementType' },
+      { header: 'Quantity Change', key: 'quantityDelta' },
+      { header: 'Stock After', key: 'balanceAfter' },
+      { header: 'Reference Type', key: 'referenceType' },
+      { header: 'Reason', key: 'reason' },
+    ];
+
+    const csv = generateCsv(columns, items);
+    const dateStr = new Date().toISOString().split('T')[0];
+    return sendCsvResponse(res, `inventory_movements_${dateStr}.csv`, csv);
   });
 }
