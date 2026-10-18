@@ -57,3 +57,30 @@
   1. Modals must always be rendered as top-level siblings (using React Fragments `<>` with mutually exclusive `visible` conditions).
   2. Quick-create domain schemas must provide fallback defaults for address fields so counter-speed creations never fail validation.
 
+---
+
+### 8. Strict Zero Agent Database Mutations Invariant (Never Touch User Database)
+- **Context**: An automated agent executed a test `POST` request against the live backend endpoint (`https://vyora-backend-gmx6.onrender.com/api/v1/parties`), creating a test record (`OLX2.0`) in the user's remote cloud database.
+- **Root Cause**: Attempting to verify backend functionality by sending real HTTP requests to the live production/staging API rather than using isolated in-memory test mocks or static analysis.
+- **Permanent Rule**: AI agents are **STRICTLY FORBIDDEN** from performing any inserts, updates, deletes, or mutations against the user's live database or remote endpoints (Render, MongoDB Atlas, Supabase). Agents must never create synthetic/test records or touch the database. All verification must be purely offline (`tsc --noEmit`, linters, build checks) or in-memory (`mongodb-memory-server` in unit tests). Live manual tests belong solely to the human user.
+
+---
+
+### 9. Counter Sales Atomic Finalization & Payment Recording Invariant
+- **Context**: Retail cash counter sales (e.g. "1-Tap Cash" or Cash/UPI selection) were being saved as un-finalized draft invoices with `status: 'DRAFT'`, `invoiceNumber: DRAFT-xxxx`, and full amount marked as due. Secondary payment attempts failed because backend strictly forbids payments against draft invoices.
+- **Root Cause**: Backend invoice creation defaulted to `finalize = false` and ignored payment options. Mobile frontend attempted to record payments in a separate call that failed and was swallowed in catch blocks.
+- **Permanent Rule**: Counter sales with Cash/UPI must be finalized atomically upon creation (`finalize: true`, `paymentMethod`). Backend `InvoicesService.create` assigns the official sequence number (`INV-xxxx`), deducts inventory stock, records the payment receipt voucher, and sets `status = 'PAID'` with `dueAmountMinor = 0` in one single transaction.
+
+---
+
+### 10. Industry Standard for Walk-in Retail Customers, Tax Place of Supply & Zero Dummy Data
+- **Context**: Quick-creation of walk-in counter customers was passing fake phone numbers (`9999999999`) and hardcoding state as `'Maharashtra'` to bypass schema validation.
+- **Root Cause**: Schema had `phone` required and `billingAddress.state` required, causing developers to insert fake placeholder values. Hardcoded `'Maharashtra'` caused out-of-state stores (e.g. in Gujarat, Delhi) to generate wrong inter-state IGST instead of intra-state CGST + SGST. Fake phone numbers risked sending automated SMS/WhatsApp messages to real people.
+- **Permanent Rule**:
+  1. **Zero Dummy Data**: Never use placeholder phone numbers like `9999999999` or hardcoded states.
+  2. **Nullable / Optional Phone**: `phone` is optional for walk-in retail parties.
+  3. **Dedicated `isWalkIn: true`**: Tag anonymous counter buyers so notifications and ledger analytics skip them.
+  4. **Place of Supply (PoS) Dynamic Resolution**: Over-the-counter retail sales must strictly inherit the physical store's own location (`business?.state` / `business?.stateCode`) to calculate correct intra-state taxes under Section 10(1)(c) of the IGST Act.
+
+
+

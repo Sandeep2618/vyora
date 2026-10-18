@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InvoicesService } from './index';
 import { InvoiceModel } from '../model';
+import { PaymentModel } from '../../payments/model';
 import { PartyModel } from '../../parties/model';
 import { ProductModel } from '../../products/model';
 import { BusinessService } from '../../business/service';
@@ -144,4 +145,88 @@ describe('InvoicesService - Core Invariants', () => {
       }),
     );
   });
+
+  it('atomically creates paid invoice, records payment receipt, and leaves zero balance on instant cash sale', async () => {
+    vi.spyOn(PartyModel, 'findOne').mockResolvedValue({
+      _id: 'cust-1',
+      name: 'Loken',
+      billingAddress: { state: 'Maharashtra', line1: 'Street 1', city: 'Mumbai' },
+    } as any);
+
+    vi.spyOn(ProductModel, 'find').mockResolvedValue([
+      {
+        _id: 'prod-1',
+        name: 'Ggg',
+        sku: 'VBV',
+        unit: 'PCS',
+        sellingPriceMinor: 10000,
+        taxRatePercent: 18,
+        currentStock: 10,
+      },
+    ] as any);
+
+    vi.spyOn(ProductModel, 'findOne').mockResolvedValue({
+      _id: 'prod-1',
+      name: 'Ggg',
+      sku: 'VBV',
+      unit: 'PCS',
+      currentStock: 10,
+    } as any);
+
+    vi.spyOn(InvoiceModel.prototype, 'save').mockResolvedValue({} as any);
+    vi.spyOn(PaymentModel, 'countDocuments').mockResolvedValue(0 as any);
+    vi.spyOn(PaymentModel, 'create').mockResolvedValue({} as any);
+
+    const result = await InvoicesService.create(
+      'biz-1',
+      {
+        customerId: 'cust-1',
+        issueDate: '2026-10-18',
+        dueDate: '2026-10-18',
+        finalize: true,
+        paymentMethod: 'CASH',
+        items: [
+          {
+            productId: 'prod-1',
+            quantity: 1,
+            unitPriceMinor: 10000,
+            discountPercent: 0,
+            taxRatePercent: 18,
+          },
+        ],
+      },
+      'user-1',
+    );
+
+    expect(result.invoiceNumber).toBe('INV-0048');
+    expect(result.status).toBe('PAID');
+    expect(result.paidAmountMinor).toBe(result.grandTotalMinor);
+    expect(result.dueAmountMinor).toBe(0);
+
+    // Stock movement must be recorded
+    expect(InventoryService.recordMovement).toHaveBeenCalledWith(
+      expect.objectContaining({
+        businessId: 'biz-1',
+        productId: 'prod-1',
+        quantityDelta: -1,
+        movementType: 'SALE',
+      }),
+    );
+
+    // Customer balance must NOT have increased due because cash was paid in full
+    expect(PartiesService.updateBalance).not.toHaveBeenCalled();
+
+    // PaymentModel.create must have recorded the receipt voucher
+    expect(PaymentModel.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        businessId: 'biz-1',
+        type: 'RECEIPT',
+        partyId: 'cust-1',
+        partyName: 'Loken',
+        paymentMethod: 'CASH',
+        amountMinor: result.grandTotalMinor,
+      }),
+    );
+  });
 });
+

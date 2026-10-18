@@ -49,7 +49,7 @@ export const PartiesPage: React.FC = () => {
       const matchesSearch =
         !q ||
         party.name.toLowerCase().includes(q) ||
-        party.phone.toLowerCase().includes(q) ||
+        (party.phone && party.phone.toLowerCase().includes(q)) ||
         (party.gstin && party.gstin.toLowerCase().includes(q)) ||
         (party.billingAddress?.city && party.billingAddress.city.toLowerCase().includes(q));
 

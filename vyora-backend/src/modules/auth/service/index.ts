@@ -71,7 +71,9 @@ export class AuthService {
     });
     await user.save();
 
-    const businessName = dto.businessName || `${dto.name}'s Business`;
+    const trimmedBizName = dto.businessName?.trim();
+    const trimmedUserName = dto.name?.trim();
+    const businessName = trimmedBizName || (trimmedUserName ? `${trimmedUserName}'s Store` : 'My Store');
     const business = new BusinessModel({
       name: businessName,
       phone: cleanPhone || '',

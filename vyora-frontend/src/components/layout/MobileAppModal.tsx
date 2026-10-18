@@ -84,7 +84,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
                 qrMode === 'apk'
-                  ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.0.apk'
+                  ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.1.apk'
                   : 'https://vyora-app-alpha.vercel.app'
               )}`}
               alt="Vyora Mobile QR Code"
@@ -95,7 +95,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             <QrCode className="w-3.5 h-3.5 shrink-0" />
             <span>
               {qrMode === 'apk'
-                ? t('mobileAppModal.scanApk', { defaultValue: 'Scan with Camera to Download APK (~73 MB)' })
+                ? t('mobileAppModal.scanApk', { defaultValue: 'Scan with Camera to Download APK (~84 MB)' })
                 : t('mobileAppModal.scanWeb', { defaultValue: 'Scan with Camera or Expo Go to Open' })}
             </span>
           </p>
@@ -109,7 +109,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
           </div>
           <div className="flex items-start gap-2">
             <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-            <p>{qrMode === 'apk' ? t('mobileAppModal.step2Apk', { defaultValue: 'Chrome will download vyora-v1.0.0.apk directly.' }) : t('mobileAppModal.step2Web', { defaultValue: 'Tap "Add to Home screen" in Chrome or open via Expo Go.' })}</p>
+            <p>{qrMode === 'apk' ? t('mobileAppModal.step2Apk', { defaultValue: 'Chrome will download vyora-v1.0.1.apk directly.' }) : t('mobileAppModal.step2Web', { defaultValue: 'Tap "Add to Home screen" in Chrome or open via Expo Go.' })}</p>
           </div>
           <div className="flex items-start gap-2">
             <span className="w-4 h-4 rounded-full bg-[#0F766E] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
@@ -122,16 +122,16 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
           <a
             href={
               qrMode === 'apk'
-                ? 'https://expo.dev/artifacts/eas/NG8TDrBmDkayZsoCEwQ4QGlGxRGtj33smuxRk_xPpyE.apk'
+                ? 'https://expo.dev/artifacts/eas/LE4g5ZlUdSnYick5yHeMF_2YuoUWt1uc0ZvCPTXPzjo.apk'
                 : 'https://vyora-app-alpha.vercel.app'
             }
-            download={qrMode === 'apk' ? 'vyora-v1.0.0.apk' : undefined}
+            download={qrMode === 'apk' ? 'vyora-v1.0.1.apk' : undefined}
             target={qrMode === 'web' ? '_blank' : undefined}
             rel="noopener noreferrer"
             className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#0F766E] hover:bg-[#0D665F] text-white text-xs font-bold py-2.5 rounded-xl transition-colors shadow-xs"
           >
             {qrMode === 'apk' ? <Download className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
-            <span>{qrMode === 'apk' ? t('mobileAppModal.downloadApkBtn', { defaultValue: 'Download Standalone APK (~73 MB)' }) : t('mobileAppModal.launchWebBtn', { defaultValue: 'Launch Mobile Web App' })}</span>
+            <span>{qrMode === 'apk' ? t('mobileAppModal.downloadApkBtn', { defaultValue: 'Download Standalone APK (~84 MB)' }) : t('mobileAppModal.launchWebBtn', { defaultValue: 'Launch Mobile Web App' })}</span>
           </a>
 
           <button
@@ -139,7 +139,7 @@ export const MobileAppModal: React.FC<MobileAppModalProps> = ({ isOpen, onClose 
             onClick={() => {
               const url =
                 qrMode === 'apk'
-                  ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.0.apk'
+                  ? 'https://vyora-website-smoky.vercel.app/downloads/vyora-v1.0.1.apk'
                   : 'https://vyora-app-alpha.vercel.app';
               navigator.clipboard.writeText(url);
               setCopiedLink(true);

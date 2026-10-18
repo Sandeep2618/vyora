@@ -7,7 +7,8 @@ export interface Party {
   type: PartyType;
   name: string;
   contactPerson?: string;
-  phone: string;
+  phone?: string;
+  isWalkIn?: boolean;
   email?: string;
   gstin?: string;
   pan?: string;

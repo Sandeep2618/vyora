@@ -24,7 +24,12 @@ export const BusinessProfileSchema = z.object({
   legalName: z.string().optional(),
   logoUrl: z.string().optional().or(z.literal('')),
   signatureUrl: z.string().optional().or(z.literal('')),
-  upiId: z.string().optional().or(z.literal('')),
+  upiId: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/, 'Invalid UPI ID format (e.g. mobile@upi or name@bankhandle)')
+    .optional()
+    .or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   gstin: z
@@ -90,7 +95,8 @@ export const PartyBaseSchema = z.object({
   type: z.enum(['CUSTOMER', 'SUPPLIER', 'BOTH']),
   name: z.string().min(2, 'Party name is required'),
   contactPerson: z.string().optional(),
-  phone: z.string().min(8, 'Valid phone number is required'),
+  phone: z.string().trim().optional().or(z.literal('')),
+  isWalkIn: z.boolean().optional().default(false),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   gstin: z
     .string()
@@ -98,22 +104,25 @@ export const PartyBaseSchema = z.object({
     .optional()
     .or(z.literal('')),
   pan: z.string().optional(),
-  billingAddress: z.object({
-    line1: z.string().min(2, 'Billing address line 1 is required'),
-    line2: z.string().optional(),
-    city: z.string().min(2, 'City is required'),
-    state: z.string().min(2, 'State is required'),
-    stateCode: z.string().optional(),
-    pincode: z.string().min(4, 'Pincode is required').default('400001'),
-  }),
+  billingAddress: z
+    .object({
+      line1: z.string().optional().default(''),
+      line2: z.string().optional(),
+      city: z.string().optional().default(''),
+      state: z.string().optional().default(''),
+      stateCode: z.string().optional(),
+      pincode: z.string().optional().default(''),
+    })
+    .optional()
+    .default({}),
   shippingAddress: z
     .object({
-      line1: z.string(),
+      line1: z.string().optional().default(''),
       line2: z.string().optional(),
-      city: z.string(),
-      state: z.string(),
+      city: z.string().optional().default(''),
+      state: z.string().optional().default(''),
       stateCode: z.string().optional(),
-      pincode: z.string(),
+      pincode: z.string().optional().default(''),
     })
     .optional(),
   openingBalanceMinor: z.number().int().default(0),
@@ -127,24 +136,33 @@ export const PartySchema = z.preprocess((val: any) => {
   // Handle flat address input from quick modals
   if (!input.billingAddress) {
     input.billingAddress = {
-      line1: input.address || input.line1 || 'Primary Address',
-      city: input.city || 'Mumbai',
+      line1: input.address || input.line1 || '',
+      city: input.city || '',
       state: input.state || '',
-      pincode: input.pincode || '400001',
+      pincode: input.pincode || '',
     };
   } else {
-    input.billingAddress = { ...input.billingAddress };
+    input.billingAddress = {
+      line1: input.billingAddress.line1 || input.address || input.line1 || '',
+      line2: input.billingAddress.line2 || '',
+      city: input.billingAddress.city || input.city || '',
+      state: input.billingAddress.state || input.state || '',
+      stateCode: input.billingAddress.stateCode || '',
+      pincode: input.billingAddress.pincode || input.pincode || '',
+    };
   }
 
   // Auto-infer state from GSTIN if state is blank or missing
   if (
-    (!input.billingAddress.state || !input.billingAddress.state.trim()) &&
     input.gstin &&
+    typeof input.gstin === 'string' &&
     input.gstin.length >= 2
   ) {
     const gstCode = input.gstin.substring(0, 2);
     if (INDIAN_GST_STATE_MAP[gstCode]) {
-      input.billingAddress.state = INDIAN_GST_STATE_MAP[gstCode];
+      if (!input.billingAddress.state || !input.billingAddress.state.trim()) {
+        input.billingAddress.state = INDIAN_GST_STATE_MAP[gstCode];
+      }
       if (!input.billingAddress.stateCode) {
         input.billingAddress.stateCode = gstCode;
       }
@@ -202,6 +220,9 @@ export const CreateInvoiceBaseSchema = z.object({
   notes: z.string().optional(),
   terms: z.string().optional(),
   roundOff: z.boolean().optional().default(true),
+  finalize: z.boolean().optional().default(false),
+  paymentMethod: z.enum(['CASH', 'BANK_TRANSFER', 'UPI', 'CHEQUE', 'CARD', 'OTHER']).optional(),
+  paidAmountMinor: z.number().int().nonnegative().optional(),
 });
 
 export const CreateInvoiceSchema = z.preprocess((val: any) => {
@@ -228,6 +249,15 @@ export const CreateInvoiceSchema = z.preprocess((val: any) => {
   if (!input.dueDate) {
     input.dueDate = input.issueDate;
   }
+  if (input.finalize === undefined && input.finalizeImmediately !== undefined) {
+    input.finalize = Boolean(input.finalizeImmediately);
+  }
+  if (!input.paymentMethod && (input.paymentMode || input.paymentMethodOption)) {
+    input.paymentMethod = input.paymentMode || input.paymentMethodOption;
+  }
+  if (input.paymentMethod && input.finalize === undefined) {
+    input.finalize = true;
+  }
   return input;
 }, CreateInvoiceBaseSchema);
 export type CreateInvoiceInput = z.input<typeof CreateInvoiceBaseSchema>;
@@ -243,6 +273,8 @@ export const CreatePurchaseBaseSchema = z.object({
   billNumber: z.string().min(1, 'Supplier bill number is required'),
   billDate: z.string().min(1, 'Bill date is required'),
   dueDate: z.string().optional(),
+  paymentMethod: z.enum(['CASH', 'BANK_TRANSFER', 'UPI', 'CHEQUE', 'CARD', 'OTHER']).optional(),
+  paidAmountMinor: z.number().int().nonnegative().optional(),
   items: z
     .array(
       z.object({
@@ -267,6 +299,26 @@ export const CreatePurchaseSchema = z.preprocess((val: any) => {
   const input = { ...val };
   if (!input.billDate && input.date) input.billDate = input.date;
   if (!input.billDate) input.billDate = new Date().toISOString().split('T')[0];
+
+  if (!input.paymentMethod && (input.paymentMode || input.paymentMethodOption)) {
+    input.paymentMethod = input.paymentMode || input.paymentMethodOption;
+  }
+
+  // Preprocess items: map unitCostMinor -> unitPriceMinor if unitPriceMinor is missing
+  if (Array.isArray(input.items)) {
+    input.items = input.items.map((item: any) => {
+      if (!item || typeof item !== 'object') return item;
+      const normalizedItem = { ...item };
+      if (normalizedItem.unitPriceMinor === undefined && normalizedItem.unitCostMinor !== undefined) {
+        normalizedItem.unitPriceMinor = normalizedItem.unitCostMinor;
+      }
+      if (normalizedItem.taxRatePercent === undefined) {
+        normalizedItem.taxRatePercent = 0;
+      }
+      return normalizedItem;
+    });
+  }
+
   return input;
 }, CreatePurchaseBaseSchema);
 export type CreatePurchaseInput = z.input<typeof CreatePurchaseBaseSchema>;

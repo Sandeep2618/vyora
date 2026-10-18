@@ -22,7 +22,8 @@
 - **Configured Connection**: In `vyora-backend/.env` via `MONGODB_URI`.
 - **Active User**: `sandeep26062004_db_user`
 - **Demo Seed Credentials**: `demo@vyora.com` / `password123`
-- **NEVER use mock data**: All reads and writes must persist directly into MongoDB Atlas. The application must display real server data across all views.
+- **NEVER use mock data in application code**: All reads and writes must persist directly into MongoDB Atlas. The application must display real server data across all views.
+- **STRICT PROHIBITION: ZERO AGENT DATABASE MUTATIONS (NEVER TOUCH USER DATABASE)**: AI agents are strictly forbidden from performing any database inserts, updates, deletes, or mutations (`POST`, `PUT`, `PATCH`, `DELETE`) against the user's remote/production database or live API endpoints (Atlas, Render, Supabase). Agents must NEVER create test records, dummy parties, fake transactions, or alter real tenant data in the user's database. All test verification by agents must be strictly offline (static analysis `tsc --noEmit`, linters, or in-memory mocks like `mongodb-memory-server` in unit tests). Agents must NEVER touch or pollute the user's database under any circumstances.
 
 ---
 
@@ -113,6 +114,12 @@ Antigravity and the dedicated tester agent (`vyora_tester_agent`) utilize 4 conf
    - Validates that API exception filters return structured error envelopes without leaking database credentials or internal stack traces.
 4. **Supabase MCP (`supabase`)**:
    - Conducts schema inspection, relational integrity checks, and read-only contract tests against external databases.
+
+### 16. Strict Zero Agent Database Mutation Policy (Never Touch User Database)
+- **Zero Live Mutations**: AI agents are strictly prohibited from executing any database mutations, API requests (`POST`, `PUT`, `PATCH`, `DELETE`), or runner scripts against the user's remote or production database (Render, MongoDB Atlas, Supabase).
+- **No Agent Data Pollution**: Never insert test records, dummy parties, fake stores, sample invoices, or synthetic entries into the user's database.
+- **Verification Boundaries**: All agent automated testing must strictly execute against isolated in-memory test databases (`mongodb-memory-server` in unit tests) or use offline static type checking (`tsc --noEmit`, linters, build compilation).
+- If manual end-to-end verification in a live environment is required, it must be performed solely by the human user. Agents must NEVER touch the database again.
 
 ---
 

@@ -56,9 +56,28 @@ export class PaymentsService {
       invoice.dueAmountMinor -= dto.amountMinor;
       invoice.status = invoice.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
       await invoice.save();
+    } else if (dto.type === 'RECEIPT') {
+      // FIFO auto-allocation: settle oldest open customer invoices with receipt amount
+      const openInvoices = await InvoiceModel.find({
+        businessId,
+        customerId: party._id.toString(),
+        dueAmountMinor: { $gt: 0 },
+        status: { $nin: ['DRAFT', 'CANCELLED'] },
+      }).sort({ issueDate: 1, createdAt: 1 });
+
+      let remaining = dto.amountMinor;
+      for (const inv of openInvoices) {
+        if (remaining <= 0) break;
+        const alloc = Math.min(remaining, inv.dueAmountMinor);
+        inv.paidAmountMinor += alloc;
+        inv.dueAmountMinor -= alloc;
+        inv.status = inv.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
+        await inv.save();
+        remaining -= alloc;
+      }
     }
 
-    // 3. Handle purchase bill allocation if specified
+    // 3. Handle purchase bill allocation if specified or FIFO
     if (dto.purchaseBillId) {
       const purchase = await PurchaseBillModel.findOne({ _id: dto.purchaseBillId, businessId });
       if (!purchase) {
@@ -73,6 +92,24 @@ export class PaymentsService {
       purchase.dueAmountMinor -= dto.amountMinor;
       purchase.status = purchase.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
       await purchase.save();
+    } else if (dto.type === 'PAYMENT') {
+      // FIFO auto-allocation: settle oldest open supplier purchase bills with payment amount
+      const openPurchases = await PurchaseBillModel.find({
+        businessId,
+        supplierId: party._id.toString(),
+        dueAmountMinor: { $gt: 0 },
+      }).sort({ billDate: 1, createdAt: 1 });
+
+      let remaining = dto.amountMinor;
+      for (const pur of openPurchases) {
+        if (remaining <= 0) break;
+        const alloc = Math.min(remaining, pur.dueAmountMinor);
+        pur.paidAmountMinor += alloc;
+        pur.dueAmountMinor -= alloc;
+        pur.status = pur.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
+        await pur.save();
+        remaining -= alloc;
+      }
     }
 
     // 4. Update Party Balance

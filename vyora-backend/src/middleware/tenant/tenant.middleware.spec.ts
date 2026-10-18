@@ -36,6 +36,14 @@ describe('tenantMiddleware - Tenant Isolation & Authorization', () => {
       isActive: true,
       permissions: ['ALL'],
     } as any);
+    vi.spyOn(BusinessModel, 'findById').mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue({
+          subscriptionPlan: 'growth',
+          subscriptionStatus: 'active',
+        }),
+      }),
+    } as any);
 
     const req: any = {
       user: { id: 'user-1', role: 'OWNER', businessId: 'biz-1' },

@@ -95,6 +95,9 @@ export interface CreateInvoiceInput {
   items: CreateInvoiceItemInput[];
   notes?: string;
   roundOff?: boolean;
+  finalize?: boolean;
+  paymentMethod?: 'CASH' | 'BANK_TRANSFER' | 'UPI' | 'CHEQUE' | 'CARD' | 'OTHER';
+  paidAmountMinor?: number;
 }
 
 export interface CalculatedLineItem {

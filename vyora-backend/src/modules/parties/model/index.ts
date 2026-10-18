@@ -2,22 +2,22 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 import { PartyType } from '@vyora/shared-types';
 
 export interface IAddress {
-  line1: string;
+  line1?: string;
   line2?: string;
-  city: string;
-  state: string;
+  city?: string;
+  state?: string;
   stateCode?: string;
-  pincode: string;
+  pincode?: string;
 }
 
 const AddressSchema = new Schema<IAddress>(
   {
-    line1: { type: String, required: true },
-    line2: { type: String },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    stateCode: { type: String, default: '27' },
-    pincode: { type: String, required: true },
+    line1: { type: String, default: '' },
+    line2: { type: String, default: '' },
+    city: { type: String, default: '' },
+    state: { type: String, default: '' },
+    stateCode: { type: String, default: '' },
+    pincode: { type: String, default: '' },
   },
   { _id: false },
 );
@@ -27,7 +27,8 @@ export interface IParty extends Document {
   type: PartyType;
   name: string;
   contactPerson?: string;
-  phone: string;
+  phone?: string;
+  isWalkIn?: boolean;
   email?: string;
   gstin?: string;
   pan?: string;
@@ -52,11 +53,12 @@ const PartySchema = new Schema<IParty>(
     },
     name: { type: String, required: true, trim: true },
     contactPerson: { type: String, trim: true },
-    phone: { type: String, required: true, trim: true },
+    phone: { type: String, default: '', trim: true },
+    isWalkIn: { type: Boolean, default: false, index: true },
     email: { type: String, lowercase: true, trim: true },
     gstin: { type: String, trim: true, uppercase: true },
     pan: { type: String, trim: true, uppercase: true },
-    billingAddress: { type: AddressSchema, required: true },
+    billingAddress: { type: AddressSchema, default: () => ({}) },
     shippingAddress: { type: AddressSchema },
     openingBalanceMinor: { type: Number, default: 0 },
     currentBalanceMinor: { type: Number, default: 0 },

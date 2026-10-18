@@ -11,7 +11,10 @@ export class InvoicesController {
   });
 
   static create = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const result = await InvoicesService.create(req.businessId!, req.body, req.user!.id);
+    const finalizeParam = req.query.finalize === 'true' || req.query.finalizeImmediately === 'true';
+    const finalizeBody = req.body?.finalize ?? req.body?.finalizeImmediately;
+    const finalizeImmediately = finalizeParam || Boolean(finalizeBody);
+    const result = await InvoicesService.create(req.businessId!, req.body, req.user!.id, finalizeImmediately);
     return ApiResponse.created(res, result);
   });
 

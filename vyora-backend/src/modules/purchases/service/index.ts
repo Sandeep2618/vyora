@@ -6,6 +6,8 @@ import { PartiesService } from '../../parties/service';
 import { AuditService } from '../../audit/service';
 import { NotFoundError } from '../../../util';
 import { CreatePurchaseInput } from '../validator';
+import { PaymentModel } from '../../payments/model';
+import { formatDocumentNumber } from '@vyora/utils';
 
 export class PurchasesService {
   static async create(businessId: string, dto: CreatePurchaseInput, userId: string, userName: string) {
@@ -56,6 +58,14 @@ export class PurchasesService {
 
     const grandTotalMinor = subtotalMinor + totalTaxMinor;
 
+    const paidAmountMinor = dto.paymentMethod
+      ? (dto.paidAmountMinor !== undefined
+          ? Math.min(dto.paidAmountMinor, grandTotalMinor)
+          : grandTotalMinor)
+      : 0;
+    const dueAmountMinor = grandTotalMinor - paidAmountMinor;
+    const status = dueAmountMinor === 0 ? 'PAID' : (paidAmountMinor > 0 ? 'PARTIAL' : 'RECEIVED');
+
     const purchase = new PurchaseBillModel({
       businessId,
       billNumber: dto.billNumber,
@@ -68,13 +78,13 @@ export class PurchasesService {
       },
       billDate: dto.billDate,
       dueDate: dto.dueDate,
-      status: 'RECEIVED',
+      status,
       items: purchaseLines,
       subtotalMinor,
       totalTaxMinor,
       grandTotalMinor,
-      paidAmountMinor: 0,
-      dueAmountMinor: grandTotalMinor,
+      paidAmountMinor,
+      dueAmountMinor,
       notes: dto.notes,
       createdByUserId: userId,
     });
@@ -95,12 +105,52 @@ export class PurchasesService {
       });
     }
 
-    // Update supplier payable balance (negative balance = money owed to supplier)
-    await PartiesService.updateBalance(
-      businessId,
-      supplier._id.toString(),
-      -grandTotalMinor,
-    );
+    // Update supplier payable balance (only remaining due adds to supplier payable debt)
+    if (dueAmountMinor > 0) {
+      await PartiesService.updateBalance(
+        businessId,
+        supplier._id.toString(),
+        -dueAmountMinor,
+      );
+    }
+
+    // If upfront payment was made to supplier, record official Payment voucher
+    if (paidAmountMinor > 0 && dto.paymentMethod) {
+      const paymentCount = await PaymentModel.countDocuments({ businessId });
+      const paymentNumber = formatDocumentNumber('PAY-', paymentCount + 1, 4);
+
+      const payment = new PaymentModel({
+        businessId,
+        paymentNumber,
+        type: 'PAYMENT',
+        partyId: supplier._id.toString(),
+        partyName: supplier.name,
+        purchaseBillId: purchase._id.toString(),
+        amountMinor: paidAmountMinor,
+        paymentMethod: dto.paymentMethod,
+        paymentDate: dto.billDate,
+        notes: `Payment for Purchase Bill ${dto.billNumber}`,
+        idempotencyKey: `pur-pay-${purchase._id.toString()}`,
+        receivedByUserId: userId,
+      });
+      await payment.save();
+
+      await AuditService.logAction({
+        businessId,
+        userId,
+        userName,
+        action: 'SUPPLIER_PAYMENT',
+        entityType: 'PAYMENT',
+        entityId: payment._id.toString(),
+        details: {
+          paymentNumber,
+          amountMinor: paidAmountMinor,
+          partyName: supplier.name,
+          purchaseBillId: purchase._id.toString(),
+          paymentMethod: dto.paymentMethod,
+        },
+      });
+    }
 
     await AuditService.logAction({
       businessId,
@@ -112,6 +162,8 @@ export class PurchasesService {
       details: {
         billNumber: dto.billNumber,
         grandTotalMinor,
+        paidAmountMinor,
+        dueAmountMinor,
       },
     });
 

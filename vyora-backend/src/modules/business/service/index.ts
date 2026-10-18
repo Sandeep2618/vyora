@@ -386,6 +386,11 @@ export class BusinessService {
       throw new ConflictError('Store or business name is required');
     }
 
+    const cleanPhone = (dto.phone || '').trim().replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      throw new ConflictError('A valid 10-digit store mobile number is required');
+    }
+
     const user = await UserModel.findById(userId);
     if (!user) {
       throw new NotFoundError('User');
@@ -439,7 +444,7 @@ export class BusinessService {
 
     const newBusiness = new BusinessModel({
       name: dto.name.trim(),
-      phone: dto.phone?.trim() || user.phone || '',
+      phone: cleanPhone,
       email: dto.email?.trim() || user.email || '',
       addressLine1: dto.addressLine1?.trim() || '',
       city: dto.city?.trim() || '',

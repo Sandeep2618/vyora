@@ -1,4 +1,5 @@
 import { InvoiceModel, IInvoice } from '../model';
+import { PaymentModel } from '../../payments/model';
 import { PartyModel } from '../../parties/model';
 import { ProductModel } from '../../products/model';
 import { BusinessService } from '../../business/service';
@@ -30,11 +31,13 @@ export class InvoicesService {
       throw new NotFoundError('Selected customer');
     }
 
+    const customerState =
+      customer.billingAddress?.state?.trim().toLowerCase() ||
+      business.state.trim().toLowerCase();
     const isInterState =
       dto.isInterState !== undefined
         ? dto.isInterState
-        : business.state.trim().toLowerCase() !==
-          customer.billingAddress.state.trim().toLowerCase();
+        : business.state.trim().toLowerCase() !== customerState;
 
     const productIds = dto.items.map((i) => i.productId);
     const products = await ProductModel.find({
@@ -99,7 +102,9 @@ export class InvoicesService {
     const { business, customer, isInterState, calculatedLines, totals } =
       await this.calculateAndBuildInvoiceData(businessId, dto);
 
-    if (finalizeImmediately) {
+    const shouldFinalize = Boolean(dto.finalize ?? finalizeImmediately);
+
+    if (shouldFinalize) {
       for (const line of calculatedLines) {
         const prod = await ProductModel.findOne({ _id: line.productId, businessId });
         if (!prod || prod.currentStock < line.quantity) {
@@ -112,15 +117,27 @@ export class InvoicesService {
 
     let invoiceNumber: string;
     let status: InvoiceStatus = 'DRAFT';
+    let paidAmountMinor = 0;
+    let dueAmountMinor = totals.grandTotalMinor;
 
-    if (finalizeImmediately) {
+    if (shouldFinalize) {
       const nextSeq = await BusinessService.acquireNextInvoiceNumber(businessId);
       invoiceNumber = formatDocumentNumber(
         business.invoicePrefix || 'INV-',
         nextSeq,
         business.invoiceNumberPadding || 4,
       );
-      status = 'UNPAID';
+
+      if (dto.paymentMethod) {
+        paidAmountMinor =
+          dto.paidAmountMinor !== undefined
+            ? Math.min(dto.paidAmountMinor, totals.grandTotalMinor)
+            : totals.grandTotalMinor;
+        dueAmountMinor = totals.grandTotalMinor - paidAmountMinor;
+        status = dueAmountMinor === 0 ? 'PAID' : (paidAmountMinor > 0 ? 'PARTIAL' : 'UNPAID');
+      } else {
+        status = 'UNPAID';
+      }
     } else {
       invoiceNumber = `DRAFT-${Date.now().toString().slice(-6)}`;
     }
@@ -145,8 +162,8 @@ export class InvoicesService {
       totalTaxMinor: totals.totalTaxMinor,
       roundOffMinor: totals.roundOffMinor,
       grandTotalMinor: totals.grandTotalMinor,
-      paidAmountMinor: 0,
-      dueAmountMinor: totals.grandTotalMinor,
+      paidAmountMinor,
+      dueAmountMinor,
       notes: dto.notes,
       terms: dto.terms || business.termsAndConditions,
       createdByUserId: userId,
@@ -154,7 +171,7 @@ export class InvoicesService {
 
     await invoice.save();
 
-    if (finalizeImmediately) {
+    if (shouldFinalize) {
       for (const line of calculatedLines) {
         await InventoryService.recordMovement({
           businessId,
@@ -169,11 +186,36 @@ export class InvoicesService {
         });
       }
 
-      await PartiesService.updateBalance(
-        businessId,
-        customer._id.toString(),
-        totals.grandTotalMinor,
-      );
+      // Update party ledger: increase by grand total, decrease by paid amount
+      const balanceDelta = totals.grandTotalMinor - paidAmountMinor;
+      if (balanceDelta !== 0) {
+        await PartiesService.updateBalance(
+          businessId,
+          customer._id.toString(),
+          balanceDelta,
+        );
+      }
+
+      // If immediate payment was collected, record official Payment receipt voucher
+      if (paidAmountMinor > 0 && dto.paymentMethod) {
+        const paymentCount = await PaymentModel.countDocuments({ businessId });
+        const paymentNumber = formatDocumentNumber('RCPT-', paymentCount + 1, 4);
+        await PaymentModel.create({
+          businessId,
+          paymentNumber,
+          type: 'RECEIPT',
+          partyId: customer._id.toString(),
+          partyName: customer.name,
+          invoiceId: invoice._id.toString(),
+          amountMinor: paidAmountMinor,
+          paymentMethod: dto.paymentMethod,
+          paymentDate: dto.issueDate || new Date().toISOString().split('T')[0],
+          referenceNumber: `${dto.paymentMethod}-${invoiceNumber}`,
+          notes: `Instant ${dto.paymentMethod} Settlement for Invoice #${invoiceNumber}`,
+          idempotencyKey: `auto-${invoice._id.toString()}-${Date.now()}`,
+          receivedByUserId: userId,
+        });
+      }
 
       await AuditService.logAction({
         businessId,
@@ -182,7 +224,7 @@ export class InvoicesService {
         action: 'FINALIZED',
         entityType: 'INVOICE',
         entityId: invoice._id.toString(),
-        details: { invoiceNumber, grandTotalMinor: totals.grandTotalMinor },
+        details: { invoiceNumber, grandTotalMinor: totals.grandTotalMinor, paidAmountMinor },
       });
     }
 

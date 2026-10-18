@@ -162,6 +162,8 @@ export const CreateInvoicePage: React.FC = () => {
         dueDate,
         notes,
         roundOff: true,
+        finalize,
+        paymentMethod: autoPaymentMode,
         items: validLines.map((l) => ({
           productId: l.productId,
           quantity: Number(l.quantity) || 1,
@@ -171,22 +173,6 @@ export const CreateInvoicePage: React.FC = () => {
         })),
       };
       const created = await api.post<Invoice>(`/invoices?finalize=${finalize}`, payload);
-
-      // If fast 1-tap counter sale, immediately record full payment receipt
-      if (autoPaymentMode && created.grandTotalMinor > 0) {
-        try {
-          await api.post('/payments', {
-            invoiceId: created.id,
-            amountMinor: created.grandTotalMinor,
-            paymentMethod: autoPaymentMode,
-            paymentDate: issueDate || new Date().toISOString().split('T')[0],
-            notes: `Counter 1-Tap ${autoPaymentMode} settlement`,
-            idempotencyKey: `auto-rcpt-${created.id}-${Date.now()}`,
-          });
-        } catch (paymentErr) {
-          console.warn('Instant payment receipt auto-record failed:', paymentErr);
-        }
-      }
       return created;
     },
     onSuccess: (data: Invoice) => {

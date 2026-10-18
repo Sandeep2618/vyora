@@ -31,7 +31,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
   useEffect(() => {
     if (partyToEdit) {
       setName(partyToEdit.name);
-      setPhone(partyToEdit.phone);
+      setPhone(partyToEdit.phone || '');
       setEmail(partyToEdit.email || '');
       setGstin(partyToEdit.gstin || '');
       setLine1(partyToEdit.billingAddress?.line1 || '');

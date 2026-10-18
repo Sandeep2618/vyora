@@ -16,14 +16,17 @@ export function buildBusinessSnapshot(business: any) {
 }
 
 export function buildCustomerSnapshot(customer: any) {
+  const line1 = customer.billingAddress?.line1 || '';
+  const city = customer.billingAddress?.city || '';
+  const addressParts = [line1, city].filter(Boolean);
   return {
     name: customer.name,
     phone: customer.phone,
     email: customer.email,
     gstin: customer.gstin,
-    address: `${customer.billingAddress.line1}, ${customer.billingAddress.city}`,
-    state: customer.billingAddress.state,
-    stateCode: customer.billingAddress.stateCode,
+    address: addressParts.join(', '),
+    state: customer.billingAddress?.state || '',
+    stateCode: customer.billingAddress?.stateCode || '',
   };
 }
 

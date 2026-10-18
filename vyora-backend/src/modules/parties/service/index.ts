@@ -1,13 +1,33 @@
 import { PartyModel, IParty } from '../model';
+import { BusinessModel } from '../../business/model';
 import { NotFoundError } from '../../../util';
 import { PartyInput } from '@vyora/validation';
 import { PartyType } from '@vyora/shared-types';
 
 export class PartiesService {
   static async create(businessId: string, dto: PartyInput) {
+    const business = await BusinessModel.findById(businessId).lean();
+
+    // Place of Supply for walk-in / counter sales strictly inherits the store's physical state
+    const state = dto.billingAddress?.state?.trim() || business?.state?.trim() || '';
+    const stateCode = dto.billingAddress?.stateCode?.trim() || business?.stateCode?.trim() || '';
+    const billingAddress = {
+      line1: dto.billingAddress?.line1 || business?.addressLine1 || '',
+      line2: dto.billingAddress?.line2 || business?.addressLine2 || '',
+      city: dto.billingAddress?.city || business?.city || '',
+      state,
+      stateCode,
+      pincode: dto.billingAddress?.pincode || business?.pincode || '',
+    };
+
+    const isWalkIn = Boolean(dto.isWalkIn || dto.name.toLowerCase().includes('walk-in'));
+
     const party = new PartyModel({
       businessId,
       ...dto,
+      phone: dto.phone?.trim() || '',
+      isWalkIn,
+      billingAddress,
       currentBalanceMinor: dto.openingBalanceMinor || 0,
       isArchived: false,
     });
@@ -97,6 +117,7 @@ export class PartiesService {
       name: party.name,
       contactPerson: party.contactPerson,
       phone: party.phone,
+      isWalkIn: party.isWalkIn || false,
       email: party.email,
       gstin: party.gstin,
       pan: party.pan,

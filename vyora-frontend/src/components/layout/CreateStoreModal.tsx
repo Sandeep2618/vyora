@@ -38,11 +38,17 @@ export const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
       return;
     }
 
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      toast.error('A valid 10-digit Store Phone number is required');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const payload = {
         name: name.trim(),
-        phone: phone.trim() || undefined,
+        phone: cleanPhone,
         email: email.trim() || undefined,
         addressLine1: addressLine1.trim() || undefined,
         city: city.trim() || undefined,
@@ -127,7 +133,7 @@ export const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-[#123B3A] dark:text-[#E6F4F1] mb-1.5">
-              Store Phone (Optional)
+              Store Phone <span className="text-red-500 font-bold">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-[#566B69] dark:text-[#8FA8A4]">
@@ -135,8 +141,10 @@ export const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
               </span>
               <input
                 type="tel"
+                required
+                maxLength={10}
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="9876543210"
                 className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-[#112322] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-xl text-[#123B3A] dark:text-[#F0FDFA] focus:outline-none focus:ring-2 focus:ring-[#0F766E]"
               />
@@ -229,7 +237,7 @@ export const CreateStoreModal: React.FC<CreateStoreModalProps> = ({
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !name.trim() || phone.replace(/\D/g, '').length !== 10}
             className="flex items-center gap-1.5"
           >
             {isSubmitting ? (
