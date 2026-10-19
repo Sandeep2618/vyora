@@ -8,6 +8,7 @@ import {
   VerifyOtpSchema,
   SelectContextSchema,
   ForgotPasswordSchema,
+  VerifyResetCodeSchema,
   ResetPasswordSchema,
   ChangePasswordSchema,
 } from '../validator';
@@ -23,6 +24,11 @@ router.post(
   '/forgot-password',
   validateRequest({ body: ForgotPasswordSchema }),
   AuthController.forgotPassword,
+);
+router.post(
+  '/verify-reset-code',
+  validateRequest({ body: VerifyResetCodeSchema }),
+  AuthController.verifyResetCode,
 );
 router.post(
   '/reset-password',

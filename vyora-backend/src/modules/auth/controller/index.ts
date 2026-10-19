@@ -82,6 +82,11 @@ export class AuthController {
     return ApiResponse.success(res, result);
   });
 
+  static verifyResetCode = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await AuthService.verifyResetCode(req.body);
+    return ApiResponse.success(res, result);
+  });
+
   static resetPassword = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const result = await AuthService.resetPassword(req.body);
     return ApiResponse.success(res, result);

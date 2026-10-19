@@ -27,6 +27,12 @@ export const ForgotPasswordSchema = z.object({
 });
 export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
 
+export const VerifyResetCodeSchema = z.object({
+  identifier: z.string().min(3, 'Email or 10-digit mobile number is required'),
+  code: z.string().length(6, 'Verification code must be 6 digits'),
+});
+export type VerifyResetCodeInput = z.infer<typeof VerifyResetCodeSchema>;
+
 export const ResetPasswordSchema = z.object({
   identifier: z.string().optional(),
   code: z.string().optional(),

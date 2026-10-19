@@ -19,6 +19,7 @@ import {
   VerifyOtpInput,
   SelectContextInput,
   ForgotPasswordInput,
+  VerifyResetCodeInput,
   ResetPasswordInput,
   ChangePasswordInput,
 } from '../validator';
@@ -600,21 +601,28 @@ export class AuthService {
       await user.save();
 
       // Dispatch branded email via Resend
-      MailService.sendPasswordResetEmail({
+      const mailRes = await MailService.sendPasswordResetEmail({
         to: user.email,
         name: user.name,
         otp,
       }).catch((err) => {
         console.warn('[AuthService] Failed to send password reset email:', err);
+        return { success: false, error: err?.message || 'Email dispatch failed' };
       });
 
       const [namePart, domain] = user.email.split('@');
       const maskedEmail = `${namePart.charAt(0)}***@${domain}`;
 
+      if (!mailRes.success) {
+        console.warn(`[AuthService] Password reset email dispatch failed for ${user.email}: ${mailRes.error}`);
+      }
+
       return {
         success: true,
         method: 'EMAIL',
-        message: `A 6-digit verification code has been sent to ${maskedEmail}`,
+        message: mailRes.success
+          ? `A 6-digit verification code has been sent to ${maskedEmail}`
+          : `Code generated for ${maskedEmail}. Delivery notice: ${mailRes.error}`,
         maskedTarget: maskedEmail,
       };
     }
@@ -626,6 +634,52 @@ export class AuthService {
       method: 'PHONE',
       message: 'Ready for phone SMS verification via Firebase',
       phone: userPhone,
+    };
+  }
+
+  /**
+   * Verify Reset Code (Step 2 of Password Reset)
+   * Validates the 6-digit OTP before allowing the user to enter a new password.
+   */
+  static async verifyResetCode(dto: VerifyResetCodeInput): Promise<{ success: boolean; message: string }> {
+    const rawId = (dto.identifier || '').trim();
+    const cleanPhone = rawId.replace(/[^0-9]/g, '');
+    const isPhone = cleanPhone.length === 10;
+
+    let user: any = null;
+    if (isPhone) {
+      user = await UserModel.findOne({ phone: cleanPhone });
+      if (!user) user = await UserModel.findOne({ email: `${cleanPhone}@vyora.in` });
+    } else {
+      user = await UserModel.findOne({ email: rawId.toLowerCase() });
+    }
+
+    if (!user) {
+      throw new BadRequestError('Invalid reset attempt or account not found');
+    }
+
+    if (!user.resetPasswordOtpHash || !user.resetPasswordExpiresAt) {
+      throw new BadRequestError('No active password reset request found. Please request a new code.');
+    }
+
+    if (user.resetPasswordExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestError('Verification code has expired. Please request a new code.');
+    }
+
+    if ((user.resetPasswordAttempts || 0) >= 5) {
+      throw new BadRequestError('Too many failed attempts. Please request a new code.');
+    }
+
+    const isMatch = await bcrypt.compare(dto.code.trim(), user.resetPasswordOtpHash);
+    if (!isMatch) {
+      user.resetPasswordAttempts = (user.resetPasswordAttempts || 0) + 1;
+      await user.save();
+      throw new BadRequestError('Invalid verification code. Please check and try again.');
+    }
+
+    return {
+      success: true,
+      message: 'Verification code confirmed. You can now set a new password.',
     };
   }
 
