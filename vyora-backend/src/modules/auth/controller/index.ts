@@ -68,13 +68,18 @@ export class AuthController {
   static sendWelcomeEmail = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const { email, name, businessName } = req.body || {};
     if (email && !email.endsWith('@vyora.in')) {
-      MailService.sendWelcomeEmail({
+      const result = await MailService.sendWelcomeEmail({
         to: email,
         name: name || 'Valued Partner',
         businessName,
-      }).catch(() => {});
+      });
+      return ApiResponse.success(res, {
+        success: result.success,
+        message: result.success ? 'Welcome email sent successfully' : (result.error || 'Failed to dispatch email'),
+        id: result.id,
+      });
     }
-    return ApiResponse.success(res, { success: true, message: 'Welcome email triggered' });
+    return ApiResponse.success(res, { success: false, message: 'Invalid or dummy recipient email' });
   });
 
   static forgotPassword = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

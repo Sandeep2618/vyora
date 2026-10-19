@@ -122,7 +122,15 @@ export class AuthService {
         to: cleanEmail,
         name: user.name,
         businessName: business.name,
-      }).catch(() => {});
+      }).then((res) => {
+        if (!res.success) {
+          console.warn(`[AuthService] Welcome email dispatch failed for ${cleanEmail}: ${res.error}`);
+        } else {
+          console.log(`[AuthService] Welcome email dispatched successfully to ${cleanEmail}. ID: ${res.id}`);
+        }
+      }).catch((err) => {
+        console.error('[AuthService] Welcome email dispatch error:', err);
+      });
     }
 
     return this.generateTokens(user, business._id.toString());
