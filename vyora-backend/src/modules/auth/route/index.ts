@@ -7,6 +7,9 @@ import {
   SendOtpSchema,
   VerifyOtpSchema,
   SelectContextSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+  ChangePasswordSchema,
 } from '../validator';
 
 const router = Router();
@@ -15,6 +18,23 @@ router.post('/register', validateRequest({ body: RegisterSchema }), AuthControll
 router.post('/login', validateRequest({ body: LoginSchema }), AuthController.login);
 router.post('/otp/send', validateRequest({ body: SendOtpSchema }), AuthController.sendOtp);
 router.post('/otp/verify', validateRequest({ body: VerifyOtpSchema }), AuthController.verifyOtp);
+
+router.post(
+  '/forgot-password',
+  validateRequest({ body: ForgotPasswordSchema }),
+  AuthController.forgotPassword,
+);
+router.post(
+  '/reset-password',
+  validateRequest({ body: ResetPasswordSchema }),
+  AuthController.resetPassword,
+);
+router.post(
+  '/change-password',
+  authMiddleware,
+  validateRequest({ body: ChangePasswordSchema }),
+  AuthController.changePassword,
+);
 
 router.get('/personas', authMiddleware, AuthController.getPersonas);
 router.post(

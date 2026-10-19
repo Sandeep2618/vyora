@@ -12,6 +12,9 @@ export interface IUser extends Document {
   defaultBusinessId?: string;
   avatarUrl?: string;
   isInvited?: boolean;
+  resetPasswordOtpHash?: string;
+  resetPasswordExpiresAt?: Date;
+  resetPasswordAttempts?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +39,9 @@ const UserSchema = new Schema<IUser>(
     defaultBusinessId: { type: String, ref: 'Business', index: true },
     avatarUrl: { type: String },
     isInvited: { type: Boolean, default: false },
+    resetPasswordOtpHash: { type: String },
+    resetPasswordExpiresAt: { type: Date },
+    resetPasswordAttempts: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

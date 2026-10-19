@@ -7,8 +7,9 @@ export class AppReleaseController {
    * Public endpoint to get the latest release notes and feature highlights.
    * Mobile app calls this to dynamically display What's New.
    */
-  static getLatestRelease = asyncHandler(async (_req: Request, res: Response) => {
-    const releaseInfo = await AppReleaseService.getLatestRelease();
+  static getLatestRelease = asyncHandler(async (req: Request, res: Response) => {
+    const clientVersion = (req.headers['x-client-version'] || req.query.version) as string | undefined;
+    const releaseInfo = await AppReleaseService.getLatestRelease(clientVersion);
     return ApiResponse.success(res, releaseInfo);
   });
 

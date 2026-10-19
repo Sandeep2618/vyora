@@ -15,6 +15,12 @@ export interface SendStaffInviteEmailOptions {
   loginUrl?: string;
 }
 
+export interface SendPasswordResetEmailOptions {
+  to: string;
+  name?: string;
+  otp: string;
+}
+
 export class MailService {
   private static get welcomeApiKey(): string {
     return process.env.RESEND_WELCOME_API_KEY || process.env.RESEND_API_KEY || '';
@@ -103,6 +109,29 @@ export class MailService {
     });
 
     return this.sendWithResend(this.inviteApiKey, {
+      from: this.fromEmail,
+      to,
+      subject,
+      html,
+    });
+  }
+
+  /**
+   * Send Password Reset OTP Email
+   */
+  static async sendPasswordResetEmail(
+    options: SendPasswordResetEmailOptions,
+  ): Promise<{ success: boolean; id?: string; error?: string }> {
+    const { to, name = 'User', otp } = options;
+    if (!to || !to.includes('@') || to.endsWith('@vyora.in')) {
+      console.warn(`[MailService] Skipping password reset email for invalid address: ${to}`);
+      return { success: false, error: 'Invalid recipient email' };
+    }
+
+    const subject = `Your Vyora Password Reset Code: ${otp}`;
+    const html = this.buildPasswordResetTemplate({ name, otp });
+
+    return this.sendWithResend(this.welcomeApiKey, {
       from: this.fromEmail,
       to,
       subject,
@@ -410,6 +439,56 @@ export class MailService {
             </td>
           </tr>
 
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  private static buildPasswordResetTemplate(params: { name: string; otp: string }): string {
+    const greeting = params.name ? `Hi ${this.escapeHtml(params.name)},` : 'Hello,';
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Your Password</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F4F8F7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#123B3A;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F4F8F7;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:540px;background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,118,110,0.08);border:1px solid #D7E5E2;">
+          <tr>
+            <td style="background:#0F766E;padding:28px 32px;text-align:center;">
+              <h1 style="margin:0;color:#FFFFFF;font-size:24px;font-weight:700;letter-spacing:0.5px;">Vyora Cloud</h1>
+              <p style="margin:4px 0 0 0;color:#E6F4F2;font-size:13px;">Security & Password Recovery</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px;">
+              <p style="margin:0 0 16px;font-size:16px;font-weight:600;color:#123B3A;">${greeting}</p>
+              <p style="margin:0 0 20px;font-size:14px;color:#566B69;line-height:1.6;">
+                We received a request to reset the password for your Vyora account. Use the 6-digit verification code below to complete the reset:
+              </p>
+              <div style="text-align:center;margin:28px 0;padding:20px;background:#E6F4F2;border-radius:12px;border:1.5px dashed #0F766E;">
+                <span style="font-size:32px;font-weight:800;letter-spacing:8px;color:#0F766E;font-family:monospace;">${params.otp}</span>
+              </div>
+              <p style="margin:0 0 12px;font-size:13px;color:#566B69;line-height:1.5;">
+                ⏱️ <strong>This code is valid for 15 minutes.</strong> Never share this code with anyone.
+              </p>
+              <p style="margin:0 0 24px;font-size:12px;color:#8CA4A0;line-height:1.5;">
+                If you did not request this password reset, please ignore this email or review your account security.
+              </p>
+              <hr style="border:none;border-top:1px solid #D7E5E2;margin:24px 0;" />
+              <p style="margin:0;font-size:11px;color:#8CA4A0;text-align:center;">
+                © 2026 Vyora Cloud Technologies. Secure Multi-Tenant GST & Billing Infrastructure.
+              </p>
+            </td>
+          </tr>
         </table>
       </td>
     </tr>

@@ -8,7 +8,7 @@ export const DEFAULT_APP_RELEASE: {
   subtitle: string;
   features: IFeatureHighlight[];
 } = {
-  version: '1.1.2',
+  version: '1.1.3',
   releaseDate: '17 Oct 2026',
   channel: 'preview',
   title: 'New Features in Vyora',
@@ -60,7 +60,7 @@ export class AppReleaseService {
    * Retrieves the latest active release notes and feature highlights.
    * If none exists in MongoDB yet, automatically initializes and returns the default release.
    */
-  static async getLatestRelease(): Promise<{
+  static async getLatestRelease(clientVersion?: string): Promise<{
     version: string;
     releaseDate: string;
     channel: string;
@@ -78,10 +78,11 @@ export class AppReleaseService {
         try {
           const created = await AppReleaseModel.create({
             ...DEFAULT_APP_RELEASE,
+            version: clientVersion || DEFAULT_APP_RELEASE.version,
             isActive: true,
           });
           return {
-            version: created.version,
+            version: clientVersion || created.version,
             releaseDate: created.releaseDate,
             channel: created.channel,
             title: created.title,
@@ -89,12 +90,15 @@ export class AppReleaseService {
             features: created.features,
           };
         } catch {
-          return DEFAULT_APP_RELEASE;
+          return {
+            ...DEFAULT_APP_RELEASE,
+            version: clientVersion || DEFAULT_APP_RELEASE.version,
+          };
         }
       }
 
       return {
-        version: release.version,
+        version: clientVersion || release.version || DEFAULT_APP_RELEASE.version,
         releaseDate: release.releaseDate,
         channel: release.channel || 'preview',
         title: release.title || DEFAULT_APP_RELEASE.title,
@@ -102,7 +106,10 @@ export class AppReleaseService {
         features: release.features || DEFAULT_APP_RELEASE.features,
       };
     } catch {
-      return DEFAULT_APP_RELEASE;
+      return {
+        ...DEFAULT_APP_RELEASE,
+        version: clientVersion || DEFAULT_APP_RELEASE.version,
+      };
     }
   }
 

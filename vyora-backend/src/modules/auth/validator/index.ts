@@ -21,3 +21,23 @@ export const SelectContextSchema = z.object({
   businessId: z.string().optional(),
 });
 export type SelectContextInput = z.infer<typeof SelectContextSchema>;
+
+export const ForgotPasswordSchema = z.object({
+  identifier: z.string().min(3, 'Email or 10-digit mobile number is required'),
+});
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
+
+export const ResetPasswordSchema = z.object({
+  identifier: z.string().optional(),
+  code: z.string().optional(),
+  firebaseIdToken: z.string().optional(),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+});
+export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
+
+export const ChangePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+});
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+

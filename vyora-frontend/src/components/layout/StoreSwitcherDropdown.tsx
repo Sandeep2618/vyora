@@ -10,6 +10,7 @@ import {
   MapPin,
   ShieldCheck,
   Loader2,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { CreateStoreModal } from './CreateStoreModal';
@@ -26,8 +27,13 @@ export const StoreSwitcherDropdown: React.FC = () => {
   const [switchingId, setSwitchingId] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isStarter = plan === 'starter';
-  const isLimitReached = isStarter && myBusinesses.length >= 2;
+  const rawPlan = (plan || 'starter').toLowerCase();
+  const isStarter = rawPlan === 'starter' || rawPlan === 'free';
+  const isGrowth = rawPlan === 'growth';
+  const isEnterprise = rawPlan === 'enterprise';
+
+  const maxAllowedStores = isEnterprise ? Infinity : isGrowth ? 3 : 1;
+  const isLimitReached = myBusinesses.length >= maxAllowedStores;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -49,6 +55,14 @@ export const StoreSwitcherDropdown: React.FC = () => {
       setIsOpen(false);
       return;
     }
+
+    // Starter plan includes 1 store only - redirect to billing
+    if (isStarter && isOwner) {
+      setIsOpen(false);
+      navigate('/account?tab=BILLING');
+      return;
+    }
+
     try {
       setSwitchingId(bizId);
       await switchBusiness(bizId);
@@ -150,6 +164,8 @@ export const StoreSwitcherDropdown: React.FC = () => {
                       <Loader2 className="w-4 h-4 animate-spin text-[#0F766E]" />
                     ) : isSelected ? (
                       <Check className="w-4 h-4 text-[#0F766E] dark:text-[#14B8A6] shrink-0" />
+                    ) : isStarter && isOwner ? (
+                      <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                     ) : null}
                   </button>
                 );
@@ -169,10 +185,12 @@ export const StoreSwitcherDropdown: React.FC = () => {
               <div className="p-2.5 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 rounded-xl space-y-2">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-purple-700 dark:text-purple-300">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Free Starter: 2 Stores Max</span>
+                  <span>{isStarter ? 'Starter Plan: 1 Store Only' : 'Growth Plan: 3 Stores Max'}</span>
                 </div>
                 <p className="text-[11px] text-[#566B69] dark:text-[#8FA8A4] leading-tight">
-                  Upgrade to Growth or Enterprise to unlock unlimited stores with shared login.
+                  {isStarter
+                    ? 'Upgrade to Growth or Enterprise to add more stores and switch between multiple branches.'
+                    : 'Upgrade to Enterprise to unlock unlimited stores with separate stock & billing.'}
                 </p>
                 <Button
                   variant="primary"
@@ -183,7 +201,7 @@ export const StoreSwitcherDropdown: React.FC = () => {
                   className="w-full text-xs py-1.5 bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Upgrade to Unlock</span>
+                  <span>Upgrade Plan</span>
                 </Button>
               </div>
             ) : (
