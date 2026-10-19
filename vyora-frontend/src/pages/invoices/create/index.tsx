@@ -13,6 +13,7 @@ import { InvoiceLineItemsTable, LineFormItem } from '../components/create/Invoic
 import { InvoiceTotalsSummary, InvoicePreviewTotals } from '../components/create/InvoiceTotalsSummary';
 import { NewCustomerModal } from '../components/create/modal';
 import { ProductFormModal } from '@/pages/products/modal/ProductFormModal';
+import { UpiQrModal } from '@/components/ui/UpiQrModal';
 
 export const CreateInvoicePage: React.FC = () => {
   const navigate = useNavigate();
@@ -49,6 +50,7 @@ export const CreateInvoicePage: React.FC = () => {
   const [cashTendered, setCashTendered] = useState<string>('');
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false);
   const [isNewProductModalOpen, setIsNewProductModalOpen] = useState(false);
+  const [isUpiQrModalOpen, setIsUpiQrModalOpen] = useState(false);
 
   // Line items state
   const [lines, setLines] = useState<LineFormItem[]>([
@@ -362,15 +364,26 @@ export const CreateInvoicePage: React.FC = () => {
             )}
 
             {posPaymentMode === 'UPI' && (
-              <button
-                type="button"
-                disabled={createMutation.isPending || !customerId || lines.every((l) => !l.productId)}
-                onClick={() => createMutation.mutate({ finalize: true, autoPaymentMode: 'UPI' })}
-                className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>1-Tap UPI Sale ({formatCurrency(grandTotalMinor)})</span>
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled={lines.every((l) => !l.productId)}
+                  onClick={() => setIsUpiQrModalOpen(true)}
+                  className="w-full py-2 px-3 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                >
+                  <QrCode className="w-4 h-4" />
+                  <span>Show UPI QR to Customer</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={createMutation.isPending || !customerId || lines.every((l) => !l.productId)}
+                  onClick={() => createMutation.mutate({ finalize: true, autoPaymentMode: 'UPI' })}
+                  className="w-full py-2.5 px-4 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                >
+                  <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                  <span>1-Tap UPI Sale ({formatCurrency(grandTotalMinor)})</span>
+                </button>
+              </div>
             )}
 
             {posPaymentMode === 'CREDIT' && (
@@ -386,6 +399,21 @@ export const CreateInvoicePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Counter UPI QR Modal */}
+      <UpiQrModal
+        isOpen={isUpiQrModalOpen}
+        onClose={() => setIsUpiQrModalOpen(false)}
+        invoiceNumber="COUNTER-POS"
+        amountMinor={grandTotalMinor}
+        merchantName={business?.name}
+        vpa={business?.upiId}
+        isConfirming={createMutation.isPending}
+        onConfirmPayment={() => {
+          setIsUpiQrModalOpen(false);
+          createMutation.mutate({ finalize: true, autoPaymentMode: 'UPI' });
+        }}
+      />
 
       {/* Add New Customer Modal */}
       <NewCustomerModal

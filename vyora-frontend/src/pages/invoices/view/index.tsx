@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Printer, ArrowLeft, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Printer, ArrowLeft, CreditCard, CheckCircle2, QrCode } from 'lucide-react';
 import { api } from '@/lib/api';
 import { formatDateReadable, minorToMajor, majorToMinor } from '@vyora/utils';
 import { Invoice, PaymentMethod } from '@vyora/shared-types';
@@ -12,15 +12,17 @@ import { toast } from '@/components/ui/Toast';
 import { InvoicePrintTemplate } from '../components/view/InvoicePrintTemplate';
 import { ThermalReceiptTemplate } from '../components/view/ThermalReceiptTemplate';
 import { RecordPaymentModal } from '../components/view/modal';
+import { UpiQrModal } from '@/components/ui/UpiQrModal';
 
 export const InvoiceViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isOwner } = useAuth();
+  const { isOwner, business } = useAuth();
 
   const [printFormat, setPrintFormat] = useState<'A4' | 'THERMAL'>('A4');
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isUpiQrModalOpen, setIsUpiQrModalOpen] = useState(false);
   const [payAmountMajor, setPayAmountMajor] = useState<number | string>('');
   const [payMethod, setPayMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [payRef, setPayRef] = useState('');
@@ -167,14 +169,24 @@ export const InvoiceViewPage: React.FC = () => {
             invoice.status !== 'DRAFT' &&
             invoice.status !== 'PAID' &&
             invoice.status !== 'CANCELLED' && (
-              <Button
-                variant="primary"
-                onClick={handleOpenPayment}
-                className="flex-1 sm:flex-none justify-center"
-              >
-                <CreditCard className="w-4 h-4 mr-1.5" />
-                Record Payment
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsUpiQrModalOpen(true)}
+                  className="flex-1 sm:flex-none justify-center text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                >
+                  <QrCode className="w-4 h-4 mr-1.5" />
+                  UPI QR
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleOpenPayment}
+                  className="flex-1 sm:flex-none justify-center"
+                >
+                  <CreditCard className="w-4 h-4 mr-1.5" />
+                  Record Payment
+                </Button>
+              </>
             )}
 
           <Button variant="outline" onClick={() => window.print()} className="flex-1 sm:flex-none justify-center">
@@ -196,6 +208,23 @@ export const InvoiceViewPage: React.FC = () => {
           isFinalizing={finalizeMutation.isPending}
         />
       )}
+
+      {/* Dynamic UPI QR Modal for Instant Counter Scanning */}
+      <UpiQrModal
+        isOpen={isUpiQrModalOpen}
+        onClose={() => setIsUpiQrModalOpen(false)}
+        invoiceNumber={invoice.invoiceNumber}
+        amountMinor={invoice.dueAmountMinor}
+        merchantName={business?.name}
+        vpa={business?.upiId}
+        isConfirming={paymentMutation.isPending}
+        onConfirmPayment={() => {
+          setIsUpiQrModalOpen(false);
+          setPayAmountMajor(minorToMajor(invoice.dueAmountMinor));
+          setPayMethod('UPI');
+          paymentMutation.mutate();
+        }}
+      />
 
       {/* Record Payment Voucher Modal */}
       <RecordPaymentModal

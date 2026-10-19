@@ -146,13 +146,14 @@ export const InvoiceLineItemsTable: React.FC<InvoiceLineItemsTableProps> = ({
                   <td className="py-2 px-2 text-center">
                     <input
                       type="number"
-                      min="1"
-                      step="1"
+                      min="0.001"
+                      step="any"
                       value={line.quantity}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) => onUpdateLine(idx, 'quantity', e.target.value)}
                       onBlur={(e) => {
-                        const qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+                        const parsed = parseFloat(String(e.target.value));
+                        const qty = !isNaN(parsed) && parsed > 0 ? parsed : 1;
                         onUpdateLine(idx, 'quantity', qty);
                       }}
                       className="w-16 h-8.5 px-1.5 bg-white dark:bg-[#0D1C1B] border border-[#D7E5E2] dark:border-[#1E3B38] rounded-lg text-xs text-center font-bold text-[#123B3A] dark:text-[#E6F4F1] focus:outline-none focus:ring-1.5 focus:ring-[#0F766E] focus:border-[#0F766E] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shadow-2xs"

@@ -40,23 +40,24 @@ export interface PartyInput {
   type: PartyType;
   name: string;
   contactPerson?: string;
-  phone: string;
+  phone?: string;
+  isWalkIn?: boolean;
   email?: string;
   gstin?: string;
   pan?: string;
-  billingAddress: {
-    line1: string;
+  billingAddress?: {
+    line1?: string;
     line2?: string;
-    city: string;
-    state: string;
-    pincode: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
   };
   shippingAddress?: {
-    line1: string;
+    line1?: string;
     line2?: string;
-    city: string;
-    state: string;
-    pincode: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
   };
   openingBalanceMinor?: number;
   creditLimitMinor?: number;

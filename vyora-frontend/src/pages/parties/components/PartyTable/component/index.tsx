@@ -3,6 +3,7 @@ import { Phone, Mail, MapPin, MessageSquare, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Party } from '@/types';
 import { formatCurrency } from '@/utils';
+import { useAuth } from '@/context/AuthContext';
 import { Table, ITableOption, ITableEvent, TABLE_EVENT } from '@/components/Table';
 import { PartyTableProps } from '../config/interface';
 import { getBalanceVariant } from '../util';
@@ -20,6 +21,7 @@ export const PartyTable: React.FC<PartyTableProps> = ({
   onViewLedger,
 }) => {
   const { t } = useTranslation(['parties', 'common']);
+  const { business } = useAuth();
 
   const tableOption: ITableOption<Party> = useMemo(
     () => ({
@@ -108,7 +110,8 @@ export const PartyTable: React.FC<PartyTableProps> = ({
               const amountRupees = (party.currentBalanceMinor / 100).toLocaleString('en-IN', {
                 minimumFractionDigits: 2,
               });
-              const msg = `Namaste ${party.name} Ji,\n\nThis is a friendly payment reminder from *Vyora Store*.\n\nPending Ledger Balance: *₹${amountRupees}*\n\nKindly clear via UPI or Cash at the counter. Thank you!`;
+              const storeName = business?.name?.trim() || 'Vyora Store';
+              const msg = `Namaste ${party.name} Ji,\n\nThis is a friendly payment reminder from *${storeName}*.\n\nPending Ledger Balance: *₹${amountRupees}*\n\nKindly clear via UPI or Cash at the counter. Thank you!`;
               window.open(`https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(msg)}`, '_blank');
             };
 

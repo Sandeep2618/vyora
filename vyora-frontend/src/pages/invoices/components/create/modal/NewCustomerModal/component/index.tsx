@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Party } from '@/types';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
@@ -17,25 +18,36 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
   onCustomerCreated,
 }) => {
   const { t } = useTranslation(['invoices', 'common']);
+  const { business } = useAuth();
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [state, setState] = useState(business?.state || '');
+
+  useEffect(() => {
+    if (business?.state && !state) {
+      setState(business.state);
+    }
+  }, [business?.state]);
 
   const addCustomerMutation = useMutation({
-    mutationFn: () =>
-      api.post<Party>('/parties', {
-        name,
+    mutationFn: () => {
+      const finalState = state.trim() || business?.state?.trim() || '';
+      return api.post<Party>('/parties', {
+        name: name.trim(),
         type: 'CUSTOMER',
-        phone,
-        email: email || undefined,
-        address: address || undefined,
-        city: city || undefined,
-        state,
-      }),
+        phone: phone.trim() || undefined,
+        email: email.trim() || undefined,
+        billingAddress: (address.trim() || city.trim() || finalState) ? {
+          line1: address.trim() || undefined,
+          city: city.trim() || undefined,
+          state: finalState || undefined,
+        } : undefined,
+      });
+    },
     onSuccess: (newParty) => {
       queryClient.invalidateQueries({ queryKey: ['parties', 'CUSTOMER'] });
       onCustomerCreated(newParty.id);
@@ -45,6 +57,7 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
       setEmail('');
       setAddress('');
       setCity('');
+      setState(business?.state || '');
       toast.success(t('newCustomerModal.successToast', { name: newParty.name, defaultValue: `Customer ${newParty.name} created!` }));
     },
     onError: (err: any) => {
@@ -65,7 +78,7 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
           </Button>
           <Button
             isLoading={addCustomerMutation.isPending}
-            disabled={!name.trim() || !phone.trim() || !state.trim()}
+            disabled={!name.trim() || addCustomerMutation.isPending}
             onClick={() => addCustomerMutation.mutate()}
             className="w-full sm:w-auto"
           >
@@ -83,11 +96,10 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
           required
         />
         <Input
-          label={t('newCustomerModal.phone', { defaultValue: 'Phone Number' })}
+          label={t('newCustomerModal.phone', { defaultValue: 'Phone Number (Optional)' })}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          placeholder={t('newCustomerModal.phonePlaceholder', { defaultValue: 'e.g. 9876543210' })}
-          required
+          placeholder={t('newCustomerModal.phonePlaceholder', { defaultValue: 'e.g. 9876543210 (Optional)' })}
         />
         <Input
           label={t('newCustomerModal.email', { defaultValue: 'Email Address' })}
@@ -114,7 +126,6 @@ export const NewCustomerModal: React.FC<NewCustomerModalProps> = ({
             value={state}
             onValueChange={setState}
             options={INDIAN_STATE_OPTIONS}
-            required
           />
         </div>
       </div>

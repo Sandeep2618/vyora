@@ -4,6 +4,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 import { useCreateParty, useUpdateParty } from '@/hooks/useParties';
 import { INDIAN_STATE_OPTIONS, getStateFromGstin } from '@/common/config/states';
 import { PartyFormModalProps } from '../config/interface';
@@ -17,6 +18,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
   partyToEdit,
 }) => {
   const { t } = useTranslation(['parties', 'common']);
+  const { business } = useAuth();
   const isEditing = Boolean(partyToEdit);
 
   const [name, setName] = useState('');
@@ -25,7 +27,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
   const [gstin, setGstin] = useState('');
   const [line1, setLine1] = useState('');
   const [city, setCity] = useState('');
-  const [state, setState] = useState('');
+  const [state, setState] = useState(business?.state || '');
   const [pincode, setPincode] = useState('');
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
       setGstin(partyToEdit.gstin || '');
       setLine1(partyToEdit.billingAddress?.line1 || '');
       setCity(partyToEdit.billingAddress?.city || '');
-      setState(partyToEdit.billingAddress?.state || '');
+      setState(partyToEdit.billingAddress?.state || business?.state || '');
       setPincode(partyToEdit.billingAddress?.pincode || '');
     } else {
       setName('');
@@ -45,10 +47,10 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
       setGstin('');
       setLine1('');
       setCity('');
-      setState('');
+      setState(business?.state || '');
       setPincode('');
     }
-  }, [partyToEdit, isOpen]);
+  }, [partyToEdit, isOpen, business?.state]);
 
   const resetForm = () => {
     setName('');
@@ -57,7 +59,7 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
     setGstin('');
     setLine1('');
     setCity('');
-    setState('');
+    setState(business?.state || '');
     setPincode('');
   };
 
@@ -80,31 +82,30 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
     }
   };
 
-  const isPhoneValid = validateIndianPhone(phone);
-  const isFormValid = Boolean(
-    name.trim() &&
-    isPhoneValid &&
-    line1.trim() &&
-    city.trim() &&
-    state.trim()
-  );
+  const isPhoneValid = !phone || validateIndianPhone(phone);
+  const isFormValid = Boolean(name.trim() && isPhoneValid);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
 
+    const finalState = state.trim() || business?.state?.trim() || '';
+    const hasAddress = Boolean(line1.trim() || city.trim() || finalState || pincode.trim());
+
     const payload = {
       type: partyType,
-      name,
-      phone,
-      email: email || undefined,
-      gstin: gstin || undefined,
-      billingAddress: {
-        line1,
-        city,
-        state,
-        pincode,
-      },
+      name: name.trim(),
+      phone: phone.trim() || undefined,
+      email: email.trim() || undefined,
+      gstin: gstin.trim() || undefined,
+      billingAddress: hasAddress
+        ? {
+            line1: line1.trim() || undefined,
+            city: city.trim() || undefined,
+            state: finalState || undefined,
+            pincode: pincode.trim() || undefined,
+          }
+        : undefined,
     };
 
     if (partyToEdit) {
@@ -154,13 +155,12 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
-            label={t('form.phone', { defaultValue: 'Phone Number' })}
+            label={t('form.phone', { defaultValue: 'Phone Number (Optional)' })}
             type="tel"
             maxLength={PHONE_LENGTH}
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-            required
-            placeholder={t('form.phonePlaceholder', { defaultValue: '9876543210' })}
+            placeholder={t('form.phonePlaceholder', { defaultValue: '9876543210 (Optional)' })}
             helperText={phone && !isPhoneValid ? t('form.phoneHelper', { defaultValue: 'Must be 10 digits starting with 6-9' }) : undefined}
             error={phone && !isPhoneValid ? t('form.phoneHelper', { defaultValue: 'Must be 10 digits starting with 6-9' }) : undefined}
           />
@@ -191,7 +191,6 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
               label={t('form.addressLine1', { defaultValue: 'Address Line 1' })}
               value={line1}
               onChange={(e) => setLine1(e.target.value)}
-              required
               placeholder={t('form.addressPlaceholder', { defaultValue: 'Shop/Office No., Street, Area' })}
             />
 
@@ -200,7 +199,6 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
                 label={t('form.city', { defaultValue: 'City' })}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                required
                 placeholder={t('form.cityPlaceholder', { defaultValue: 'Mumbai' })}
               />
 
@@ -209,7 +207,6 @@ export const PartyFormModal: React.FC<PartyFormModalProps> = ({
                 value={state}
                 onValueChange={(val) => setState(val)}
                 options={INDIAN_STATE_OPTIONS}
-                required
               />
 
               <Input

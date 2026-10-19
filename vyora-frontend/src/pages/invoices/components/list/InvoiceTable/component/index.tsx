@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, CheckCircle2, XCircle } from 'lucide-react';
+import { Eye, CheckCircle2, XCircle, Printer, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatCurrency, formatDateReadable } from '@/utils';
+import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/Badge';
 import { Table, ITableOption, ITableEvent, TABLE_EVENT } from '@/components/Table';
 import { Invoice } from '@/types';
@@ -20,6 +21,7 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
   onCreateClick,
 }) => {
   const { t } = useTranslation(['invoices', 'common']);
+  const { business } = useAuth();
 
   const tableOption: ITableOption<Invoice> = useMemo(
     () => ({
@@ -101,40 +103,76 @@ export const InvoiceTable: React.FC<InvoiceTableProps> = ({
           dataIndex: 'action',
           title: t('columns.actions'),
           align: 'right',
-          render: (inv) => (
-            <div className="flex items-center justify-end gap-1" data-prevent-row-click="true">
-              <Link
-                to={`/invoices/${inv.id}`}
-                className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#0F766E] dark:hover:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
-                title="View Details"
-                aria-label="View Details"
-              >
-                <Eye className="w-3.5 h-3.5" />
-              </Link>
-              {isOwner && inv.status === 'DRAFT' && (
+          render: (inv) => {
+            const handleWhatsAppShare = (e: React.MouseEvent) => {
+              e.stopPropagation();
+              const phone = inv.customerSnapshot?.phone || '';
+              const clean = phone.replace(/[^0-9]/g, '');
+              const phoneWithCountry = clean.length === 10 ? `91${clean}` : clean;
+              const amountRupees = (inv.grandTotalMinor / 100).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+              });
+              const storeName = inv.businessSnapshot?.name?.trim() || business?.name?.trim() || 'Vyora Store';
+              const customerName = inv.customerSnapshot?.name?.trim() || 'Customer';
+              const msg = `Namaste ${customerName} Ji,\n\nHere are details for your invoice *#${inv.invoiceNumber}* from *${storeName}*:\nTotal Amount: *₹${amountRupees}*\nStatus: *${inv.status}*\n\nThank you for your business!`;
+              const url = phoneWithCountry
+                ? `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(msg)}`
+                : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+              window.open(url, '_blank');
+            };
+
+            return (
+              <div className="flex items-center justify-end gap-1" data-prevent-row-click="true">
+                <Link
+                  to={`/invoices/${inv.id}`}
+                  className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#0F766E] dark:hover:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
+                  title="View Details"
+                  aria-label="View Details"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to={`/invoices/${inv.id}`}
+                  className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#0F766E] dark:hover:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
+                  title="Print Invoice"
+                  aria-label="Print Invoice"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                </Link>
                 <button
                   type="button"
-                  onClick={() => onFinalize(inv.id)}
-                  className="p-1.5 text-[#0F766E] dark:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
-                  title="Finalize Invoice"
-                  aria-label="Finalize Invoice"
+                  onClick={handleWhatsAppShare}
+                  className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#0F766E] dark:hover:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
+                  title="Share on WhatsApp"
+                  aria-label="Share on WhatsApp"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <MessageSquare className="w-3.5 h-3.5" />
                 </button>
-              )}
-              {isOwner && inv.status !== 'CANCELLED' && (
-                <button
-                  type="button"
-                  onClick={() => onCancelClick(inv)}
-                  className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#B91C1C] dark:hover:text-rose-400 hover:bg-[#FEE2E2] dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
-                  title="Cancel Invoice"
-                  aria-label="Cancel Invoice"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          ),
+                {isOwner && inv.status === 'DRAFT' && (
+                  <button
+                    type="button"
+                    onClick={() => onFinalize(inv.id)}
+                    className="p-1.5 text-[#0F766E] dark:text-[#14B8A6] hover:bg-[#E6F4F2] dark:hover:bg-[#162E2D] rounded-lg transition-colors cursor-pointer"
+                    title="Finalize Invoice"
+                    aria-label="Finalize Invoice"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {isOwner && inv.status !== 'CANCELLED' && (
+                  <button
+                    type="button"
+                    onClick={() => onCancelClick(inv)}
+                    className="p-1.5 text-[#566B69] dark:text-[#8FA8A4] hover:text-[#B91C1C] dark:hover:text-rose-400 hover:bg-[#FEE2E2] dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+                    title="Cancel Invoice"
+                    aria-label="Cancel Invoice"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            );
+          },
         },
       ],
       emptyState: {
