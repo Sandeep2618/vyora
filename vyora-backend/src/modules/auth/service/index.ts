@@ -23,7 +23,6 @@ import {
   ResetPasswordInput,
   ChangePasswordInput,
 } from '../validator';
-import { FirebaseService } from './firebase.service';
 import { AuthTokens, UserProfile, UserPersonas, UserWorkspace } from '@vyora/shared-types';
 
 export class AuthService {
@@ -196,7 +195,7 @@ export class AuthService {
   static async getMyBusinesses(userId: string): Promise<UserWorkspace[]> {
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     const memberships = await MembershipModel.find({
@@ -245,7 +244,7 @@ export class AuthService {
     ]);
 
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
     if (!membership || !business) {
       throw new ForbiddenError('You do not have active membership in this business workspace');
@@ -300,7 +299,7 @@ export class AuthService {
     ]);
 
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
     if (!membership || !business) {
       throw new NotFoundError('Invitation not found for this business');
@@ -330,7 +329,7 @@ export class AuthService {
   static async updateProfile(userId: string, dto: { name?: string; avatarUrl?: string }): Promise<UserProfile> {
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     if (dto.name !== undefined && dto.name.trim()) {
@@ -415,7 +414,7 @@ export class AuthService {
   static async getPersonas(userId: string): Promise<UserPersonas> {
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     const memberships = await MembershipModel.find({ userId: user._id.toString(), isActive: true });
@@ -494,7 +493,7 @@ export class AuthService {
   static async selectContext(userId: string, dto: SelectContextInput): Promise<AuthTokens> {
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     if (dto.contextType === 'OWNER') {
@@ -550,7 +549,7 @@ export class AuthService {
   static async getProfile(userId: string): Promise<UserProfile> {
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     return {
@@ -566,11 +565,11 @@ export class AuthService {
   }
 
   /**
-   * Request Password Reset (Email OTP or Firebase Phone validation)
+   * Request Password Reset (Email OTP)
    */
   static async forgotPassword(dto: ForgotPasswordInput): Promise<{
     success: boolean;
-    method?: 'EMAIL' | 'PHONE';
+    method?: 'EMAIL';
     message: string;
     maskedTarget?: string;
     phone?: string;
@@ -635,13 +634,10 @@ export class AuthService {
       };
     }
 
-    // If user only has phone registered, authorize Firebase Phone Auth
-    const userPhone = user.phone || cleanPhone;
+    // If user does not have a registered email address
     return {
-      success: true,
-      method: 'PHONE',
-      message: 'Ready for phone SMS verification via Firebase',
-      phone: userPhone,
+      success: false,
+      message: 'No registered recovery email found for this account. Please update your profile email or contact support.',
     };
   }
 
@@ -692,71 +688,50 @@ export class AuthService {
   }
 
   /**
-   * Reset Password using Email OTP or verified Firebase ID Token
+   * Reset Password using Email OTP verification code
    */
   static async resetPassword(dto: ResetPasswordInput): Promise<AuthTokens> {
     if (!dto.newPassword || dto.newPassword.length < 6) {
       throw new BadRequestError('Password must be at least 6 characters');
     }
 
-    let user: any = null;
-
-    // Case 1: Firebase ID Token verified (Phone Auth)
-    if (dto.firebaseIdToken) {
-      const decoded = await FirebaseService.verifyIdToken(dto.firebaseIdToken);
-      if (!decoded || !decoded.phone_number) {
-        throw new BadRequestError('Invalid or unverified Firebase phone session');
-      }
-
-      const verifiedPhone = decoded.phone_number.replace(/[^0-9]/g, '').slice(-10);
-      user = await UserModel.findOne({ phone: verifiedPhone });
-      if (!user) {
-        user = await UserModel.findOne({ email: `${verifiedPhone}@vyora.in` });
-      }
-
-      if (!user) {
-        throw new NotFoundError('No user account found matching this verified phone number');
-      }
-
-      user.phoneVerified = true;
+    if (!dto.code || !dto.identifier) {
+      throw new BadRequestError('Verification code and registered email are required');
     }
-    // Case 2: Email OTP code verified
-    else if (dto.code && dto.identifier) {
-      const rawId = dto.identifier.trim();
-      const cleanPhone = rawId.replace(/[^0-9]/g, '');
-      const isPhone = cleanPhone.length === 10;
 
-      if (isPhone) {
-        user = await UserModel.findOne({ phone: cleanPhone });
-        if (!user) user = await UserModel.findOne({ email: `${cleanPhone}@vyora.in` });
-      } else {
-        user = await UserModel.findOne({ email: rawId.toLowerCase() });
-      }
+    const rawId = dto.identifier.trim();
+    const cleanPhone = rawId.replace(/[^0-9]/g, '');
+    const isPhone = cleanPhone.length === 10;
 
-      if (!user) {
-        throw new BadRequestError('Invalid reset attempt or account not found');
-      }
-
-      if (!user.resetPasswordOtpHash || !user.resetPasswordExpiresAt) {
-        throw new BadRequestError('No active password reset request found. Please request a new code.');
-      }
-
-      if (user.resetPasswordExpiresAt.getTime() < Date.now()) {
-        throw new BadRequestError('Verification code has expired. Please request a new code.');
-      }
-
-      if ((user.resetPasswordAttempts || 0) >= 5) {
-        throw new BadRequestError('Too many failed attempts. Please request a new code.');
-      }
-
-      const isMatch = await bcrypt.compare(dto.code.trim(), user.resetPasswordOtpHash);
-      if (!isMatch) {
-        user.resetPasswordAttempts = (user.resetPasswordAttempts || 0) + 1;
-        await user.save();
-        throw new BadRequestError('Invalid verification code. Please check and try again.');
-      }
+    let user: any = null;
+    if (isPhone) {
+      user = await UserModel.findOne({ phone: cleanPhone });
+      if (!user) user = await UserModel.findOne({ email: `${cleanPhone}@vyora.in` });
     } else {
-      throw new BadRequestError('Either verification code or Firebase phone session token is required');
+      user = await UserModel.findOne({ email: rawId.toLowerCase() });
+    }
+
+    if (!user) {
+      throw new BadRequestError('Invalid reset attempt or account not found');
+    }
+
+    if (!user.resetPasswordOtpHash || !user.resetPasswordExpiresAt) {
+      throw new BadRequestError('No active password reset request found. Please request a new code.');
+    }
+
+    if (user.resetPasswordExpiresAt.getTime() < Date.now()) {
+      throw new BadRequestError('Verification code has expired. Please request a new code.');
+    }
+
+    if ((user.resetPasswordAttempts || 0) >= 5) {
+      throw new BadRequestError('Too many failed attempts. Please request a new code.');
+    }
+
+    const isMatch = await bcrypt.compare(dto.code.trim(), user.resetPasswordOtpHash);
+    if (!isMatch) {
+      user.resetPasswordAttempts = (user.resetPasswordAttempts || 0) + 1;
+      await user.save();
+      throw new BadRequestError('Invalid verification code. Please check and try again.');
     }
 
     // Hash new password and clear reset state
@@ -787,7 +762,7 @@ export class AuthService {
 
     const user = await UserModel.findById(userId);
     if (!user) {
-      throw new NotFoundError('User');
+      throw new UnauthorizedError('User account not found or deleted');
     }
 
     // Verify current password (check both trimmed and raw input for maximum compatibility)

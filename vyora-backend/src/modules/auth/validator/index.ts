@@ -34,9 +34,8 @@ export const VerifyResetCodeSchema = z.object({
 export type VerifyResetCodeInput = z.infer<typeof VerifyResetCodeSchema>;
 
 export const ResetPasswordSchema = z.object({
-  identifier: z.string().optional(),
-  code: z.string().optional(),
-  firebaseIdToken: z.string().optional(),
+  identifier: z.string().min(3, 'Registered email or mobile identifier is required'),
+  code: z.string().length(6, '6-digit verification code is required'),
   newPassword: z.string().min(6, 'Password must be at least 6 characters'),
 });
 export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
