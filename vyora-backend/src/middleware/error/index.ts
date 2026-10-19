@@ -9,25 +9,44 @@ export const errorHandler = (
 ) => {
   const requestId = req.id;
 
-  if (err instanceof AppError) {
-    if (err.statusCode >= 500) {
-      logger.error(`AppError [${err.statusCode}] on ${req.method} ${req.originalUrl} [ReqID: ${requestId}]`, {
+  const isAppError =
+    err instanceof AppError ||
+    (err && typeof err.statusCode === 'number' && err.statusCode >= 400 && err.statusCode < 600);
+
+  if (isAppError) {
+    const statusCode = err.statusCode || 500;
+    const errorCode =
+      err.errorCode ||
+      (statusCode === 400
+        ? 'BAD_REQUEST'
+        : statusCode === 401
+        ? 'UNAUTHORIZED'
+        : statusCode === 403
+        ? 'FORBIDDEN'
+        : statusCode === 404
+        ? 'NOT_FOUND'
+        : statusCode === 409
+        ? 'CONFLICT'
+        : 'APP_ERROR');
+
+    if (statusCode >= 500) {
+      logger.error(`AppError [${statusCode}] on ${req.method} ${req.originalUrl} [ReqID: ${requestId}]`, {
         message: err.message,
-        errorCode: err.errorCode,
+        errorCode,
         details: err.details,
         tenantId: req.businessId,
         userId: req.user?.id,
       });
     } else {
-      logger.warn(`AppError [${err.statusCode}] ${err.errorCode}: ${err.message} [ReqID: ${requestId}]`, {
+      logger.warn(`AppError [${statusCode}] ${errorCode}: ${err.message} [ReqID: ${requestId}]`, {
         details: err.details,
       });
     }
 
-    return res.status(err.statusCode).json({
-      statusCode: err.statusCode,
-      message: err.message,
-      error: err.errorCode,
+    return res.status(statusCode).json({
+      statusCode,
+      message: err.message || 'An error occurred',
+      error: errorCode,
       details: err.details,
       ...(typeof err.details === 'object' && err.details !== null ? err.details : {}),
       requestId,

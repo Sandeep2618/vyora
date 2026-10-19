@@ -129,24 +129,40 @@ export class AuthService {
 
   static async login(dto: LoginInput): Promise<AuthTokens> {
     const rawIdentifier = (dto.emailOrPhone || dto.email || dto.phone || '').trim();
-    const cleanPhone = rawIdentifier.replace(/[^0-9]/g, '');
-    const isPhone = cleanPhone.length === 10;
+    const digitsOnly = rawIdentifier.replace(/[^0-9]/g, '');
+    const cleanPhone = digitsOnly.slice(-10);
+    const isPhone = digitsOnly.length >= 10 && !rawIdentifier.includes('@');
+    const inputPassword = (dto.password || '').trim();
 
     let user: any = null;
     if (isPhone) {
-      user = await UserModel.findOne({ phone: cleanPhone });
-      if (!user) {
-        user = await UserModel.findOne({ email: `${cleanPhone}@vyora.in` });
-      }
+      user = await UserModel.findOne({
+        $or: [
+          { phone: cleanPhone },
+          { phone: `+91${cleanPhone}` },
+          { email: `${cleanPhone}@vyora.in` },
+        ],
+      });
     } else {
       user = await UserModel.findOne({ email: rawIdentifier.toLowerCase() });
+    }
+
+    if (!user && digitsOnly.length >= 10) {
+      user = await UserModel.findOne({
+        $or: [
+          { phone: cleanPhone },
+          { phone: `+91${cleanPhone}` },
+        ],
+      });
     }
 
     if (!user) {
       throw new UnauthorizedError('Invalid mobile number/email or password');
     }
 
-    const isValid = await bcrypt.compare(dto.password, user.passwordHash || '');
+    const isValid =
+      (await bcrypt.compare(inputPassword, user.passwordHash || '')) ||
+      (await bcrypt.compare(dto.password, user.passwordHash || ''));
     if (!isValid) {
       throw new UnauthorizedError('Invalid mobile number/email or password');
     }
@@ -700,7 +716,10 @@ export class AuthService {
     userId: string,
     dto: ChangePasswordInput,
   ): Promise<{ success: boolean; message: string }> {
-    if (!dto.newPassword || dto.newPassword.length < 6) {
+    const newPassword = (dto.newPassword || '').trim();
+    const currentPassword = (dto.currentPassword || '').trim();
+
+    if (!newPassword || newPassword.length < 6) {
       throw new BadRequestError('New password must be at least 6 characters');
     }
 
@@ -709,16 +728,18 @@ export class AuthService {
       throw new NotFoundError('User');
     }
 
-    // Verify current password
+    // Verify current password (check both trimmed and raw input for maximum compatibility)
     if (user.passwordHash) {
-      const isMatch = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+      const isMatch =
+        (await bcrypt.compare(currentPassword, user.passwordHash)) ||
+        (await bcrypt.compare(dto.currentPassword, user.passwordHash));
       if (!isMatch) {
         throw new BadRequestError('Current password is incorrect');
       }
     }
 
     const salt = await bcrypt.genSalt(10);
-    user.passwordHash = await bcrypt.hash(dto.newPassword, salt);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
     await user.save();
 
     return { success: true, message: 'Password changed successfully' };
