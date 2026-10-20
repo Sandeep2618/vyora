@@ -23,7 +23,9 @@ export const validateRequest = (schemas: ValidationSchemas) => {
       return next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const firstMessage = error.errors[0]?.message || 'Validation error';
+        const firstErr = error.errors[0];
+        const fieldPath = firstErr?.path?.length ? `${firstErr.path.join('.')}: ` : '';
+        const firstMessage = `${fieldPath}${firstErr?.message || 'Validation error'}`;
         return next(new BadRequestError(firstMessage, error.errors));
       }
       return next(error);

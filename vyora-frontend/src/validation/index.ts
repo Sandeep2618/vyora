@@ -179,7 +179,7 @@ export const ProductSchema = z.object({
   description: z.string().optional(),
   unit: z.enum(['PCS', 'BOX', 'KG', 'LTR', 'MTR', 'SET', 'UNT', 'PKT']).default('PCS'),
   sellingPriceMinor: z.number().int().nonnegative('Selling price must be >= 0'),
-  purchasePriceMinor: z.number().int().nonnegative('Purchase price must be >= 0'),
+  purchasePriceMinor: z.number().int().nonnegative('Purchase price must be >= 0').optional().default(0),
   taxRatePercent: z.union([
     z.literal(0),
     z.literal(5),
