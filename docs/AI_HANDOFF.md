@@ -501,5 +501,178 @@ Located at `scripts/check-secrets.js` and wired to `.git/hooks/pre-commit` and `
 * **Secret Guard**: `node scripts/check-secrets.js` &rarr; **Passed: No sensitive credentials or secrets detected**.
 * **Branch Status**: `feal/struture` synchronized with `origin/feal/struture`.
 
+---
+
+## 21. Critical Incident Resolutions & Fix Hardening (October 2026)
+
+### 21.1 Resolution of Product Quick-Add Validation Failure (`Product Creation Failed: Required`)
+* **Incident Description**: When a cashier or store owner quick-added a new product from the mobile POS invoice creation screen (`CreateInvoiceScreen.tsx`), the backend rejected the request with HTTP 400 Bad Request and a naked `"Required"` error message.
+* **Root Causes Discovered**:
+  1. **Mandatory Purchase Price in Schema**: `ProductSchema` in both `vyora-backend/src/shared/validation.ts` and `vyora-frontend/src/validation/index.ts` defined `purchasePriceMinor` as a mandatory positive integer without defaults. In fast retail billing, cashiers only set a selling price and initial stock; forcing purchase price caused validation to fail.
+  2. **Vague Error Formatting**: `validationMiddleware` in `vyora-backend/src/middleware/validation/index.ts` returned `firstErr.message` directly (`"Required"`), hiding the identity of the failing field from developers and users.
+  3. **Hardcoded Placeholder Inventory & Invalid Enum**: `CreateInvoiceScreen.tsx` hardcoded `currentStock: 100` and unit `'PACKET'` (an invalid unit enum; the backend canonical value is `'PKT'`).
+* **Fixes Implemented & Verified**:
+  - Schema Resilience: Made `purchasePriceMinor` optional with `.optional().default(0)` in backend and frontend Zod schemas.
+  - Descriptive Error Messages: Updated validation middleware to prefix the field path (`${fieldPath}: ${firstErr.message}`).
+  - Quick-Add UX Hardening: In `vyora-app/src/screens/CreateInvoiceScreen.tsx`, added dynamic `openingStock` input (defaulting to 0), corrected unit chip to `'PKT'`, added `purchasePriceMinor: 0`, and added tri-lingual translations for `'PKT'` across `en.ts`, `hi.ts`, and `gu.ts`.
+
+### 21.2 Resolution of Expo Doctor & EAS Build Failures (`vyora-app`)
+* **Incident Description**: Running `npx expo-doctor` in `vyora-app` failed 4 checks out of 21: multiple lockfiles, schema errors in `app.json`, missing `expo-font` peer dependency, and 5 package version mismatches.
+* **Root Causes Discovered**:
+  1. Both `pnpm-lock.yaml` and `package-lock.json` were present in `vyora-app`, breaking package manager inference in CI and EAS.
+  2. Root `"splash"` property in `app.json` was deprecated in Expo SDK 52+ / 57+.
+  3. Peer dependency `expo-font` was omitted.
+  4. Outdated/mismatched major packages (`@react-native-async-storage/async-storage`, `react-native-safe-area-context`, `react-native-svg`).
+* **Fixes Implemented & Verified**:
+  - Standardized on `package-lock.json`, removed `pnpm-lock.yaml`.
+  - Migrated `app.json` splash configuration to `expo-splash-screen` plugin under `"plugins"`.
+  - Installed `expo-font: ~57.0.4`, pinned `@react-native-async-storage/async-storage@2.2.0`, `react-native-safe-area-context@~5.7.0`, `react-native-svg@15.15.4`.
+  - Resolved `AccessDeniedModal.tsx` interval type and `tsconfig.json` TS 6.0 deprecation flag.
+  - Result: `npx expo-doctor` passes **21/21 checks**.
+
+### 21.3 Resolution of Windows Hermes Bytecode Failure on EAS Update
+* **Incident Description**: Running `npm run update:preview` on Windows failed with `Error: Cannot find the hermesc executable` during iOS bundling.
+* **Root Causes Discovered**:
+  1. `node_modules/hermes-compiler/hermesc/win64-bin/` had corrupted 0-byte binaries.
+  2. `eas update` without platform flag defaults to `--platform all` (Android + iOS). Bundling iOS bytecode on Windows fails because the iOS compiler requires macOS Darwin binaries.
+* **Fixes Implemented & Verified**:
+  - Restored full 64-bit Windows Hermes binaries (2.5 MB `hermesc.exe` + DLLs).
+  - Updated `package.json` scripts (`update:preview`, `update:production`) to explicitly include `--platform android`.
+  - Verified `npx expo export -p android` bundles cleanly in 9.7 seconds, producing `index-...hbc`.
+
+### 21.4 EAS Production APK Build & Website Downloads Alignment
+* **Active EAS APK Build**: `39ef7ebf-1f44-471a-9815-035a27133287`
+  - URL: `https://expo.dev/accounts/sandipyadavvs-team/projects/vyora-billing/builds/39ef7ebf-1f44-471a-9815-035a27133287`
+* **Synchronized Artifacts Across Repositories**:
+  - `vyora-website/src/config/constants.ts`: Updated `APK_DOWNLOAD_URL` and `APK_BUILD_PAGE_URL`.
+  - `vyora-website/src/pages/MobileAppPage.tsx`: Updated direct APK download link.
+  - `vyora-website/vercel.json`: Updated redirect routes (`/downloads/vyora-v1.0.1.apk`, `/download-apk`).
+  - `vyora-frontend/src/components/layout/MobileAppModal.tsx`: Updated download button link and QR code generator URL.
+
+---
+
+## 22. Permanent Invariants Added to `vyora-core` Skill
+* **Rule DD**: Mobile EAS & Expo Build Invariants (single lockfile, splash plugin, Windows `--platform android` flag, doctor check).
+* **Rule EE**: Counter Quick-Add & Schema Resilience (optional `purchasePriceMinor`, zero dummy stocks, minor currency accounting).
+* **Rule FF**: Clear & Self-Explaining API Validation Envelopes (prefixing field names in validation errors).
+* **Rule GG**: Absolute Git & Remote Database Boundaries (NEVER run `git commit` or `git push`; NEVER mutate remote DB).
+* **Rule HH**: Centralized Single Source of Truth (DRY - change once, reflect everywhere; zero calculation/theme duplication).
+* **Rule II**: Zero Silent Errors & Meaningful User-Facing Error Messages (no empty catches, no phantom state, plain-language localized error banners).
+* **Rule JJ**: Mobile Domain Architecture & Screen Decomposition (lean composition screens ~150-250 lines, feature folders, decoupled modals).
+
+---
+
+## 23. Mobile & Backend Deep-Dive Architectural Gap Audit & Modernization Blueprint
+
+* **Blueprint Document**: Full architectural specification and phased implementation roadmap stored in [`docs/MOBILE_ARCHITECTURE_AND_GAPS.md`](file:///D:/project/vyora/docs/MOBILE_ARCHITECTURE_AND_GAPS.md) and [`vyora-app/docs/MOBILE_ARCHITECTURE_AND_GAPS.md`](file:///D:/project/vyora-app/docs/MOBILE_ARCHITECTURE_AND_GAPS.md).
+
+### 23.1 Summary of Critical Discovered Gaps
+1. **Silent Catches & Phantom State**:
+   - `DashboardScreen.tsx` & `HomeScreen.tsx`: 6 parallel endpoints catch errors silently with `.catch(() => ({ items: [] }))`, misleading users with ₹0 metrics when network fails.
+   - `AccountScreen.tsx`: Caught invite failures still display "Invite Sent" alert and inject fake synthetic members with `id: Date.now().toString()`.
+   - `CreateInvoiceScreen.tsx` & `CreatePurchaseScreen.tsx`: Silent `.catch(console.error)` on catalog initialization leaves pickers empty without notifying the user.
+2. **Correctness, Timezone & Math Bugs**:
+   - Direct line item object mutation in `useState` via shallow `[...lines]` copying.
+   - UTC date shift bug (`new Date().toISOString().split('T')[0]`) in mobile billing and backend fallback stamping midnight Indian transactions with yesterday's date.
+   - Hardcoded `igstMinor: 0` ignoring inter-state GST rules.
+   - Static read-only selling rates on invoice line items.
+   - Hardcoded `'Gujarat'` state fallback when adding new parties.
+3. **DRY & Centralization Violations**:
+   - 1,267 hardcoded hex values across screens and components.
+   - 62 hardcoded untranslated `Alert.alert` calls.
+   - Unencrypted JWT token storage in `AsyncStorage`.
+   - God screens ranging from 1,028 to 2,118 lines with embedded modals.
+   - Zero automated tests and 98.6% accessibility label gap.
+4. **Authentication, Session & Access Control Gaps (Category I)**:
+   - Phone-only accounts permanently locked out on forgot password (no self-serve recovery).
+   - Insecure password reset (Step 2 lacks signed JWT `resetToken`; plain OTP replayed in Step 3).
+   - Hardcoded static password (`VyoraStaff@123`) for invited staff accounts.
+   - Staff invitations strictly demand email (mobile number invite impossible).
+   - Missing `/auth/refresh` endpoint and mobile silent refresh (abrupt 24h logouts).
+   - Deactivated staff retain 24h active access (zombie tokens; missing `Membership.isActive` check in `authMiddleware`).
+   - Stale role permissions on workspace switching (`AuthContext` updates token/business but never updates `user.role`).
+   - No session revocation (`tokenVersion`) on password change or reset.
+   - Phone auto-detection regex flaw in `api/auth.ts` (fails on country code or spaces, sending invalid email payload).
+   - Silent mock return on profile update failure (`catch { return data as User; }`).
+   - Customer OTP login role breach in app shell (`CUSTOMER` role has no restricted view in `App.tsx`, granting access to POS billing and product management).
+   - Mobile logout does not inform backend server (`POST /auth/logout` unused).
+5. **Customer, Parties & Ledger Gaps (Category J - Gaps 38-43)**:
+   - `PartyLedgerModal.tsx`: In-memory client filtering of 100 business purchases drops older supplier transactions; silent catches show empty ledger.
+   - `InvoicesScreen.tsx` & `PaymentModal.tsx`: Settling anonymous walk-in bills auto-selects `res.items[0]`, misallocating cash payments to the first random customer in the DB.
+   - `PartiesScreen.tsx`: Add/edit modal lacks Street Address (Line 1), shipping address, and PAN.
+   - `CreateInvoiceScreen.tsx`: Auto-creates duplicate "Walk-in Customer" records on mount if not in first 100 returned items.
+   - Missing credit limit & overdue aging checks when extending credit to defaulting customers.
+   - Zero PDF/CSV export for party ledger account statements.
+6. **Invoicing, POS Counter & Payment Allocation Gaps (Category K - Gaps 44-48)**:
+   - Missing invoice cancellation flow in mobile app; backend `POST /invoices/:id/cancel` uncallable from UI.
+   - `dueDate: today` hardcoded on all bills; no credit payment terms (Net-7, Net-15, Net-30).
+   - Card / Bank transfer payments drop to `paymentMethod: undefined` on submission, marking paid counter sales as unpaid credit invoices.
+   - No draft saving / counter bill parking (`finalize: true` unconditionally sent).
+   - No line-item discounts or flat cash roundoff support.
+7. **Profile, Settings, Staff & Reporting Gaps (Category L - Gaps 49-55)**:
+   - Settings in `SettingsScreen.tsx` stored only in device `AsyncStorage` with zero backend sync, and ignored during billing.
+   - Missing Bank Account (Name, Number, IFSC) and settlement UPI configuration for invoice payment instructions.
+   - Staff list in `AccountScreen.tsx` is completely read-only; no role updates, status toggles, or member removal.
+   - `AuthContext.tsx` silently swallows business profile update errors, while `BusinessProfileScreen.tsx` shows fake "Profile Saved" success.
+   - Missing default invoice terms & conditions in business profile.
+   - Single-day hardcoded Daybook in `ReportsScreen.tsx` with zero date range pickers or CA exports.
+   - Missing root `<ErrorBoundary>` in `App.tsx`; unhandled JS exceptions crash app to device home screen.
+8. **Profile, Identity & Media Management Gaps (Category M - Gaps 56-58)**:
+   - Gallery/camera signatures upload multi-megabyte base64 strings directly into MongoDB, bloating documents and risking Express 413 errors.
+   - Cloudinary upload failure silently falls back to local file URI (`file:///data/user/0/...`), corrupting business logos for all other devices.
+   - Edit user profile modal omits phone and email fields, causing permanent user recovery lockout.
+9. **Billing, Subscription & Multitenancy Gaps (Category N - Gaps 59-61)**:
+   - Mobile calls `PUT /business/current` instead of backend's `PUT /business/plan`; backend never updates plan while mobile mutates local storage.
+   - Plan checkout has zero payment verification or UTR entry; tapping "I have paid" instantly activates paid tiers for free.
+   - Multitenant store switching checks `isStarter` on current store, trapping owners inside a free store even when invited to a paid store.
+10. **Roles, RBAC & Missing Mobile Modules (Category O - Gaps 62-69)**:
+   - Dashboard tab is completely ungated in bottom navigation, exposing business turnover and gross profit margins to counter staff.
+   - Home screen transaction feed fetches supplier purchases, leaking supplier names and inward costs to staff.
+   - Tapping "Purchase Bills" in menu redirects to Dashboard because no Purchases List screen exists.
+   - Absence of dedicated Payments & Vouchers register screen.
+   - Absence of camera barcode scanning for retail counter checkout.
+   - Fake thermal paper setting; `invoicePdf.ts` prints unreadable microscopic A4 receipts on thermal POS printers.
+   - Missing in-app account deletion flow, risking Google Play Store rejection.
+   - Absence of stock movement and inventory audit ledger screen.
+11. **Advanced Backend Architecture, Security & POS Gaps (Category P - Gaps 70-79)**:
+   - Lack of MongoDB ACID Transaction Session across invoice save, stock movement, ledger update, and payment receipt (partial commits on crash).
+   - Unprotected `DELETE /api/v1/expenses/:id` (lacks `requireRoles('OWNER', 'ADMIN')`); staff can delete company expense logs.
+   - Voucher numbering race condition (`countDocuments({ businessId }) + 1`) generating duplicate voucher numbers on concurrent payments.
+   - Collapse of purchase tax into single scalar `totalTaxMinor` without CGST/SGST/IGST breakdown, preventing GSTR-3B Input Tax Credit (ITC) claims.
+   - Lack of official GSTR-1 tables (Table 4 B2B, Table 5 B2C Large, Table 7 B2C Small, Table 12 HSN Summary).
+   - Rigid integer stepper (`+` and `-` by 1) with no numeric input; impossible to bill fractional/decimal quantities (KG, LTR, MTR) or type 50 items.
+   - Complete absence of Android hardware back button handling (`BackHandler` missing); pressing back kills the app.
+   - Missing offline connectivity detection (`NetInfo`) and status banner; actions hang for 30s on drop.
+   - Missing biometric app lock (`expo-local-authentication`) for POS counter cashier security.
+   - Missing invoice creation idempotency check in `InvoicesService.create`, allowing rapid double-billing on network lag.
+12. **RBAC & Multitenant Security Inversions (Category Q - Gaps 80-84)**:
+   - Critical RBAC inversion on counter billing operations; `POST /invoices`, `POST /parties`, `POST /payments` require `'OWNER', 'ADMIN'`, completely blocking `STAFF` cashiers from creating sales bills or registering counter walk-in customers.
+   - Unprotected financial metrics & complete data exfiltration exposure; any staff token can view gross margins, net profit, and download customer debt and supplier cost registers.
+   - Cross-tenant admin impersonation & authorization bypass; `tenantMiddleware` bypasses membership checks if user holds `role: 'ADMIN'`, allowing access to any other business via `x-business-id`.
+   - Cross-tenant global `UserModel.role` corruption; updating staff role in Store A mutates global user account document, stripping owner permissions in Store B.
+   - Ephemeral in-memory OTP store in Node.js heap; server restarts or multi-instance load balancing wipes active OTPs, causing login and reset failures.
+13. **Core Accounting, Inventory & Return Flows (Category R - Gaps 85-90)**:
+   - Complete absence of Credit Notes (Sales Return) & Debit Notes (Purchase Return); cannot legally process returns, restock returned goods, reverse GST liability, or file GSTR-1 Table 9B.
+   - Inventory read-modify-write concurrency race condition; concurrent counter checkout causes lost updates and untracked stock depletion.
+   - Inventory loss & damage adjustments misclassified as sales; negative stock write-offs record `movementType: 'SALE'`, corrupting sales revenue and tax audits.
+   - Purchase inward cost updates ignored in product master; incoming supplier bills do not update `purchasePriceMinor`, leading to stale catalog costs and skewed profit margins.
+   - Rigid GST tax enums excluding statutory 3% (jewellery) and 0.25% (diamonds) rates, blocking gemstone and jewellery merchants.
+   - Strict rejection of customer advance / overpayment in voucher allocation; payment crashing with 400 when customer pays rounded excess.
+14. **Mobile POS, Hardware & Offline Gaps (Category S - Gaps 91-95)**:
+   - Security & privacy breach in UPI QR generation via external web service (`api.qrserver.com`); leaks invoice amounts and merchant VPAs over HTTP and fails when offline.
+   - Missing infinite scroll & list pagination in mobile app; hardcoded limits prevent viewing bills or customers beyond 50/100 items.
+   - Incomplete Daybook reconciliation missing cash purchases and supplier payout vouchers (`PAYMENT_OUT`), misstating daily closing cash-in-hand.
+   - Disconnected party ledger display lacking chronological interleaving and running balances (Debit, Credit, Balance).
+   - Missing date range filtering across mobile registers; merchants cannot audit sales for specific custom date periods.
+
+### 23.2 User's Approved Order of Work & Roadmap
+1. **Fix correctness bugs** (state mutation, UTC date, missing cost editing, IGST, idempotency).
+2. **Extract tax.ts and useDraftLines, add unit tests**.
+3. **Unify the theme and strip hard-coded colors**.
+4. **Split screens into components** (start with the modals, since they are the biggest chunks).
+5. **Introduce TanStack Query and server-side search**.
+6. **Move to React Navigation**.
+7. **Add Sentry, tests, CI**.
+*(With security, auth, session lifecycle, parties, invoicing, profile, billing, and settings gaps picked along the way)*.
 
 
