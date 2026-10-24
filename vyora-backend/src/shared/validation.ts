@@ -185,6 +185,8 @@ export const ProductSchema = z.object({
   purchasePriceMinor: z.number().int().nonnegative('Purchase price must be >= 0').optional().default(0),
   taxRatePercent: z.union([
     z.literal(0),
+    z.literal(0.25),
+    z.literal(3),
     z.literal(5),
     z.literal(12),
     z.literal(18),
@@ -203,6 +205,8 @@ export const InvoiceItemSchema = z.object({
   discountPercent: z.number().min(0).max(100).default(0),
   taxRatePercent: z.union([
     z.literal(0),
+    z.literal(0.25),
+    z.literal(3),
     z.literal(5),
     z.literal(12),
     z.literal(18),
@@ -283,6 +287,8 @@ export const CreatePurchaseBaseSchema = z.object({
         unitPriceMinor: z.number().int().nonnegative('Purchase price must be >= 0'),
         taxRatePercent: z.union([
           z.literal(0),
+    z.literal(0.25),
+    z.literal(3),
           z.literal(5),
           z.literal(12),
           z.literal(18),
@@ -399,3 +405,19 @@ export const CreateExpenseSchema = z.object({
 });
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;
 
+
+
+// Return Vouchers (Credit Note & Debit Note) Validation
+export const CreateReturnSchema = z.object({
+  reason: z.string().min(3, 'Return reason must be at least 3 characters'),
+  issueDate: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1, 'Product is required'),
+        quantity: z.number().positive('Return quantity must be greater than 0'),
+      })
+    )
+    .min(1, 'At least one return item is required'),
+});
+export type CreateReturnInput = z.infer<typeof CreateReturnSchema>;

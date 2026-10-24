@@ -82,20 +82,31 @@ export class ReportsService {
 
     let totalSubtotalMinor = 0;
     let totalTaxMinor = 0;
+    let totalCgstMinor = 0;
+    let totalSgstMinor = 0;
+    let totalIgstMinor = 0;
     let totalGrandMinor = 0;
 
     const items = purchases.map((p: any) => {
       totalSubtotalMinor += p.subtotalMinor || 0;
       totalTaxMinor += p.totalTaxMinor || 0;
+      totalCgstMinor += p.cgstMinor || 0;
+      totalSgstMinor += p.sgstMinor || 0;
+      totalIgstMinor += p.igstMinor || 0;
       totalGrandMinor += p.grandTotalMinor || 0;
 
       return {
         id: p._id.toString(),
         billNumber: p.billNumber,
         supplierName: p.supplierSnapshot?.name || 'Supplier',
+        supplierGstin: p.supplierSnapshot?.gstin,
         billDate: p.billDate,
         status: p.status,
         subtotalMinor: p.subtotalMinor,
+        cgstMinor: p.cgstMinor || 0,
+        sgstMinor: p.sgstMinor || 0,
+        igstMinor: p.igstMinor || 0,
+        isInterState: p.isInterState || false,
         totalTaxMinor: p.totalTaxMinor,
         grandTotalMinor: p.grandTotalMinor,
       };
@@ -106,7 +117,11 @@ export class ReportsService {
       summary: {
         totalBills: items.length,
         totalSubtotalMinor,
+        totalCgstMinor,
+        totalSgstMinor,
+        totalIgstMinor,
         totalTaxMinor,
+        totalItcEligibleMinor: totalTaxMinor,
         totalGrandMinor,
       },
     };

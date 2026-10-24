@@ -17,13 +17,24 @@ export class PurchasesController {
   static findAll = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const skip = req.query.skip ? parseInt(req.query.skip as string, 10) : 0;
-    const result = await PurchasesService.findAll(req.businessId!, limit, skip);
+    const supplierId = req.query.supplierId as string | undefined;
+    const result = await PurchasesService.findAll(req.businessId!, limit, skip, supplierId);
     return ApiResponse.success(res, result);
   });
 
   static findOne = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const purchase = await PurchasesService.findOne(req.businessId!, req.params.id as string);
     return ApiResponse.success(res, purchase);
+  });
+
+  static softDelete = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await PurchasesService.softDelete(
+      req.businessId!,
+      req.params.id as string,
+      req.user?.id,
+      req.body?.reason,
+    );
+    return ApiResponse.success(res, result);
   });
 
   static exportCsv = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

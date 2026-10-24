@@ -101,5 +101,10 @@ export class AuthController {
     const result = await AuthService.changePassword(req.user!.id, req.body);
     return ApiResponse.success(res, result);
   });
+
+  static deleteAccount = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await AuthService.deleteAccount(req.user!.id);
+    return ApiResponse.success(res, result);
+  });
 }
 

@@ -38,6 +38,9 @@ export interface IParty extends Document {
   currentBalanceMinor: number;
   creditLimitMinor?: number;
   isArchived: boolean;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedByUserId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,11 +67,15 @@ const PartySchema = new Schema<IParty>(
     currentBalanceMinor: { type: Number, default: 0 },
     creditLimitMinor: { type: Number },
     isArchived: { type: Boolean, default: false, index: true },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date },
+    deletedByUserId: { type: String, ref: 'User' },
   },
   { timestamps: true },
 );
 
 PartySchema.index({ businessId: 1, type: 1, isArchived: 1 });
+PartySchema.index({ businessId: 1, isDeleted: 1 });
 PartySchema.index({ businessId: 1, name: 1 });
 
 export const PartyModel: Model<IParty> =

@@ -16,6 +16,9 @@ export interface IProduct extends Document {
   currentStock: number;
   reorderLevel: number;
   isArchived: boolean;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedByUserId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,18 +42,22 @@ const ProductSchema = new Schema<IProduct>(
       type: Number,
       required: true,
       default: 18,
-      enum: [0, 5, 12, 18, 28],
+      enum: [0, 0.25, 3, 5, 12, 18, 28],
     },
     openingStock: { type: Number, default: 0 },
     currentStock: { type: Number, default: 0 },
     reorderLevel: { type: Number, default: 5 },
     isArchived: { type: Boolean, default: false, index: true },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date },
+    deletedByUserId: { type: String, ref: 'User' },
   },
   { timestamps: true },
 );
 
 ProductSchema.index({ businessId: 1, sku: 1 });
 ProductSchema.index({ businessId: 1, isArchived: 1 });
+ProductSchema.index({ businessId: 1, isDeleted: 1 });
 
 export const ProductModel: Model<IProduct> =
   mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);

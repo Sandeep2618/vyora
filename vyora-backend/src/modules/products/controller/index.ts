@@ -63,7 +63,7 @@ export class ProductsController {
   });
 
   static delete = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const result = await ProductsService.delete(req.businessId!, req.params.id as string);
+    const result = await ProductsService.delete(req.businessId!, req.params.id as string, req.user?.id);
     return ApiResponse.success(res, result);
   });
 

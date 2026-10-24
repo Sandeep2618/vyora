@@ -10,6 +10,9 @@ export interface IPurchaseItemSnapshot {
   unitPriceMinor: number;
   taxRatePercent: TaxRatePercent;
   taxableAmountMinor: number;
+  cgstMinor?: number;
+  sgstMinor?: number;
+  igstMinor?: number;
   totalTaxMinor: number;
   lineTotalMinor: number;
 }
@@ -24,6 +27,9 @@ const PurchaseItemSnapshotSchema = new Schema<IPurchaseItemSnapshot>(
     unitPriceMinor: { type: Number, required: true },
     taxRatePercent: { type: Number, required: true },
     taxableAmountMinor: { type: Number, required: true },
+    cgstMinor: { type: Number, default: 0 },
+    sgstMinor: { type: Number, default: 0 },
+    igstMinor: { type: Number, default: 0 },
     totalTaxMinor: { type: Number, required: true },
     lineTotalMinor: { type: Number, required: true },
   },
@@ -39,18 +45,27 @@ export interface IPurchaseBill extends Document {
     phone: string;
     gstin?: string;
     state?: string;
+    stateCode?: string;
   };
   billDate: string;
   dueDate?: string;
   status: PurchaseStatus;
   items: IPurchaseItemSnapshot[];
   subtotalMinor: number;
+  cgstMinor?: number;
+  sgstMinor?: number;
+  igstMinor?: number;
+  isInterState?: boolean;
   totalTaxMinor: number;
   grandTotalMinor: number;
   paidAmountMinor: number;
   dueAmountMinor: number;
   notes?: string;
   createdByUserId: string;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedByUserId?: string;
+  deleteReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,17 +86,26 @@ const PurchaseBillSchema = new Schema<IPurchaseBill>(
     },
     items: { type: [PurchaseItemSnapshotSchema], required: true },
     subtotalMinor: { type: Number, required: true },
+    cgstMinor: { type: Number, default: 0 },
+    sgstMinor: { type: Number, default: 0 },
+    igstMinor: { type: Number, default: 0 },
+    isInterState: { type: Boolean, default: false },
     totalTaxMinor: { type: Number, default: 0 },
     grandTotalMinor: { type: Number, required: true },
     paidAmountMinor: { type: Number, default: 0 },
     dueAmountMinor: { type: Number, required: true },
     notes: { type: String },
     createdByUserId: { type: String, required: true, ref: 'User' },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date },
+    deletedByUserId: { type: String, ref: 'User' },
+    deleteReason: { type: String },
   },
   { timestamps: true },
 );
 
 PurchaseBillSchema.index({ businessId: 1, billNumber: 1 });
+PurchaseBillSchema.index({ businessId: 1, isDeleted: 1 });
 PurchaseBillSchema.index({ businessId: 1, createdAt: -1 });
 
 export const PurchaseBillModel: Model<IPurchaseBill> =

@@ -809,4 +809,19 @@ export class AuthService {
       },
     };
   }
+
+  static async deleteAccount(userId: string) {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User account not found');
+    }
+
+    await MembershipModel.deleteMany({ userId: user._id.toString() });
+    await UserModel.findByIdAndDelete(userId);
+
+    return {
+      success: true,
+      message: 'Account and associated personal data erased successfully',
+    };
+  }
 }

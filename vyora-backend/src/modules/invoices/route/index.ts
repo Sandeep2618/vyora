@@ -6,7 +6,8 @@ import {
   requireRoles,
   validateRequest,
 } from '../../../middleware';
-import { CreateInvoiceSchema, CancelInvoiceSchema } from '../validator';
+import { CreateInvoiceSchema, CancelInvoiceSchema, CreateReturnSchema } from '@vyora/validation';
+import { ReturnsController } from '../../returns/controller';
 
 const router = Router();
 
@@ -33,5 +34,17 @@ router.post(
   validateRequest({ body: CancelInvoiceSchema }),
   InvoicesController.cancel,
 );
+router.delete(
+  '/:id',
+  requireRoles('OWNER', 'ADMIN'),
+  InvoicesController.softDelete,
+);
+router.post(
+  '/:id/return',
+  requireRoles('OWNER', 'ADMIN'),
+  validateRequest({ body: CreateReturnSchema }),
+  ReturnsController.createInvoiceReturn,
+);
+router.get('/:id/returns', ReturnsController.getInvoiceReturns);
 
 export const invoicesRouter = router;

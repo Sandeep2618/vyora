@@ -113,9 +113,9 @@ export function calculateLineItem(
       igstMinor = Math.round((taxableAmountMinor * item.taxRatePercent) / 100);
     } else {
       // Intra-state: Split 50/50 between CGST and SGST
-      const halfRate = item.taxRatePercent / 2;
-      cgstMinor = Math.round((taxableAmountMinor * halfRate) / 100);
-      sgstMinor = Math.round((taxableAmountMinor * halfRate) / 100);
+      const totalTax = Math.round((taxableAmountMinor * item.taxRatePercent) / 100);
+      cgstMinor = Math.floor(totalTax / 2);
+      sgstMinor = totalTax - cgstMinor;
     }
   }
 

@@ -20,6 +20,9 @@ export interface IExpenseRecord extends Document {
   isGst?: boolean;
   items?: IExpenseItemLine[];
   createdByUserId: string;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedByUserId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,11 +51,15 @@ const ExpenseRecordSchema = new Schema<IExpenseRecord>(
       },
     ],
     createdByUserId: { type: String, required: true, ref: 'User' },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date },
+    deletedByUserId: { type: String, ref: 'User' },
   },
   { timestamps: true },
 );
 
 ExpenseRecordSchema.index({ businessId: 1, expenseDate: -1 });
+ExpenseRecordSchema.index({ businessId: 1, isDeleted: 1 });
 
 export const ExpenseRecordModel: Model<IExpenseRecord> =
   mongoose.models.ExpenseRecord || mongoose.model<IExpenseRecord>('ExpenseRecord', ExpenseRecordSchema);

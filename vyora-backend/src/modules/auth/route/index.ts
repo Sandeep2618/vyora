@@ -50,6 +50,7 @@ router.post(
   AuthController.selectContext,
 );
 router.get('/me', authMiddleware, AuthController.getProfile);
+router.delete('/me', authMiddleware, AuthController.deleteAccount);
 router.put('/profile', authMiddleware, AuthController.updateProfile);
 router.patch('/profile', authMiddleware, AuthController.updateProfile);
 router.get('/businesses', authMiddleware, AuthController.getMyBusinesses);

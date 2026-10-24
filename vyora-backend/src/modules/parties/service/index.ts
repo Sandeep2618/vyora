@@ -98,12 +98,15 @@ export class PartiesService {
     );
   }
 
-  static async delete(businessId: string, id: string) {
+  static async delete(businessId: string, id: string, userId?: string) {
     const party = await PartyModel.findOne({ _id: id, businessId });
     if (!party) {
       throw new NotFoundError('Party');
     }
     party.isArchived = true;
+    party.isDeleted = true;
+    party.deletedAt = new Date();
+    party.deletedByUserId = userId;
     await party.save();
     return { success: true, message: 'Party deleted successfully' };
   }

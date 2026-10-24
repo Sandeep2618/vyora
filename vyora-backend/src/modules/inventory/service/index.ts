@@ -14,24 +14,37 @@ export class InventoryService {
     performedByUserId: string;
     allowNegative?: boolean;
   }): Promise<IInventoryMovement> {
-    const product = await ProductModel.findOne({
+    const filter: Record<string, any> = {
       _id: params.productId,
       businessId: params.businessId,
-    });
+    };
 
-    if (!product) {
-      throw new NotFoundError(`Product ${params.productId}`);
+    if (!params.allowNegative && params.quantityDelta < 0) {
+      filter.currentStock = { $gte: Math.abs(params.quantityDelta) };
     }
 
-    const nextStock = product.currentStock + params.quantityDelta;
-    if (nextStock < 0 && !params.allowNegative) {
+    const updatedProduct = await ProductModel.findOneAndUpdate(
+      filter,
+      { $inc: { currentStock: params.quantityDelta } },
+      { new: true },
+    );
+
+    if (!updatedProduct) {
+      const exists = await ProductModel.findOne({
+        _id: params.productId,
+        businessId: params.businessId,
+      });
+
+      if (!exists) {
+        throw new NotFoundError(`Product ${params.productId}`);
+      }
+
       throw new BadRequestError(
-        `Insufficient inventory for "${product.name}" (SKU: ${product.sku}). Available: ${product.currentStock}, requested change: ${params.quantityDelta}`,
+        `Insufficient inventory for "${exists.name}" (SKU: ${exists.sku}). Available: ${exists.currentStock}, requested change: ${params.quantityDelta}`,
       );
     }
 
-    product.currentStock = nextStock;
-    await product.save();
+    const nextStock = updatedProduct.currentStock;
 
     const movement = new InventoryMovementModel({
       businessId: params.businessId,
@@ -57,7 +70,17 @@ export class InventoryService {
     reason: string,
     userId: string,
   ) {
-    const movementType = quantityDelta > 0 ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT';
+    let movementType = quantityDelta > 0 ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT';
+    const lowerReason = (reason || '').toLowerCase();
+    if (quantityDelta < 0) {
+      if (lowerReason.includes('damag') || lowerReason.includes('broken')) {
+        movementType = 'ADJUSTMENT_DAMAGE';
+      } else if (lowerReason.includes('expir') || lowerReason.includes('spoil')) {
+        movementType = 'ADJUSTMENT_EXPIRED';
+      } else if (lowerReason.includes('loss') || lowerReason.includes('theft') || lowerReason.includes('stolen')) {
+        movementType = 'ADJUSTMENT_LOSS';
+      }
+    }
 
     const movement = await this.recordMovement({
       businessId,

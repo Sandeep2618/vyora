@@ -13,6 +13,8 @@ import { reportsRouter } from '../modules/reports';
 import { auditRouter } from '../modules/audit';
 import { healthRouter } from '../modules/health';
 import { appReleaseRouter } from '../modules/app';
+import { trashRouter } from '../modules/trash';
+import { backupRouter } from '../modules/backup';
 
 const router = Router();
 
@@ -30,5 +32,7 @@ router.use('/reports', reportsRouter);
 router.use('/audit', auditRouter);
 router.use('/health', healthRouter);
 router.use('/app', appReleaseRouter);
+router.use('/trash', trashRouter);
+router.use('/backup', backupRouter);
 
 export const apiRouter = router;

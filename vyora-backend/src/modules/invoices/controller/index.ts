@@ -57,6 +57,16 @@ export class InvoicesController {
     return ApiResponse.success(res, result);
   });
 
+  static softDelete = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const result = await InvoicesService.softDelete(
+      req.businessId!,
+      req.params.id as string,
+      req.user?.id,
+      req.body?.reason,
+    );
+    return ApiResponse.success(res, result);
+  });
+
   static exportCsv = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
     const customerId = req.query.customerId as string;
     const status = req.query.status as InvoiceStatus;

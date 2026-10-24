@@ -7,6 +7,8 @@ import {
   validateRequest,
 } from '../../../middleware';
 import { CreatePurchaseSchema } from '../validator';
+import { CreateReturnSchema } from '@vyora/validation';
+import { ReturnsController } from '../../returns/controller';
 
 const router = Router();
 
@@ -22,5 +24,18 @@ router.post(
 router.get('/', PurchasesController.findAll);
 router.get('/export', PurchasesController.exportCsv);
 router.get('/:id', PurchasesController.findOne);
+router.delete(
+  '/:id',
+  requireRoles('OWNER', 'ADMIN'),
+  PurchasesController.softDelete,
+);
+
+router.post(
+  '/:id/return',
+  requireRoles('OWNER', 'ADMIN'),
+  validateRequest({ body: CreateReturnSchema }),
+  ReturnsController.createPurchaseReturn,
+);
+router.get('/:id/returns', ReturnsController.getPurchaseReturns);
 
 export const purchasesRouter = router;

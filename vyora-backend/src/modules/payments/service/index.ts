@@ -46,16 +46,32 @@ export class PaymentsService {
         throw new BadRequestError('Cannot record payment against a cancelled invoice.');
       }
 
-      if (dto.amountMinor > invoice.dueAmountMinor) {
-        throw new BadRequestError(
-          `Payment amount (${dto.amountMinor / 100}) exceeds outstanding invoice due (${invoice.dueAmountMinor / 100})`,
-        );
-      }
-
-      invoice.paidAmountMinor += dto.amountMinor;
-      invoice.dueAmountMinor -= dto.amountMinor;
+      const alloc = Math.min(dto.amountMinor, invoice.dueAmountMinor);
+      invoice.paidAmountMinor += alloc;
+      invoice.dueAmountMinor = Math.max(0, invoice.dueAmountMinor - alloc);
       invoice.status = invoice.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
       await invoice.save();
+
+      let surplus = dto.amountMinor - alloc;
+      if (surplus > 0) {
+        const otherOpenInvoices = await InvoiceModel.find({
+          businessId,
+          customerId: party._id.toString(),
+          _id: { $ne: invoice._id },
+          dueAmountMinor: { $gt: 0 },
+          status: { $nin: ['DRAFT', 'CANCELLED'] },
+        }).sort({ issueDate: 1, createdAt: 1 });
+
+        for (const otherInv of otherOpenInvoices) {
+          if (surplus <= 0) break;
+          const otherAlloc = Math.min(surplus, otherInv.dueAmountMinor);
+          otherInv.paidAmountMinor += otherAlloc;
+          otherInv.dueAmountMinor -= otherAlloc;
+          otherInv.status = otherInv.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
+          await otherInv.save();
+          surplus -= otherAlloc;
+        }
+      }
     } else if (dto.type === 'RECEIPT') {
       // FIFO auto-allocation: settle oldest open customer invoices with receipt amount
       const openInvoices = await InvoiceModel.find({
@@ -84,14 +100,31 @@ export class PaymentsService {
         throw new NotFoundError('Associated purchase bill');
       }
 
-      if (dto.amountMinor > purchase.dueAmountMinor) {
-        throw new BadRequestError('Payment amount exceeds outstanding purchase bill due');
-      }
-
-      purchase.paidAmountMinor += dto.amountMinor;
-      purchase.dueAmountMinor -= dto.amountMinor;
+      const alloc = Math.min(dto.amountMinor, purchase.dueAmountMinor);
+      purchase.paidAmountMinor += alloc;
+      purchase.dueAmountMinor = Math.max(0, purchase.dueAmountMinor - alloc);
       purchase.status = purchase.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
       await purchase.save();
+
+      let surplus = dto.amountMinor - alloc;
+      if (surplus > 0) {
+        const otherPurchases = await PurchaseBillModel.find({
+          businessId,
+          supplierId: party._id.toString(),
+          _id: { $ne: purchase._id },
+          dueAmountMinor: { $gt: 0 },
+        }).sort({ billDate: 1, createdAt: 1 });
+
+        for (const otherPur of otherPurchases) {
+          if (surplus <= 0) break;
+          const otherAlloc = Math.min(surplus, otherPur.dueAmountMinor);
+          otherPur.paidAmountMinor += otherAlloc;
+          otherPur.dueAmountMinor -= otherAlloc;
+          otherPur.status = otherPur.dueAmountMinor === 0 ? 'PAID' : 'PARTIAL';
+          await otherPur.save();
+          surplus -= otherAlloc;
+        }
+      }
     } else if (dto.type === 'PAYMENT') {
       // FIFO auto-allocation: settle oldest open supplier purchase bills with payment amount
       const openPurchases = await PurchaseBillModel.find({

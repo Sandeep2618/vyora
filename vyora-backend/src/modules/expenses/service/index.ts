@@ -30,7 +30,7 @@ export class ExpensesService {
       skip?: number;
     },
   ) {
-    const filter: any = { businessId };
+    const filter: any = { businessId, isDeleted: { $ne: true } };
     if (query.category) {
       filter.category = query.category;
     }
@@ -78,7 +78,7 @@ export class ExpensesService {
   }
 
   static async getSummaryBreakdown(businessId: string) {
-    const expenses = await ExpenseRecordModel.find({ businessId }).lean();
+    const expenses = await ExpenseRecordModel.find({ businessId, isDeleted: { $ne: true } }).lean();
 
     const categoryTotals: Record<string, { totalAmountMinor: number; count: number }> = {};
     const defaultCategories = [
@@ -143,8 +143,18 @@ export class ExpensesService {
     };
   }
 
-  static async remove(businessId: string, id: string) {
-    const res = await ExpenseRecordModel.findOneAndDelete({ _id: id, businessId });
+  static async remove(businessId: string, id: string, userId?: string) {
+    const res = await ExpenseRecordModel.findOneAndUpdate(
+      { _id: id, businessId, isDeleted: { $ne: true } },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedByUserId: userId,
+        },
+      },
+      { new: true },
+    );
     if (!res) {
       throw new NotFoundError('Expense');
     }
@@ -182,7 +192,7 @@ export class ExpensesService {
       search?: string;
     },
   ) {
-    const filter: any = { businessId };
+    const filter: any = { businessId, isDeleted: { $ne: true } };
     if (query.category) {
       filter.category = query.category;
     }

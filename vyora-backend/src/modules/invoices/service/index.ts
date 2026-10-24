@@ -368,7 +368,7 @@ export class InvoicesService {
       skip?: number;
     },
   ) {
-    const filter: any = { businessId };
+    const filter: any = { businessId, isDeleted: { $ne: true } };
     if (query.customerId) filter.customerId = query.customerId;
     if (query.status) filter.status = query.status;
     if (query.startDate || query.endDate) {
@@ -394,11 +394,30 @@ export class InvoicesService {
   }
 
   static async findOne(businessId: string, id: string) {
-    const invoice = await InvoiceModel.findOne({ _id: id, businessId });
+    const invoice = await InvoiceModel.findOne({ _id: id, businessId, isDeleted: { $ne: true } });
     if (!invoice) {
       throw new NotFoundError('Invoice');
     }
     return mapInvoiceDocument(invoice);
+  }
+
+  static async softDelete(businessId: string, id: string, userId?: string, reason?: string) {
+    const invoice = await InvoiceModel.findOneAndUpdate(
+      { _id: id, businessId, isDeleted: { $ne: true } },
+      {
+        $set: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedByUserId: userId,
+          deleteReason: reason || 'Deleted by merchant',
+        },
+      },
+      { new: true },
+    );
+    if (!invoice) {
+      throw new NotFoundError('Invoice');
+    }
+    return { success: true, message: 'Invoice moved to Recycle Bin' };
   }
 
   static async recordPayment(
@@ -436,7 +455,7 @@ export class InvoicesService {
       search?: string;
     },
   ) {
-    const filter: any = { businessId };
+    const filter: any = { businessId, isDeleted: { $ne: true } };
     if (query.customerId) filter.customerId = query.customerId;
     if (query.status) filter.status = query.status;
     if (query.startDate || query.endDate) {

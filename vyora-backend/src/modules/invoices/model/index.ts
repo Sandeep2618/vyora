@@ -87,6 +87,10 @@ export interface IInvoice extends Document {
   cancelReason?: string;
   cancelledAt?: string;
   cancelledByUserId?: string;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedByUserId?: string;
+  deleteReason?: string;
   createdByUserId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -126,6 +130,10 @@ const InvoiceSchema = new Schema<IInvoice>(
     cancelReason: { type: String },
     cancelledAt: { type: String },
     cancelledByUserId: { type: String, ref: 'User' },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date },
+    deletedByUserId: { type: String, ref: 'User' },
+    deleteReason: { type: String },
     createdByUserId: { type: String, required: true, ref: 'User' },
   },
   { timestamps: true },
@@ -133,6 +141,7 @@ const InvoiceSchema = new Schema<IInvoice>(
 
 InvoiceSchema.index({ businessId: 1, invoiceNumber: 1 });
 InvoiceSchema.index({ businessId: 1, status: 1 });
+InvoiceSchema.index({ businessId: 1, isDeleted: 1 });
 InvoiceSchema.index({ businessId: 1, createdAt: -1 });
 
 export const InvoiceModel: Model<IInvoice> =

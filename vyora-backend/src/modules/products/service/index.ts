@@ -131,10 +131,10 @@ export class ProductsService {
     };
   }
 
-  static async delete(businessId: string, id: string) {
+  static async delete(businessId: string, id: string, userId?: string) {
     const product = await ProductModel.findOneAndUpdate(
       { _id: id, businessId },
-      { isArchived: true },
+      { isArchived: true, isDeleted: true, deletedAt: new Date(), deletedByUserId: userId },
       { new: true },
     );
     if (!product) {
@@ -155,21 +155,31 @@ export class ProductsService {
       throw new NotFoundError('Product');
     }
 
-    product.currentStock = Math.max(0, product.currentStock + quantityDelta);
-    await product.save();
+    let movementType = quantityDelta >= 0 ? 'ADJUSTMENT_IN' : 'ADJUSTMENT_OUT';
+    const lowerReason = (reason || '').toLowerCase();
+    if (quantityDelta < 0) {
+      if (lowerReason.includes('damag') || lowerReason.includes('broken')) {
+        movementType = 'ADJUSTMENT_DAMAGE';
+      } else if (lowerReason.includes('expir') || lowerReason.includes('spoil')) {
+        movementType = 'ADJUSTMENT_EXPIRED';
+      } else if (lowerReason.includes('loss') || lowerReason.includes('theft') || lowerReason.includes('stolen')) {
+        movementType = 'ADJUSTMENT_LOSS';
+      }
+    }
 
     await InventoryService.recordMovement({
       businessId,
       productId: product._id.toString(),
       quantityDelta,
-      movementType: quantityDelta >= 0 ? 'PURCHASE' : 'SALE',
-      referenceType: 'MANUAL',
+      movementType,
+      referenceType: 'MANUAL_ADJUSTMENT',
       reason,
       performedByUserId: userId || 'system',
       allowNegative: false,
     });
 
-    return this.mapProduct(product);
+    const updated = await ProductModel.findOne({ _id: id, businessId });
+    return this.mapProduct(updated || product);
   }
 
   private static mapProduct(product: IProduct) {

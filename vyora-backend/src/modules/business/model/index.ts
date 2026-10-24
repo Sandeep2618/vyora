@@ -22,6 +22,10 @@ export interface IBusiness extends Document {
   purchasePrefix: string;
   nextPurchaseNumber: number;
   termsAndConditions?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankIfsc?: string;
+  bankAccountHolderName?: string;
   ownerUserId: string;
   subscriptionPlan: SubscriptionPlan;
   subscriptionStatus?: 'active' | 'expired' | 'trial';
@@ -63,6 +67,10 @@ const BusinessSchema = new Schema<IBusiness>(
     purchasePrefix: { type: String, default: 'BILL-' },
     nextPurchaseNumber: { type: Number, default: 1 },
     termsAndConditions: { type: String },
+    bankName: { type: String, trim: true },
+    bankAccountNumber: { type: String, trim: true },
+    bankIfsc: { type: String, trim: true, uppercase: true },
+    bankAccountHolderName: { type: String, trim: true },
     ownerUserId: { type: String, required: true, index: true },
     subscriptionPlan: {
       type: String,

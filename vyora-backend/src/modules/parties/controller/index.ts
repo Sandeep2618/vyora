@@ -36,7 +36,7 @@ export class PartiesController {
   });
 
   static delete = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const result = await PartiesService.delete(req.businessId!, req.params.id as string);
+    const result = await PartiesService.delete(req.businessId!, req.params.id as string, req.user?.id);
     return ApiResponse.success(res, result);
   });
 

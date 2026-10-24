@@ -113,7 +113,7 @@ export interface Party {
 }
 
 // Product / Item
-export type TaxRatePercent = 0 | 5 | 12 | 18 | 28;
+export type TaxRatePercent = 0 | 0.25 | 3 | 5 | 12 | 18 | 28;
 export type ItemUnit = 'PCS' | 'BOX' | 'KG' | 'LTR' | 'MTR' | 'SET' | 'UNT' | 'PKT';
 
 export interface Product {
@@ -143,7 +143,11 @@ export type StockMovementType =
   | 'ADJUSTMENT_IN'
   | 'ADJUSTMENT_OUT'
   | 'SALE_CANCEL'
-  | 'PURCHASE_CANCEL';
+  | 'PURCHASE_CANCEL'
+  | 'ADJUSTMENT_DAMAGE'
+  | 'ADJUSTMENT_EXPIRED'
+  | 'ADJUSTMENT_LOSS'
+  | 'RETURN';
 
 export interface StockMovement {
   id: string;
@@ -370,4 +374,57 @@ export interface DashboardSummary {
     percentage: number;
   }[];
   lowStockCount: number;
+}
+
+
+// Credit Note (Sales Return) & Debit Note (Purchase Return)
+export type ReturnVoucherType = 'CREDIT_NOTE' | 'DEBIT_NOTE';
+
+export interface ReturnItemLine {
+  productId: string;
+  productName: string;
+  sku: string;
+  unit: ItemUnit;
+  quantity: number;
+  unitPriceMinor: number;
+  taxRatePercent: TaxRatePercent;
+  taxableAmountMinor: number;
+  cgstMinor: number;
+  sgstMinor: number;
+  igstMinor: number;
+  totalMinor: number;
+}
+
+export interface CreditNote {
+  id: string;
+  businessId: string;
+  creditNoteNumber: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  customerId: string;
+  customerName: string;
+  issueDate: string;
+  reason: string;
+  items: ReturnItemLine[];
+  subtotalMinor: number;
+  totalTaxMinor: number;
+  grandTotalMinor: number;
+  createdAt: string;
+}
+
+export interface DebitNote {
+  id: string;
+  businessId: string;
+  debitNoteNumber: string;
+  purchaseBillId: string;
+  billNumber: string;
+  supplierId: string;
+  supplierName: string;
+  issueDate: string;
+  reason: string;
+  items: ReturnItemLine[];
+  subtotalMinor: number;
+  totalTaxMinor: number;
+  grandTotalMinor: number;
+  createdAt: string;
 }
